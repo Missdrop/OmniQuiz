@@ -1,3 +1,5 @@
+import '../../l10n/localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -12,16 +14,16 @@ class ReviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final vm = context.watch<ReviewViewModel>();
     return PageFrame(
-      eyebrow: 'Mistakes become progress',
-      title: 'Worth another look.',
-      subtitle: 'Missed questions return here. Three correct reviews graduate a question from this queue.',
+      eyebrow: context.l10n.reviewEyebrow,
+      title: context.l10n.reviewTitle,
+      subtitle: context.l10n.reviewSubtitle,
       children: [
         if (vm.error != null) Notice(vm.error!, error: true),
         if (vm.entries.isEmpty)
-          const EmptyCard(
+          EmptyCard(
             icon: Icons.spa_outlined,
-            title: 'A fresh start',
-            body: 'Your missed questions will appear here. Keep practicing to discover what needs another look.',
+            title: context.l10n.reviewEmptyTitle,
+            body: context.l10n.reviewEmptyBody,
           ),
         for (final entry in vm.entries)
           Card(
@@ -50,12 +52,17 @@ class ReviewPage extends StatelessWidget {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        '${entry.state.streak}/3 correct reviews · ${entry.state.mistakes} missed',
+                        context.l10n.reviewProgress(
+                          entry.state.streak,
+                          entry.state.mistakes,
+                        ),
                       ),
                       Text(
                         entry.state.dueAt.isAfter(DateTime.now())
-                            ? 'Due ${entry.state.dueAt.toLocal().toString().substring(0, 16)}'
-                            : 'Due now',
+                            ? context.l10n.dueDate(
+                                '${MaterialLocalizations.of(context).formatMediumDate(entry.state.dueAt.toLocal())} ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(entry.state.dueAt.toLocal()))}',
+                              )
+                            : context.l10n.dueNow,
                         style: const TextStyle(color: Colors.black54),
                       ),
                       TextButton(
@@ -67,8 +74,8 @@ class ReviewPage extends StatelessWidget {
                         },
                         child: Text(
                           entry.state.dueAt.isAfter(DateTime.now())
-                              ? 'Review early'
-                              : 'Review now',
+                              ? context.l10n.reviewEarly
+                              : context.l10n.reviewNow,
                         ),
                       ),
                     ],

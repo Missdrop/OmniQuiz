@@ -136,6 +136,15 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 
 ## Code map
 
+Interface translations live in `lib/l10n/app_en.arb` and `app_zh.arb`.
+Run `flutter gen-l10n` after editing them. `LanguageViewModel` persists the
+interface preference independently of AI profiles, so switching UI languages
+does not cancel generation or require an API key. System language is the default.
+`localization.dart` translates existing application diagnostics and stored source
+locations at the presentation boundary; it never translates user documents or
+cached AI questions. New questions use the provider profile's question language.
+
+
 - `lib/domain`: immutable models, question invariants, review and buffer policies.
 - `lib/application`: interfaces, import/settings use cases, validation, generation coordination.
 - `lib/infrastructure`: Drift repositories, HTTP adapter, document parsers, system storage.

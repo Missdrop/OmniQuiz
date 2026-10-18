@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_localizations:
+    sdk: flutter
   flutter:
     sdk: flutter
 
@@ -47,6 +49,7 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   pdfrx: ^2.6.5
 
+  intl: ^0.20.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -63,7 +66,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  generate: true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

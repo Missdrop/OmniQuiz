@@ -89,6 +89,15 @@ void main() {
           final body = jsonDecode(r.body);
           expect(body['model'], 'model');
           expect(body['messages'][1]['content'], contains(chunk.text));
+          expect(
+            jsonDecode(body['messages'][1]['content'])['language'],
+            '简体中文',
+          );
+          expect(
+            body['messages'][0]['content'],
+            contains('in the requested language'),
+          );
+          expect(body['messages'][0]['content'], contains('quote verbatim'));
           return http.Response(
             jsonEncode({
               'choices': [

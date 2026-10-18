@@ -1,0 +1,265 @@
+{
+  "@@locale": "en",
+  "library": "Library",
+  "practice": "Practice",
+  "review": "Review",
+  "settings": "Settings",
+  "tagline": "Make knowledge yours.",
+  "localByDesign": "Local by design",
+  "libraryEyebrow": "Your learning space",
+  "libraryTitle": "A little practice. A lot of progress.",
+  "librarySubtitle": "Bring your notes. Build understanding, one question at a time.",
+  "documents": "Documents",
+  "questionsReady": "Questions ready",
+  "answersGiven": "Answers given",
+  "toRevisit": "To revisit",
+  "importFiles": "Import files",
+  "importFolder": "Import folder",
+  "goToPractice": "Go to practice",
+  "supportedFiles": "TXT, Markdown & text PDF · up to 20 MB per file",
+  "libraryEmptyTitle": "Your next chapter starts here",
+  "libraryEmptyBody": "Import a document to turn it into practice questions.\nYour materials stay on this device until you choose to generate.",
+  "trySample": "Try sample notes",
+  "close": "Close",
+  "removeDocument": "Remove document",
+  "removeDocumentTitle": "Remove this document?",
+  "removeDocumentBody": "Its questions will leave the practice and review queues. Your answer history will be retained.",
+  "cancel": "Cancel",
+  "remove": "Remove",
+  "reviewPracticeEyebrow": "Build lasting knowledge",
+  "practiceEyebrow": "One question at a time",
+  "reviewPracticeTitle": "A second look.",
+  "practiceTitle": "Find your flow.",
+  "reviewPracticeSubtitle": "Recall it first. Then read the explanation.",
+  "practiceSubtitle": "Fresh questions from your materials, ready before you need them.",
+  "practiceScope": "Practice scope",
+  "allMaterials": "All materials",
+  "pauseGeneration": "Pause generation",
+  "generateTitle": "Generate practice questions?",
+  "generateBody": "Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.",
+  "start": "Start",
+  "generateQuestions": "Generate questions",
+  "backToFresh": "Back to fresh questions",
+  "reviewCaughtUp": "You’re caught up for now",
+  "firstQuestion": "Ready for your first question?",
+  "reviewCaughtUpBody": "Come back when your next review is due, or choose another item from Review.",
+  "firstQuestionBody": "Import your notes, connect an AI provider, then start generating.\nOnce saved, questions work offline too.",
+  "openLibrary": "Open library",
+  "reviewQueue": "Review queue",
+  "setUpAi": "Set up AI",
+  "singleChoice": "Single choice",
+  "saving": "Saving…",
+  "nextQuestion": "Next question",
+  "checkAnswer": "Check answer",
+  "hideQuestionTitle": "Hide this question?",
+  "hideQuestionBody": "If the question is incorrect or ambiguous, remove it from practice and review. This report stays on your device.",
+  "hideQuestion": "Hide question",
+  "reportProblem": "Report a problem",
+  "correctAnswer": "Well done.",
+  "wrongAnswer": "A useful mistake.",
+  "fullSource": "Read the full source excerpt",
+  "aiDisclaimer": "AI-generated. Check the source if an answer seems wrong.",
+  "reviewEyebrow": "Mistakes become progress",
+  "reviewTitle": "Worth another look.",
+  "reviewSubtitle": "Missed questions return here. Three correct reviews graduate a question from this queue.",
+  "reviewEmptyTitle": "A fresh start",
+  "reviewEmptyBody": "Your missed questions will appear here. Keep practicing to discover what needs another look.",
+  "dueNow": "Due now",
+  "reviewEarly": "Review early",
+  "reviewNow": "Review now",
+  "settingsEyebrow": "Make it yours",
+  "settingsTitle": "Your AI. Your choice.",
+  "settingsSubtitle": "Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.",
+  "aiProvider": "AI provider",
+  "apiBaseUrl": "API base URL",
+  "apiBaseUrlHelp": "Include /v1 if your provider requires it. Do not append /chat/completions.",
+  "modelId": "Model ID",
+  "modelHint": "Enter a model available from your provider",
+  "apiKey": "API key",
+  "pasteKey": "Paste your API key",
+  "keepKey": "Leave blank to keep the saved key",
+  "hideKey": "Hide key",
+  "showKey": "Show key",
+  "noKey": "This endpoint does not require a key",
+  "jsonMode": "JSON response mode",
+  "jsonModeHelp": "Enable only if your provider supports response_format: json_object.",
+  "questionLanguage": "Question language",
+  "saveSettings": "Save settings",
+  "testConnection": "Test connection",
+  "privacyNotice": "Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.",
+  "licenses": "Open-source licenses",
+  "appLanguage": "Interface language",
+  "systemLanguage": "Follow system",
+  "appLanguageHelp": "Applies immediately and is saved on this device. Question language is configured separately below.",
+  "questionLanguageHelp": "Applies to newly generated questions and explanations. Existing questions keep their original language.",
+  "languageSaveError": "Could not save the interface language. Please try again.",
+  "startupError": "OmniQuiz could not open local storage. Check available disk space and application permissions, then restart.",
+  "readyCount": "{count} ready",
+  "@readyCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "documentDetails": "{count} source excerpts · imported {date}",
+  "@documentDetails": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewProgress": "{streak}/3 correct reviews · {mistakes} missed",
+  "@reviewProgress": {
+    "placeholders": {
+      "streak": {
+        "type": "int"
+      },
+      "mistakes": {
+        "type": "int"
+      }
+    }
+  },
+  "dueDate": "Due {date}",
+  "@dueDate": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceName": "SOURCE · {name}",
+  "@sourceName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "importSummary": "{count} imported · {unchanged} unchanged",
+  "@importSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unchanged": {
+        "type": "int"
+      }
+    }
+  },
+  "bufferReady": "{count} questions ready",
+  "@bufferReady": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "retryGeneration": "Retrying generation ({attempt}/3)…",
+  "@retryGeneration": {
+    "placeholders": {
+      "attempt": {
+        "type": "int"
+      }
+    }
+  },
+  "httpError": "Provider returned HTTP {code}. Check the base URL, model and JSON mode.",
+  "@httpError": {
+    "placeholders": {
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "fileTooLarge": "{name} exceeds the 20 MB file limit.",
+  "@fileTooLarge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "textLocation": "Text · characters {start}–{end}",
+  "@textLocation": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "pageLocation": "Page {page} · characters {start}–{end}",
+  "@pageLocation": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidQuestion": "The provider returned an invalid question.",
+  "invalidProfile": "Enter an HTTPS API base URL and a model name. HTTP is allowed only for localhost.",
+  "loadLibraryError": "Could not load your library.",
+  "importError": "Import failed. Check file permissions and try again.",
+  "removeError": "Could not remove this document.",
+  "loadQuestionsError": "Could not load questions.",
+  "saveAnswerError": "Could not save your answer. Try again.",
+  "loadReviewError": "Could not load your review queue.",
+  "loadSettingsError": "Could not load provider settings.",
+  "settingsSaved": "Settings saved. Your key is stored securely on this device.",
+  "saveSettingsError": "Could not save settings.",
+  "testKeyRequired": "Enter the API key for this endpoint before testing.",
+  "connectionSuccess": "Connection successful. The model returned valid JSON.",
+  "connectionError": "Connection test failed. Check secure storage and connectivity.",
+  "readyStatus": "Ready when you are",
+  "pausedStatus": "Generation paused · cached questions remain available",
+  "configureFirst": "Configure your AI provider in Settings first.",
+  "importFirst": "Import study materials first.",
+  "generatingStatus": "Preparing your next questions…",
+  "changedStatus": "Materials or settings changed. Start generation again.",
+  "savedQuestionsStatus": "New questions saved",
+  "generateError": "Could not save or generate questions. Please try again.",
+  "fileLimit": "File exceeds 20 MB.",
+  "textLimit": "Extracted text exceeds 1 million characters. Split the file.",
+  "noText": "No readable text found.",
+  "readError": "Could not read this file.",
+  "keyRequired": "Enter an API key or explicitly select an endpoint without a key.",
+  "newKeyRequired": "Enter a key for the new endpoint, or explicitly select no key.",
+  "secureSaveError": "Secure storage is unavailable. API key was not saved.",
+  "encodingError": "Text files must use UTF-8 encoding.",
+  "documentLimit": "This document is too large. Split it into smaller files.",
+  "scanError": "No text found. Scanned PDFs need OCR before import.",
+  "formatError": "Supported formats: TXT, Markdown, and text-based PDF.",
+  "authError": "API authorization failed. Check your key and model access.",
+  "quotaError": "Provider rate limit or quota reached. Try again later.",
+  "providerUnavailable": "The AI provider is temporarily unavailable.",
+  "responseLimit": "Provider response exceeded the size limit.",
+  "outputTruncated": "Provider output was truncated. Try a model with a larger output limit.",
+  "timeoutError": "Generation timed out. A retry may incur another API charge.",
+  "invalidJson": "The provider returned invalid JSON.",
+  "incompatibleResponse": "The provider response is not compatible with Chat Completions.",
+  "networkError": "Could not reach the provider. Check your connection and API address.",
+  "probeJsonError": "The model responded, but did not follow the JSON test. Try another model.",
+  "modelJsonError": "The model did not return valid JSON. Try JSON mode or a different model.",
+  "secureReadError": "Cannot access secure storage. Unlock your device and try again.",
+  "missingCredentials": "API credentials are missing. Save them in Settings.",
+  "noQuestions": "The provider returned no question list.",
+  "staleQuestion": "This question is no longer available. Choose another question.",
+  "invalidAnswer": "Invalid answer submission.",
+  "noNewQuestions": "No new valid questions were generated. Try another source or model.",
+  "invalidBatch": "No valid, new questions were returned. Try another model or add more material.",
+  "fileReadError": "The selected file could not be read. Try copying it to this device first.",
+  "useFiles": "Use Import files on this device.",
+  "folderLimit": "Import at most 100 files / 100 MB at once. Select a smaller folder."
+}

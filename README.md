@@ -12,6 +12,7 @@ A local-first quiz app for phones and desktops. Bring your notes and your own AI
 - **Learn from mistakes.** Wrong answers enter a spaced review queue. Three correct reviews graduate a question.
 - **Choose your AI.** Configure an OpenAI-compatible Chat Completions endpoint, model, and API key.
 - **Practice offline.** Saved questions, explanations, and progress remain available without a connection.
+- **Use your language.** Switch between English and Simplified Chinese, or follow your system. Choose the language for new questions separately.
 
 > Early release. Automated tests cover the core workflow. Native builds and platform-specific integrations are validated separately; see [development](docs/development.md).
 

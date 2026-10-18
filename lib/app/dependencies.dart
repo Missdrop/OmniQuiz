@@ -18,6 +18,8 @@ import '../presentation/library/library_view_model.dart';
 import '../presentation/practice/practice_view_model.dart';
 import '../presentation/review/review_view_model.dart';
 import '../presentation/settings/settings_view_model.dart';
+import '../presentation/settings/language_view_model.dart';
+import '../infrastructure/persistence/preferences_repository.dart';
 
 class AppDependencies {
   AppDependencies._(
@@ -27,6 +29,7 @@ class AppDependencies {
     this.practice,
     this.review,
     this.settings,
+    this.language,
   );
   final QuizDatabase database;
   final GenerationCoordinator coordinator;
@@ -34,6 +37,7 @@ class AppDependencies {
   final PracticeViewModel practice;
   final ReviewViewModel review;
   final SettingsViewModel settings;
+  final LanguageViewModel language;
 
   static Future<AppDependencies> create({
     required QuizDatabase database,
@@ -42,6 +46,8 @@ class AppDependencies {
     AiQuestionGenerator? ai,
   }) async {
     final materials = SqlMaterialRepository(database);
+    final language = LanguageViewModel(SqlPreferencesRepository(database));
+    await language.load();
     final questions = SqlQuestionRepository(database);
     final profiles = SqlProfileRepository(database);
     final credentials =
@@ -98,6 +104,7 @@ class AppDependencies {
         generator,
         coordinator,
       ),
+      language,
     );
   }
 
@@ -107,6 +114,7 @@ class AppDependencies {
     library.dispose();
     review.dispose();
     settings.dispose();
+    language.dispose();
     await database.close();
   }
 }
