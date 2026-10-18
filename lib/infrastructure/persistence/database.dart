@@ -49,7 +49,7 @@ class QuizDatabase extends GeneratedDatabase {
       "UPDATE settings SET value = CAST(value AS INTEGER) + 1 WHERE key = 'epoch'",
     );
     await customStatement(
-      "UPDATE jobs SET state = 'cancelled' WHERE state IN ('queued', 'running', 'retryScheduled')",
+      "UPDATE jobs SET state = 'cancelled', request = '{}' WHERE state IN ('queued', 'running', 'retryScheduled')",
     );
   }
 }

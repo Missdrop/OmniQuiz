@@ -270,7 +270,7 @@ class SqlJobRepository implements JobRepository {
     // Requests are not replayed automatically after restart: remote billing may
     // have happened before a crash. The next user-started session refills safely.
     await db.customStatement(
-      "UPDATE jobs SET state='cancelled', message='Interrupted; start practice to refill.' WHERE state IN ('queued','running','retryScheduled')",
+      "UPDATE jobs SET state='cancelled', request='{}', message='Interrupted; start practice to refill.' WHERE state IN ('queued','running','retryScheduled')",
     );
   }
 

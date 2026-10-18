@@ -16,6 +16,11 @@ class ConfigureProvider {
     bool replaceKey = false,
   }) async {
     final old = await profiles.load();
+    if (old == null && key.trim().isEmpty && !replaceKey) {
+      throw const AppFailure(
+        'Enter an API key or explicitly select an endpoint without a key.',
+      );
+    }
     // Do not silently reuse a secret after changing the recipient endpoint.
     final sameEndpoint = old?.baseUrl == baseUrl.trim();
     if (!replaceKey && key.isEmpty && old != null && !sameEndpoint) {
