@@ -34,7 +34,7 @@ Requires Git and the native build tools for your target platform.
 ./scripts/flutter run -d macos
 ```
 
-The scripts keep Flutter and package caches inside `.tooling/`. They do not change your system PATH. Replace `macos` with an available device from `./scripts/flutter devices`. On Windows, use an existing Flutter installation with `flutter pub get` and `flutter run -d windows`, or run the bootstrap scripts in Git Bash with the Windows build tools installed.
+The scripts keep Flutter and package caches inside `.tooling/`. They do not change your system PATH. Replace `macos` with an available device from `./scripts/flutter devices`. On Windows, use `scripts/bootstrap.ps1` and `scripts/flutter.ps1 run -d windows`; see the [PowerShell setup](docs/development.md#windows-powershell) for prerequisites and commands.
 
 See [development](docs/development.md) for platform requirements, tests, and limitations.
 

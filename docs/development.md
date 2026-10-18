@@ -28,6 +28,28 @@ endpoint/model/key. Then import a small document and generate questions.
 Check both a correct and an incorrect answer, restart the app, and confirm
 that the cached questions and review queue persist. No real API key is bundled.
 
+### Windows PowerShell
+
+Enable Windows Developer Mode for plugin symlinks. Install Visual Studio's
+Desktop development with C++ workload, including ATL, CMake, and a Windows SDK.
+Then run from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 doctor -v
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 analyze
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 test
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 run -d windows
+```
+
+The PowerShell wrappers use the same pinned Flutter version and project-local
+caches as the Bash scripts. They change environment variables only in the
+invoked process; no persistent PATH or execution-policy change is required.
+For Android, extract a Windows JDK 17 into `.tooling/jdk` and install SDK tools
+under `.tooling/android-sdk`. The wrappers detect `jdk/bin/java.exe` automatically.
+SDK 36, build-tools 36.0.0, and NDK 28.2.13676358 match the pinned Flutter SDK.
+Use `scripts/dart.ps1` for Dart commands.
+
 ## Native build requirements
 
 | Target | Requirements | Build command |
