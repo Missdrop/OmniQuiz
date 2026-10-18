@@ -21,7 +21,7 @@ No OmniQuiz server required. When using a remote AI provider, relevant excerpts 
 
 ## Stack
 
-Planned: Flutter, Dart, and SQLite.
+Flutter, Dart, and SQLite (Drift). See the [architecture](docs/architecture.md) for module boundaries, core objects, and the implementation plan.
 
 ## Contributing
 
