@@ -51,6 +51,32 @@ unsigned iOS build is a compilation check, not an installable iPhone release.
 Check each workflow run before assuming a target passed. No release signing
 keys are stored in this repository.
 
+## Releases
+
+- Push any tag except the reserved `nightly` tag to publish a regular release.
+  Its title is exactly the tag name. Update `pubspec.yaml` before tagging a new
+  app version; the tag does not change the embedded application version.
+- Every push to `main` updates the single **Nightly** prerelease. Other branches
+  do not publish. You can also run **Rolling prerelease** manually on `main`.
+- Both workflows require tests and all five native builds to pass. Each release
+  includes Android, Linux, Windows, macOS and unsigned iOS archives, plus SHA-256
+  checksums. Unix archives preserve permissions and symbolic links.
+- Nightly reuses the same release ID and asset names, and moves the `nightly`
+  tag to the built commit. It does not delete and recreate the release. Existing
+  assets are replaced individually, so replacement is not atomic; rerun a failed
+  publishing job to repair a partial upload. Build failures leave assets untouched.
+- Publishing is serialized and never cancelled by a newer push. Outdated main
+  builds are skipped; rapid pushes may be coalesced to the newest pending run.
+  Published regular releases are left unchanged when a workflow is rerun.
+- Workflows use the built-in `GITHUB_TOKEN`; only publishing jobs can write to
+  the repository. Keep `nightly` mutable if you enable immutable releases or tag
+  protection rules. The rolling workflow cannot update an immutable release.
+
+Android APKs currently use temporary debug signing keys, so upgrading across
+builds may require uninstalling the previous app (which removes local data).
+Apple artifacts are unsigned/not notarized as described above. Release automation
+does not add distribution certificates or turn the iOS archive into an installable IPA.
+
 macOS uses the legacy system Keychain through flutter_secure_storage, avoiding
 cross-app Keychain Sharing. Test secure storage on your signed/distributed build.
 iOS signing and Keychain access must likewise be checked on a device. Linux

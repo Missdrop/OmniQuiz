@@ -1,19 +1,22 @@
 name: Build and test
 on:
-  push:
-    branches: [main]
+  workflow_call:
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}
+  group: build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/publish-release.test.cjs
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.47.7'
@@ -64,8 +67,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev libjsoncpp-dev
       - run: flutter pub get
       - run: ${{ matrix.command }}
+      - name: Package release assets
+        run: python scripts/package_release.py ${{ matrix.target }}
       - uses: actions/upload-artifact@v4
         with:
           name: omniquiz-${{ matrix.target }}
-          path: ${{ matrix.artifact }}
+          path: dist/*
           if-no-files-found: error
