@@ -26,3 +26,7 @@ Flutter, Dart, and SQLite (Drift). See the [architecture](docs/architecture.md) 
 ## Contributing
 
 The project is being initialized. Issues and ideas are welcome.
+
+## License
+
+[GPL-3.0-only](LICENSE). Copyright (C) 2026 OmniQuiz contributors.
