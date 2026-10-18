@@ -1,0 +1,102 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import '../../application/generation/coordinator.dart';
+import '../../application/ports/repositories.dart';
+import '../../application/use_cases/import_materials.dart';
+import '../../domain/models.dart';
+
+class LibraryViewModel extends ChangeNotifier {
+  LibraryViewModel(
+    this.materials,
+    this.questions,
+    this.access,
+    this.importer,
+    this.coordinator,
+  );
+  final MaterialRepository materials;
+  final QuestionRepository questions;
+  final DocumentAccess access;
+  final ImportMaterials importer;
+  final GenerationCoordinator coordinator;
+  List<StudyDocument> _documents = [];
+  List<StudyDocument> get documents => List.unmodifiable(_documents);
+  StudyStats stats = const StudyStats();
+  bool busy = false;
+  String? message;
+  bool get supportsDirectories => access.supportsDirectories;
+  Future<void> refresh() async {
+    try {
+      _documents = await materials.documents();
+      stats = await questions.stats();
+    } catch (_) {
+      message = 'Could not load your library.';
+    }
+    notifyListeners();
+  }
+
+  Future<void> import({bool directory = false, bool sample = false}) async {
+    if (busy) return;
+    busy = true;
+    message = null;
+    notifyListeners();
+    try {
+      final inputs = sample
+          ? [
+              ImportInput(
+                name: 'Learning science.md',
+                origin: 'sample:learning-science',
+                bytes: utf8.encode(_sample),
+              ),
+            ]
+          : await (directory ? access.pickDirectory() : access.pickFiles());
+      if (inputs.isEmpty) return;
+      await coordinator.stop();
+      final result = await importer.execute(inputs);
+      message =
+          '${result.imported} imported · ${result.unchanged} unchanged'
+          '${result.errors.isEmpty ? '' : '\n${result.errors.join('\n')}'}';
+      await refresh();
+    } catch (e) {
+      message = e is AppFailure
+          ? e.message
+          : 'Import failed. Check file permissions and try again.';
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> remove(String id) async {
+    if (busy) return;
+    busy = true;
+    notifyListeners();
+    try {
+      await coordinator.stop();
+      await materials.removeDocument(id);
+      await refresh();
+    } catch (_) {
+      message = 'Could not remove this document.';
+    } finally {
+      busy = false;
+      notifyListeners();
+    }
+  }
+
+  Future<List<SourceChunk>> source(String id) => materials.chunks(id);
+  static const _sample = '''# Learning science
+
+Retrieval practice means actively recalling information from memory, instead of only rereading it. Answering a question before checking the answer is one way to practice retrieval.
+
+Spaced practice distributes study sessions over time. Massed practice places them together in one session. Spacing creates opportunities to retrieve information after a delay.
+
+Feedback helps learners correct errors. An explanation of why an answer is correct can be more useful than a correctness label alone. A learner should check generated explanations against the source material.
+
+Interleaving mixes different kinds of problems within a study session. Blocked practice groups similar problems together. Mixing problems can require the learner to decide which method applies.
+
+Recognition and recall differ. Recognizing a familiar answer among options does not necessarily mean that a learner can explain it without cues. Combining multiple-choice questions with self-explanation can reveal this gap.
+
+Study progress should be evaluated using new questions as well as familiar ones. Repeating exactly the same item can measure memory for that item's answer rather than understanding of its topic.
+''';
+}
