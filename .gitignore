@@ -39,3 +39,9 @@
 
 # Project-local toolchains and caches
 /.tooling/
+
+# Local planning and design exploration
+/AGENTS.md
+/docs/architecture.md
+/docs/development.md
+/docs/branding/proposals/
