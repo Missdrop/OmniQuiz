@@ -62,7 +62,18 @@ def windows_manifest(source, output):
     ET.ElementTree(root).write(output, encoding='utf-8', xml_declaration=True)
 
 
+def wix_executable():
+    # Hosted Windows runners set WIX to the legacy WiX 3 install directory.
+    # Use the same pinned tool that CI installs and loads extensions into.
+    executable = pathlib.Path('.tooling/wix/wix.exe').resolve()
+    if not executable.is_file():
+        raise FileNotFoundError(
+            f'WiX executable missing: {executable}. Install WiX 5.0.2 in .tooling/wix first.')
+    return str(executable)
+
+
 def windows_package(destination):
+    wix = wix_executable()
     source = pathlib.Path('build/windows/x64/runner/Release')
     if not (source / 'omniquiz.exe').is_file():
         raise FileNotFoundError('Build the Windows release first')
@@ -77,7 +88,6 @@ def windows_package(destination):
     escaped = license_text.replace('\\', r'\\').replace('{', r'\{').replace('}', r'\}').replace('\n', '\\par\n')
     license_rtf = work / 'License.rtf'
     license_rtf.write_text('{\\rtf1\\ansi\n' + escaped + '}', encoding='ascii')
-    wix = os.environ.get('WIX', str(pathlib.Path('.tooling/wix/wix.exe').resolve()))
     subprocess.run([wix, 'build', 'packaging/windows/OmniQuiz.wxs', str(manifest),
                     '-arch', 'x64', '-ext', 'WixToolset.UI.wixext/5.0.2',
                     '-d', f'AppVersion={app_version()}', '-d', f'LicenseRtf={license_rtf.resolve()}',

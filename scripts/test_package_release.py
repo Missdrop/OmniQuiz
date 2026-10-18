@@ -1,13 +1,34 @@
+import contextlib
+import os
 import pathlib
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
-from package_release import app_version, windows_manifest, macos_dmg
+from package_release import app_version, windows_manifest, macos_dmg, wix_executable
 
 
 class PackagingTests(unittest.TestCase):
+    def test_legacy_wix_environment_does_not_override_project_executable(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
+            legacy = pathlib.Path('WiX Toolset v3.14')
+            legacy.mkdir()
+            tool = pathlib.Path('.tooling/wix/wix.exe')
+            tool.parent.mkdir(parents=True)
+            tool.write_bytes(b'project tool')
+            with patch.dict(os.environ, {'WIX': str(legacy.resolve())}):
+                self.assertEqual(wix_executable(), str(tool.resolve()))
+
+    def test_missing_or_directory_wix_path_reports_setup_error(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
+            tool = pathlib.Path('.tooling/wix/wix.exe')
+            for directory_exists in (False, True):
+                if directory_exists:
+                    tool.mkdir(parents=True)
+                with self.assertRaisesRegex(FileNotFoundError, 'Install WiX 5.0.2'):
+                    wix_executable()
+
     def test_manifest_contains_nested_assets_with_stable_component_ids(self):
         with tempfile.TemporaryDirectory() as directory:
             root = pathlib.Path(directory)
