@@ -10,7 +10,6 @@ concurrency:
   cancel-in-progress: true
 jobs:
   test:
-    if: github.event_name != 'pull_request' || github.head_ref != 'dev'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +27,6 @@ jobs:
       - run: flutter analyze
       - run: flutter test --timeout 90s
   build:
-    if: github.event_name != 'pull_request' || github.head_ref != 'dev'
     strategy:
       fail-fast: false
       matrix:
