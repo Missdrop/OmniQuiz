@@ -1,6 +1,6 @@
 # Architecture
 
-Status: accepted design; implementation has not started.
+Status: accepted design. The first implementation is available; see [development](development.md) for the implemented scope and deliberate simplifications.
 
 OmniQuiz is a local-first Flutter application for Android, iOS, Windows,
 macOS, and Linux. Users supply their own AI API credentials. There is no
@@ -118,7 +118,7 @@ Important contracts:
 - `CredentialStore` reads, writes, and deletes secrets by opaque reference.
 - `Clock` and `IdGenerator` allow reproducible scheduling and retry tests.
 
-These are design contracts, not implemented Dart APIs.
+These are conceptual contracts. Implemented ports combine related atomic operations where needed; see `lib/application/ports/repositories.dart`.
 
 ## AI boundary
 
@@ -166,8 +166,9 @@ queued -> running -> completed
 queued/running/retryScheduled -> cancelled
 ```
 
-Claim jobs atomically. Persist a lease for running jobs; recover expired leases
-on startup. Bound retries and queue size. Persist valid results before offering
+Claim jobs atomically and persist a lease. The initial implementation cancels
+unfinished jobs on startup to avoid replaying potentially charged requests; the
+user starts a new refill. Future unattended recovery can use lease expiry. Bound retries and queue size. Persist valid results before offering
 them to the user. If no candidates pass validation, fail the batch explicitly.
 
 Each job captures collection, source revisions, provider profile version, model,
@@ -184,12 +185,12 @@ offline. Do not require background execution or a constantly running process.
 
 Drift owns tables, transactions, migrations, and mapping. Store source revisions,
 chunks, knowledge points, questions/options/references, attempts, review state,
-provider profiles, and jobs. Large imported files live in app-managed storage;
-SQLite stores their metadata and relative paths.
+provider profiles, and jobs. The initial implementation stores extracted text and source metadata in SQLite;
+it does not retain a second copy of the original file.
 
-Hash imported content to identify changed revisions. Use temporary files and a
-recoverable import state because filesystem writes and database transactions
-cannot be one atomic operation. Removing or replacing a source invalidates its
+Hash imported content to identify changed revisions. Parse before committing an import in one database transaction. If retaining
+original files is added, use temporary files and a recoverable import state
+because filesystem writes and database transactions cannot be atomic together. Removing or replacing a source invalidates its
 pending work and marks related questions stale without deleting study history.
 
 Desktop can select a directory and incrementally scan it. Phone users import
