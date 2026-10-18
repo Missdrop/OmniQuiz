@@ -27,6 +27,7 @@
 **/Pods/
 **/.symlinks/
 **/.gradle/
+**/.kotlin/
 **/local.properties
 **/xcuserdata/
 

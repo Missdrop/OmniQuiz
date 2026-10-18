@@ -1,5 +1,9 @@
 # Development
 
+Develop on `dev` and commit independently verified changes there. Promote to
+`main` only when a release build is needed: each push to `main` triggers the
+full build matrix and updates Nightly.
+
 ## Toolchain
 
 The project is developed with Flutter 3.47.7 / Dart 3.13.5. `pubspec.lock` pins
