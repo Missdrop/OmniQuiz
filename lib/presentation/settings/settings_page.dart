@@ -1,7 +1,10 @@
+import '../../l10n/localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'settings_view_model.dart';
+import 'language_view_model.dart';
 import '../shared/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -50,11 +53,48 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SettingsViewModel>();
+    final language = context.watch<LanguageViewModel>();
     return PageFrame(
-      eyebrow: 'Make it yours',
-      title: 'Your AI. Your choice.',
-      subtitle: 'Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.',
+      eyebrow: context.l10n.settingsEyebrow,
+      title: context.l10n.settingsTitle,
+      subtitle: context.l10n.settingsSubtitle,
       children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  key: ValueKey('interface-${language.language}'),
+                  initialValue: language.language,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.appLanguage,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text(context.l10n.systemLanguage),
+                    ),
+                    const DropdownMenuItem(value: 'zh', child: Text('简体中文')),
+                    const DropdownMenuItem(value: 'en', child: Text('English')),
+                  ],
+                  onChanged: language.saving
+                      ? null
+                      : (value) {
+                          if (value != null) language.select(value);
+                        },
+                ),
+                const SizedBox(height: 12),
+                Text(context.l10n.appLanguageHelp),
+                if (language.saveFailed)
+                  Notice(context.l10n.languageSaveError, error: true),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
         if (!vm.loaded) const LinearProgressIndicator(),
         if (vm.message != null) Notice(vm.message!),
         Card(
@@ -64,7 +104,7 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'AI provider',
+                  context.l10n.aiProvider,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 24),
@@ -72,18 +112,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   controller: _url,
                   enabled: !vm.busy,
                   keyboardType: TextInputType.url,
-                  decoration: const InputDecoration(
-                    labelText: 'API base URL',
-                    helperText: 'Include /v1 if your provider requires it. Do not append /chat/completions.',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.apiBaseUrl,
+                    helperText: context.l10n.apiBaseUrlHelp,
+                    helperMaxLines: 3,
                   ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _model,
                   enabled: !vm.busy,
-                  decoration: const InputDecoration(
-                    labelText: 'Model ID',
-                    hintText: 'Enter a model available from your provider',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.modelId,
+                    hintText: context.l10n.modelHint,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -94,12 +135,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   enableSuggestions: false,
                   autocorrect: false,
                   decoration: InputDecoration(
-                    labelText: 'API key',
+                    labelText: context.l10n.apiKey,
                     hintText: vm.profile == null
-                        ? 'Paste your API key'
-                        : 'Leave blank to keep the saved key',
+                        ? context.l10n.pasteKey
+                        : context.l10n.keepKey,
                     suffixIcon: IconButton(
-                      tooltip: _visible ? 'Hide key' : 'Show key',
+                      tooltip: _visible
+                          ? context.l10n.hideKey
+                          : context.l10n.showKey,
                       onPressed: () => setState(() => _visible = !_visible),
                       icon: Icon(
                         _visible ? Icons.visibility_off : Icons.visibility,
@@ -109,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 CheckboxListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('This endpoint does not require a key'),
+                  title: Text(context.l10n.noKey),
                   value: _noKey,
                   onChanged: vm.busy
                       ? null
@@ -117,10 +160,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('JSON response mode'),
-                  subtitle: const Text(
-                    'Enable only if your provider supports response_format: json_object.',
-                  ),
+                  title: Text(context.l10n.jsonMode),
+                  subtitle: Text(context.l10n.jsonModeHelp),
                   value: _json,
                   onChanged: vm.busy
                       ? null
@@ -130,8 +171,10 @@ class _SettingsPageState extends State<SettingsPage> {
                 DropdownButtonFormField<String>(
                   initialValue: _language,
                   key: ValueKey(_language),
-                  decoration: const InputDecoration(
-                    labelText: 'Question language',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.questionLanguage,
+                    helperText: context.l10n.questionLanguageHelp,
+                    helperMaxLines: 3,
                   ),
                   items: ['简体中文', 'English']
                       .map((v) => DropdownMenuItem(value: v, child: Text(v)))
@@ -142,6 +185,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
                 const SizedBox(height: 24),
                 Wrap(
+                  key: const ValueKey('provider-actions'),
                   spacing: 12,
                   runSpacing: 12,
                   children: [
@@ -159,7 +203,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               );
                               if (saved && mounted) _key.clear();
                             },
-                      child: const Text('Save settings'),
+                      child: Text(context.l10n.saveSettings),
                     ),
                     OutlinedButton(
                       onPressed: vm.busy || !vm.loaded
@@ -171,12 +215,12 @@ class _SettingsPageState extends State<SettingsPage> {
                               _json,
                               _noKey,
                             ),
-                      child: const Text('Test connection'),
+                      child: Text(context.l10n.testConnection),
                     ),
                   ],
                 ),
                 if (vm.busy)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(top: 20),
                     child: LinearProgressIndicator(),
                   ),
@@ -185,10 +229,8 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 20),
-        const Notice(
-          'Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.',
-        ),
-        const Text(
+        Notice(context.l10n.privacyNotice),
+        Text(
           'OmniQuiz 0.1.0 · GPL-3.0-only',
           style: TextStyle(color: Colors.black54),
         ),
@@ -199,7 +241,7 @@ class _SettingsPageState extends State<SettingsPage> {
             applicationVersion: '0.1.0',
             applicationLegalese: 'Copyright © 2026 OmniQuiz contributors\nLicensed under GPL-3.0-only',
           ),
-          child: const Text('Open-source licenses'),
+          child: Text(context.l10n.licenses),
         ),
       ],
     );

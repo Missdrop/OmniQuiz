@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/localization.dart';
+
 class PageFrame extends StatelessWidget {
   const PageFrame({
     super.key,
@@ -61,7 +63,10 @@ class Notice extends StatelessWidget {
       color: error ? const Color(0xFFFFE8E2) : const Color(0xFFE7EFE5),
       borderRadius: BorderRadius.circular(12),
     ),
-    child: Text(text, style: const TextStyle(height: 1.5)),
+    child: Text(
+      context.l10n.diagnostic(text),
+      style: const TextStyle(height: 1.5),
+    ),
   );
 }
 

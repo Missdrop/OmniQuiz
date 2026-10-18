@@ -6,7 +6,9 @@ const assets = [
   'OmniQuiz-android-debug.apk',
   'OmniQuiz-linux-x64.tar.gz',
   'OmniQuiz-windows-x64.zip',
+  'OmniQuiz-windows-x64.msi',
   'OmniQuiz-macos.tar.gz',
+  'OmniQuiz-macos.dmg',
   'OmniQuiz-ios-unsigned.tar.gz',
 ];
 
@@ -48,7 +50,9 @@ module.exports = async function publish({ github, context, core, nightly, direct
     '', `Commit: ${context.sha}`,
     `Build: https://github.com/${repo.owner}/${repo.repo}/actions/runs/${context.runId}`,
     '', 'Android is a debug-signed test APK (signing keys may change between builds).',
-    'macOS is not notarized. The unsigned iOS app requires signing before installation.',
+    'Windows: MSI installer or portable ZIP. The installer is not code-signed.',
+    'macOS: open the DMG and drag OmniQuiz to Applications. It is not notarized.',
+    'The unsigned iOS app requires signing before installation.',
     'Application version comes from pubspec.yaml; update it before tagging a version.',
   ].join('\n');
   if (!release) {

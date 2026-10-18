@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_localizations:
+    sdk: flutter
   flutter:
     sdk: flutter
 
@@ -47,6 +49,7 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   pdfrx: ^2.6.5
 
+  intl: ^0.20.3
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -57,19 +60,21 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: 0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  generate: true
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
   assets:
     - LICENSE
+    - assets/branding/logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

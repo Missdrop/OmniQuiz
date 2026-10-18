@@ -36,7 +36,11 @@ class LibraryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> import({bool directory = false, bool sample = false}) async {
+  Future<void> import({
+    bool directory = false,
+    bool sample = false,
+    bool chineseSample = false,
+  }) async {
     if (busy) return;
     busy = true;
     message = null;
@@ -45,9 +49,9 @@ class LibraryViewModel extends ChangeNotifier {
       final inputs = sample
           ? [
               ImportInput(
-                name: 'Learning science.md',
+                name: chineseSample ? '学习方法示例.md' : 'Learning science.md',
                 origin: 'sample:learning-science',
-                bytes: utf8.encode(_sample),
+                bytes: utf8.encode(chineseSample ? _chineseSample : _sample),
               ),
             ]
           : await (directory ? access.pickDirectory() : access.pickFiles());
@@ -85,6 +89,20 @@ class LibraryViewModel extends ChangeNotifier {
   }
 
   Future<List<SourceChunk>> source(String id) => materials.chunks(id);
+  static const _chineseSample = '''# 学习方法
+
+检索练习是主动从记忆中回想信息，而不是只反复阅读。在查看答案前尝试回答问题，就是检索练习的一种形式。
+
+间隔练习将学习安排在不同时间进行，集中练习则将学习放在一次连续的时段中。间隔能让学习者在遗忘发生后再次尝试回忆。
+
+反馈有助于纠正错误。解释为什么答案正确，通常比只标记对错更有帮助。对于 AI 生成的解析，学习者应当核对原始资料。
+
+交错练习在同一次学习中混合不同类型的题目，分块练习则将相似题目放在一起。混合不同题目能促使学习者判断适用的方法。
+
+识别与回忆不同。从选项中认出熟悉的答案，不代表能在没有提示时解释概念。结合选择题与自我解释，可以发现这种差距。
+
+评估学习效果时，应同时使用新题和熟悉的题目。反复练习完全相同的题目，可能只是在测量对选项答案的记忆，而不是对知识的理解。
+''';
   static const _sample = '''# Learning science
 
 Retrieval practice means actively recalling information from memory, instead of only rereading it. Answering a question before checking the answer is one way to practice retrieval.

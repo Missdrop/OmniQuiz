@@ -1,3 +1,5 @@
+import '../../l10n/localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -16,12 +18,14 @@ class PracticePage extends StatelessWidget {
     final generation = vm.generation;
     return PageFrame(
       eyebrow: vm.reviewing
-          ? 'Build lasting knowledge'
-          : 'One question at a time',
-      title: vm.reviewing ? 'A second look.' : 'Find your flow.',
+          ? context.l10n.reviewPracticeEyebrow
+          : context.l10n.practiceEyebrow,
+      title: vm.reviewing
+          ? context.l10n.reviewPracticeTitle
+          : context.l10n.practiceTitle,
       subtitle: vm.reviewing
-          ? 'Recall it first. Then read the explanation.'
-          : 'Fresh questions from your materials, ready before you need them.',
+          ? context.l10n.reviewPracticeSubtitle
+          : context.l10n.practiceSubtitle,
       children: [
         if (!vm.reviewing)
           Wrap(
@@ -37,13 +41,13 @@ class PracticePage extends StatelessWidget {
                       ? vm.scope
                       : '',
                   isExpanded: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Practice scope',
+                  decoration: InputDecoration(
+                    labelText: context.l10n.practiceScope,
                   ),
                   items: [
-                    const DropdownMenuItem(
+                    DropdownMenuItem(
                       value: '',
-                      child: Text('All materials'),
+                      child: Text(context.l10n.allMaterials),
                     ),
                     ...library.documents.map(
                       (d) => DropdownMenuItem(
@@ -61,7 +65,7 @@ class PracticePage extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: vm.stopGeneration,
                   icon: const Icon(Icons.pause),
-                  label: const Text('Pause generation'),
+                  label: Text(context.l10n.pauseGeneration),
                 )
               else
                 FilledButton.icon(
@@ -69,18 +73,16 @@ class PracticePage extends StatelessWidget {
                     final proceed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Generate practice questions?'),
-                        content: const Text(
-                          'Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.',
-                        ),
+                        title: Text(context.l10n.generateTitle),
+                        content: Text(context.l10n.generateBody),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
+                            child: Text(context.l10n.cancel),
                           ),
                           FilledButton(
                             onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Start'),
+                            child: Text(context.l10n.start),
                           ),
                         ],
                       ),
@@ -88,10 +90,10 @@ class PracticePage extends StatelessWidget {
                     if (proceed == true) await vm.startGeneration();
                   },
                   icon: const Icon(Icons.auto_awesome),
-                  label: const Text('Generate questions'),
+                  label: Text(context.l10n.generateQuestions),
                 ),
               Chip(
-                label: Text('${vm.readyCount} ready'),
+                label: Text(context.l10n.readyCount(vm.readyCount)),
                 avatar: const Icon(Icons.offline_pin_outlined, size: 18),
               ),
             ],
@@ -100,11 +102,11 @@ class PracticePage extends StatelessWidget {
           TextButton.icon(
             onPressed: vm.leaveReview,
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Back to fresh questions'),
+            label: Text(context.l10n.backToFresh),
           ),
         const SizedBox(height: 20),
         if (generation.running)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 12),
             child: LinearProgressIndicator(),
           ),
@@ -114,22 +116,26 @@ class PracticePage extends StatelessWidget {
           EmptyCard(
             icon: vm.reviewing ? Icons.task_alt : Icons.psychology_outlined,
             title: vm.reviewing
-                ? 'You’re caught up for now'
-                : 'Ready for your first question?',
+                ? context.l10n.reviewCaughtUp
+                : context.l10n.firstQuestion,
             body: vm.reviewing
-                ? 'Come back when your next review is due, or choose another item from Review.'
-                : 'Import your notes, connect an AI provider, then start generating.\nOnce saved, questions work offline too.',
+                ? context.l10n.reviewCaughtUpBody
+                : context.l10n.firstQuestionBody,
             action: Wrap(
               spacing: 12,
               children: [
                 TextButton(
                   onPressed: () => context.go('/library'),
-                  child: const Text('Open library'),
+                  child: Text(context.l10n.openLibrary),
                 ),
                 TextButton(
                   onPressed: () =>
                       context.go(vm.reviewing ? '/review' : '/settings'),
-                  child: Text(vm.reviewing ? 'Review queue' : 'Set up AI'),
+                  child: Text(
+                    vm.reviewing
+                        ? context.l10n.reviewQueue
+                        : context.l10n.setUpAi,
+                  ),
                 ),
               ],
             ),
@@ -148,7 +154,7 @@ class PracticePage extends StatelessWidget {
                     runSpacing: 8,
                     children: [
                       Chip(label: Text(q.topic)),
-                      const Chip(label: Text('Single choice')),
+                      Chip(label: Text(context.l10n.singleChoice)),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -230,10 +236,10 @@ class PracticePage extends StatelessWidget {
                             : vm.submit,
                         child: Text(
                           vm.busy
-                              ? 'Saving…'
+                              ? context.l10n.saving
                               : vm.answered
-                              ? 'Next question'
-                              : 'Check answer',
+                              ? context.l10n.nextQuestion
+                              : context.l10n.checkAnswer,
                         ),
                       ),
                       TextButton.icon(
@@ -243,20 +249,20 @@ class PracticePage extends StatelessWidget {
                                 final flag = await showDialog<bool>(
                                   context: context,
                                   builder: (context) => AlertDialog(
-                                    title: const Text('Hide this question?'),
-                                    content: const Text(
-                                      'If the question is incorrect or ambiguous, remove it from practice and review. This report stays on your device.',
+                                    title: Text(context.l10n.hideQuestionTitle),
+                                    content: Text(
+                                      context.l10n.hideQuestionBody,
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(context, false),
-                                        child: const Text('Cancel'),
+                                        child: Text(context.l10n.cancel),
                                       ),
                                       FilledButton(
                                         onPressed: () =>
                                             Navigator.pop(context, true),
-                                        child: const Text('Hide question'),
+                                        child: Text(context.l10n.hideQuestion),
                                       ),
                                     ],
                                   ),
@@ -264,7 +270,7 @@ class PracticePage extends StatelessWidget {
                                 if (flag == true) await vm.flag();
                               },
                         icon: const Icon(Icons.flag_outlined, size: 18),
-                        label: const Text('Report a problem'),
+                        label: Text(context.l10n.reportProblem),
                       ),
                     ],
                   ),
@@ -272,8 +278,8 @@ class PracticePage extends StatelessWidget {
                     const Divider(height: 40),
                     Text(
                       q.isCorrect(vm.selected!)
-                          ? 'Well done.'
-                          : 'A useful mistake.',
+                          ? context.l10n.correctAnswer
+                          : context.l10n.wrongAnswer,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
@@ -283,7 +289,7 @@ class PracticePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'SOURCE · ${q.source.documentName}',
+                      context.l10n.sourceName(q.source.documentName),
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -291,7 +297,7 @@ class PracticePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      q.source.location,
+                      context.l10n.sourceLocation(q.source.location),
                       style: const TextStyle(color: Colors.black54),
                     ),
                     const SizedBox(height: 12),
@@ -304,7 +310,7 @@ class PracticePage extends StatelessWidget {
                     ),
                     ExpansionTile(
                       tilePadding: EdgeInsets.zero,
-                      title: const Text('Read the full source excerpt'),
+                      title: Text(context.l10n.fullSource),
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16),
@@ -315,8 +321,8 @@ class PracticePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Text(
-                      'AI-generated. Check the source if an answer seems wrong.',
+                    Text(
+                      context.l10n.aiDisclaimer,
                       style: TextStyle(fontSize: 12, color: Colors.black54),
                     ),
                   ],

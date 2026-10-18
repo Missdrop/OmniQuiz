@@ -1,3 +1,5 @@
+import '../l10n/localization.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -14,6 +16,7 @@ import '../presentation/settings/settings_page.dart';
 import '../presentation/settings/settings_view_model.dart';
 import 'dependencies.dart';
 import 'theme.dart';
+import '../presentation/settings/language_view_model.dart';
 
 class OmniQuizApp extends StatefulWidget {
   const OmniQuizApp({super.key, required this.dependencies});
@@ -81,14 +84,30 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
       Icons.history_rounded,
       Icons.tune_rounded,
     ];
-    const labels = ['Library', 'Practice', 'Review', 'Settings'];
+    final labels = [
+      context.l10n.library,
+      context.l10n.practice,
+      context.l10n.review,
+      context.l10n.settings,
+    ];
     return Scaffold(
       appBar: wide
           ? null
           : AppBar(
-              title: const Text(
-                'OmniQuiz',
-                style: TextStyle(fontWeight: FontWeight.w800),
+              title: Row(
+                children: [
+                  Image.asset(
+                    'assets/branding/logo.png',
+                    width: 36,
+                    height: 36,
+                    excludeFromSemantics: true,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'OmniQuiz',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ],
               ),
               centerTitle: false,
             ),
@@ -103,11 +122,16 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.fromLTRB(24, 36, 24, 4),
                         child: Row(
                           children: [
-                            Icon(Icons.spa, color: Color(0xFF245C46)),
+                            Image.asset(
+                              'assets/branding/logo.png',
+                              width: 32,
+                              height: 32,
+                              excludeFromSemantics: true,
+                            ),
                             SizedBox(width: 10),
                             Flexible(
                               child: Text(
@@ -121,10 +145,10 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                           ],
                         ),
                       ),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.fromLTRB(24, 4, 24, 32),
                         child: Text(
-                          'Make knowledge yours.',
+                          context.l10n.tagline,
                           style: TextStyle(fontSize: 12, color: Colors.black54),
                         ),
                       ),
@@ -146,7 +170,7 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                           ),
                         ),
                       const Spacer(),
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.all(24),
                         child: Row(
                           children: [
@@ -154,7 +178,7 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                             SizedBox(width: 8),
                             Flexible(
                               child: Text(
-                                'Local by design',
+                                context.l10n.localByDesign,
                                 style: TextStyle(fontSize: 12),
                               ),
                             ),
@@ -188,6 +212,9 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) => MultiProvider(
     providers: [
+      ChangeNotifierProvider<LanguageViewModel>.value(
+        value: widget.dependencies.language,
+      ),
       ChangeNotifierProvider<LibraryViewModel>.value(
         value: widget.dependencies.library,
       ),
@@ -201,11 +228,16 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
         value: widget.dependencies.settings,
       ),
     ],
-    child: MaterialApp.router(
-      title: 'OmniQuiz',
-      debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
-      routerConfig: _router,
+    child: Consumer<LanguageViewModel>(
+      builder: (context, language, _) => MaterialApp.router(
+        locale: language.locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        title: 'OmniQuiz',
+        debugShowCheckedModeBanner: false,
+        theme: buildTheme(),
+        routerConfig: _router,
+      ),
     ),
   );
   @override

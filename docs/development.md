@@ -1,6 +1,25 @@
 # Development
 
-## Toolchain
+Develop on `dev` and commit independently verified changes there. Promote to
+`main` only when a release build is needed: each push to `main` triggers the
+full build matrix and updates Nightly.
+
+## App icons
+
+The approved logo is `assets/branding/logo.png`. It is shared by the app UI,
+README, and Linux window icon. To regenerate Android, iOS, macOS, and Windows
+launcher icons after replacing it, run `./scripts/dart run flutter_launcher_icons`
+(on Windows: `scripts/dart.ps1 run flutter_launcher_icons`). Configuration lives
+in `flutter_launcher_icons.yaml`. Commit the generated platform icons alongside
+the source asset. Design candidates, prompts, and internal architecture notes
+stay local and are ignored by Git.
+
+Review the generated diff: version 0.14.4 can incorrectly replace the iOS
+`ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS` boolean with
+`AppIcon`. Keep that setting at `YES`; changing the existing icon artwork does
+not require changing the Xcode project settings.
+
+## Toolchain setup
 
 The project is developed with Flutter 3.47.7 / Dart 3.13.5. `pubspec.lock` pins
 application dependencies. `scripts/bootstrap`, `scripts/flutter`, and
@@ -27,6 +46,28 @@ For a live smoke test, run the app and use **Test connection** with your own
 endpoint/model/key. Then import a small document and generate questions.
 Check both a correct and an incorrect answer, restart the app, and confirm
 that the cached questions and review queue persist. No real API key is bundled.
+
+### Windows PowerShell
+
+Enable Windows Developer Mode for plugin symlinks. Install Visual Studio's
+Desktop development with C++ workload, including ATL, CMake, and a Windows SDK.
+Then run from the repository root:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 doctor -v
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 analyze
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 test
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/flutter.ps1 run -d windows
+```
+
+The PowerShell wrappers use the same pinned Flutter version and project-local
+caches as the Bash scripts. They change environment variables only in the
+invoked process; no persistent PATH or execution-policy change is required.
+For Android, extract a Windows JDK 17 into `.tooling/jdk` and install SDK tools
+under `.tooling/android-sdk`. The wrappers detect `jdk/bin/java.exe` automatically.
+SDK 36, build-tools 36.0.0, and NDK 28.2.13676358 match the pinned Flutter SDK.
+Use `scripts/dart.ps1` for Dart commands.
 
 ## Native build requirements
 
@@ -59,8 +100,9 @@ keys are stored in this repository.
 - Every push to `main` updates the single **Nightly** prerelease. Other branches
   do not publish. You can also run **Rolling prerelease** manually on `main`.
 - Both workflows require tests and all five native builds to pass. Each release
-  includes Android, Linux, Windows, macOS and unsigned iOS archives, plus SHA-256
-  checksums. Unix archives preserve permissions and symbolic links.
+  includes Android APK, Windows MSI and portable ZIP, macOS DMG and TAR.GZ,
+  Linux TAR.GZ, and unsigned iOS TAR.GZ, plus SHA-256 checksums.
+  Unix archives preserve permissions and symbolic links.
 - Nightly reuses the same release ID and asset names, and moves the `nightly`
   tag to the built commit. It does not delete and recreate the release. Existing
   assets are replaced individually, so replacement is not atomic; rerun a failed
@@ -76,6 +118,38 @@ Android APKs currently use temporary debug signing keys, so upgrading across
 builds may require uninstalling the previous app (which removes local data).
 Apple artifacts are unsigned/not notarized as described above. Release automation
 does not add distribution certificates or turn the iOS archive into an installable IPA.
+
+### Desktop installers
+
+After building, run `python scripts/package_release.py windows` or `macos` on
+the corresponding OS. Output goes to the ignored `dist/` directory.
+
+Windows packaging requires Python, .NET SDK 8, and WiX 5.0.2:
+
+```powershell
+dotnet tool install wix --version 5.0.2 --tool-path .tooling/wix
+.tooling/wix/wix.exe extension add WixToolset.UI.wixext/5.0.2
+python scripts/package_release.py windows
+```
+
+The MSI installs for all users under Program Files (administrator permission
+required), adds a Start menu shortcut, and supports Windows uninstall/repair.
+Both MSI and ZIP bundle the x64 C++ runtime DLLs from Visual Studio's
+redistributable directory. No prerequisite download is needed during installation.
+The ZIP is an alternative for users without administrator access.
+Uninstall removes installed application files, not the user's library or settings.
+The MSI is currently unsigned.
+
+The stable `UpgradeCode` in `packaging/windows/OmniQuiz.wxs` identifies the app
+across versions. MSI uses the three numeric fields from `pubspec.yaml` and
+allows same-version replacement for Nightly builds; build metadata after `+`
+is not an MSI version. Consequently, an older Nightly with the same version
+can replace a newer one. Increment the app version for numbered releases.
+
+macOS packaging uses the system `ditto` and `hdiutil` tools, preserves the app
+bundle, includes an Applications shortcut, and verifies the generated DMG.
+It does not add Developer ID signing or notarization. Linux and iOS keep their
+existing archives; no installer is generated for those targets.
 
 macOS uses the legacy system Keychain through flutter_secure_storage, avoiding
 cross-app Keychain Sharing. Test secure storage on your signed/distributed build.
@@ -109,6 +183,15 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
   and ChatGPT subscription authorization are not included in this release.
 
 ## Code map
+
+Interface translations live in `lib/l10n/app_en.arb` and `app_zh.arb`.
+Run `flutter gen-l10n` after editing them. `LanguageViewModel` persists the
+interface preference independently of AI profiles, so switching UI languages
+does not cancel generation or require an API key. System language is the default.
+`localization.dart` translates existing application diagnostics and stored source
+locations at the presentation boundary; it never translates user documents or
+cached AI questions. New questions use the provider profile's question language.
+
 
 - `lib/domain`: immutable models, question invariants, review and buffer policies.
 - `lib/application`: interfaces, import/settings use cases, validation, generation coordination.

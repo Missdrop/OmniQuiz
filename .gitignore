@@ -22,11 +22,15 @@
 .pub-cache/
 .pub/
 /build/
+/dist/
+/.wix/
+__pycache__/
 **/Flutter/ephemeral/
 **/flutter/ephemeral/
 **/Pods/
 **/.symlinks/
 **/.gradle/
+**/.kotlin/
 **/local.properties
 **/xcuserdata/
 
@@ -38,3 +42,8 @@
 
 # Project-local toolchains and caches
 /.tooling/
+
+# Local planning and design exploration
+/AGENTS.md
+/docs/architecture.md
+/docs/branding/proposals/

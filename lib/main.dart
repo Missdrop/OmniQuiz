@@ -11,6 +11,7 @@ import 'app/app.dart';
 import 'app/dependencies.dart';
 import 'app/theme.dart';
 import 'infrastructure/persistence/database.dart';
+import 'l10n/localization.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,13 +33,15 @@ Future<void> main() async {
   } catch (_) {
     runApp(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: buildTheme(),
-        home: const Scaffold(
-          body: Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: SelectableText(
-                'OmniQuiz could not open local storage. Check available disk space and application permissions, then restart.',
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: Padding(
+                padding: EdgeInsets.all(32),
+                child: SelectableText(context.l10n.startupError),
               ),
             ),
           ),

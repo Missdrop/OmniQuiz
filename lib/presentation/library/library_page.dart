@@ -1,3 +1,5 @@
+import '../../l10n/localization.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -12,10 +14,9 @@ class LibraryPage extends StatelessWidget {
     final vm = context.watch<LibraryViewModel>();
     final stats = vm.stats;
     return PageFrame(
-      eyebrow: 'Your learning space',
-      title: 'A little practice. A lot of progress.',
-      subtitle:
-          'Bring your notes. Build understanding, one question at a time.',
+      eyebrow: context.l10n.libraryEyebrow,
+      title: context.l10n.libraryTitle,
+      subtitle: context.l10n.librarySubtitle,
       children: [
         Wrap(
           spacing: 12,
@@ -24,25 +25,25 @@ class LibraryPage extends StatelessWidget {
             _stat(
               context,
               '${stats.documents}',
-              'Documents',
+              context.l10n.documents,
               Icons.library_books_outlined,
             ),
             _stat(
               context,
               '${stats.ready}',
-              'Questions ready',
+              context.l10n.questionsReady,
               Icons.auto_awesome_outlined,
             ),
             _stat(
               context,
               '${stats.attempts}',
-              'Answers given',
+              context.l10n.answersGiven,
               Icons.check_circle_outline,
             ),
             _stat(
               context,
               '${stats.review}',
-              'To revisit',
+              context.l10n.toRevisit,
               Icons.history_rounded,
             ),
           ],
@@ -55,29 +56,29 @@ class LibraryPage extends StatelessWidget {
             FilledButton.icon(
               onPressed: vm.busy ? null : () => vm.import(),
               icon: const Icon(Icons.add),
-              label: const Text('Import files'),
+              label: Text(context.l10n.importFiles),
             ),
             if (vm.supportsDirectories)
               OutlinedButton.icon(
                 onPressed: vm.busy ? null : () => vm.import(directory: true),
                 icon: const Icon(Icons.create_new_folder_outlined),
-                label: const Text('Import folder'),
+                label: Text(context.l10n.importFolder),
               ),
             TextButton.icon(
               onPressed: () => context.go('/practice'),
               icon: const Icon(Icons.arrow_forward),
-              label: const Text('Go to practice'),
+              label: Text(context.l10n.goToPractice),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        const Text(
-          'TXT, Markdown & text PDF · up to 20 MB per file',
+        Text(
+          context.l10n.supportedFiles,
           style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
         const SizedBox(height: 20),
         if (vm.busy)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(bottom: 16),
             child: LinearProgressIndicator(),
           ),
@@ -85,11 +86,16 @@ class LibraryPage extends StatelessWidget {
         if (vm.documents.isEmpty)
           EmptyCard(
             icon: Icons.menu_book_outlined,
-            title: 'Your next chapter starts here',
-            body: 'Import a document to turn it into practice questions.\nYour materials stay on this device until you choose to generate.',
+            title: context.l10n.libraryEmptyTitle,
+            body: context.l10n.libraryEmptyBody,
             action: TextButton(
-              onPressed: vm.busy ? null : () => vm.import(sample: true),
-              child: const Text('Try sample notes'),
+              onPressed: vm.busy
+                  ? null
+                  : () => vm.import(
+                      sample: true,
+                      chineseSample: context.l10n.localeName == 'zh',
+                    ),
+              child: Text(context.l10n.trySample),
             ),
           ),
         for (final doc in vm.documents)
@@ -105,7 +111,11 @@ class LibraryPage extends StatelessWidget {
               ),
               title: Text(doc.name),
               subtitle: Text(
-                '${doc.chunkCount} source excerpts · imported ${doc.importedAt.toLocal().toString().split(' ').first}',
+                context.l10n.documentDetails(
+                  doc.chunkCount,
+                  MaterialLocalizations.of(context)
+                      .formatMediumDate(doc.importedAt.toLocal()),
+                ),
               ),
               onTap: () async {
                 final chunks = await vm.source(doc.id);
@@ -122,7 +132,7 @@ class LibraryPage extends StatelessWidget {
                           children: [
                             for (final c in chunks) ...[
                               Text(
-                                c.location,
+                                context.l10n.sourceLocation(c.location),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -138,32 +148,30 @@ class LibraryPage extends StatelessWidget {
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text('Close'),
+                        child: Text(context.l10n.close),
                       ),
                     ],
                   ),
                 );
               },
               trailing: IconButton(
-                tooltip: 'Remove document',
+                tooltip: context.l10n.removeDocument,
                 onPressed: vm.busy
                     ? null
                     : () async {
                         final remove = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Remove this document?'),
-                            content: const Text(
-                              'Its questions will leave the practice and review queues. Your answer history will be retained.',
-                            ),
+                            title: Text(context.l10n.removeDocumentTitle),
+                            content: Text(context.l10n.removeDocumentBody),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
-                                child: const Text('Cancel'),
+                                child: Text(context.l10n.cancel),
                               ),
                               FilledButton(
                                 onPressed: () => Navigator.pop(context, true),
-                                child: const Text('Remove'),
+                                child: Text(context.l10n.remove),
                               ),
                             ],
                           ),

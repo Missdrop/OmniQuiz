@@ -1,57 +1,79 @@
-# OmniQuiz
+<p align="center">
+  <img src="assets/branding/logo.png" alt="OmniQuiz logo" width="140">
+</p>
+<h1 align="center">OmniQuiz</h1>
+<p align="center"><strong>Turn your notes into practice questions.</strong></p>
+<p align="center">
+  <a href="https://github.com/Missdrop/OmniQuiz/releases">Download</a> ·
+  <a href="#get-started">Get started</a> ·
+  <a href="docs/development.md">Build from source</a> ·
+  <a href="https://github.com/Missdrop/OmniQuiz/issues">Report a bug</a>
+</p>
 
-**Turn your study materials into endless practice.**
+Bring your study materials, connect your own AI provider, and start practicing.
+OmniQuiz keeps your library and progress on your device. No account needed.
 
-A local-first quiz app for phones and desktops. Bring your notes and your own AI API.
+## What you can do
 
-## Features
+- **Study your own notes.** Import TXT, Markdown, or PDFs with selectable text.
+- **Understand each answer.** Read explanations alongside excerpts from your materials.
+- **Review your mistakes.** Missed questions come back for spaced review.
+- **Keep practicing offline.** Previously generated questions stay available.
+- **Choose your language.** English and Simplified Chinese interfaces, with a separate language setting for AI questions.
 
-- **Learn from your materials.** Import TXT, Markdown, or text-based PDFs. Desktop users can import a folder recursively.
-- **Stay in flow.** Questions are generated in small batches and cached ahead of time.
-- **Check the source.** Every accepted question includes an excerpt and its document location.
-- **Learn from mistakes.** Wrong answers enter a spaced review queue. Three correct reviews graduate a question.
-- **Choose your AI.** Configure an OpenAI-compatible Chat Completions endpoint, model, and API key.
-- **Practice offline.** Saved questions, explanations, and progress remain available without a connection.
+## Download
 
-> Early release. Automated tests cover the core workflow. Native builds and platform-specific integrations are validated separately; see [development](docs/development.md).
+Get the available builds from [GitHub Releases](https://github.com/Missdrop/OmniQuiz/releases).
+**Nightly builds are early previews** and may contain bugs.
+
+| Platform | Release file |
+| --- | --- |
+| Windows | `OmniQuiz-windows-x64.msi` — run the installer; `.zip` is also available for use without installation |
+| Android | `OmniQuiz-android-debug.apk` — install on your device |
+| macOS | `OmniQuiz-macos.dmg` — open and drag OmniQuiz into Applications |
+| Linux | `OmniQuiz-linux-x64.tar.gz` |
+
+For iOS, the release archive is unsigned; building and signing requires macOS and Xcode.
+Windows installers are not code-signed, and macOS builds are not notarized.
+See the [development guide](docs/development.md) for platform requirements.
 
 ## Get started
 
-1. Open **Settings**, enter your API base URL and model, then save your API key.
-2. Use **Test connection** to verify the provider. This makes a small API request.
-3. Import your study materials in **Library**, or try the sample notes.
-4. Open **Practice**, choose a source, and select **Generate questions**.
-5. Revisit missed questions in **Review**.
+1. **Connect your AI.** In **Settings**, enter your provider's API base URL, model, and API key. Select **Test connection**.
+2. **Add your notes.** Import a document in **Library**, or try the included sample notes.
+3. **Start practicing.** In **Practice**, choose your material and select **Generate questions**. Visit **Review** later to revisit mistakes.
 
-Generation uses your provider's API balance. It pauses when you leave Practice or the app is suspended. Cached questions are always available. Reimport a folder to scan for changed files; continuous folder watching is not implemented.
+You need an API provider compatible with OpenAI Chat Completions. New questions require
+an internet connection and may incur charges from your provider. Saved questions work offline.
 
-## Run locally
+## Your data
 
-Requires Git and the native build tools for your target platform.
+Your library, questions, and progress are stored locally. When you generate questions,
+selected text excerpts go directly to the AI provider you configured. Your API key is
+kept in your operating system's secure storage. OmniQuiz has no backend or analytics.
+
+AI can make mistakes. Use the source excerpts to check answers and hide incorrect questions.
+Scanned PDFs need OCR before import.
+
+## Development
+
+Built with Flutter. For setup, tests, and platform details, see [Development](docs/development.md).
 
 ```sh
 ./scripts/bootstrap
 ./scripts/flutter run -d macos
 ```
 
-The scripts keep Flutter and package caches inside `.tooling/`. They do not change your system PATH. Replace `macos` with an available device from `./scripts/flutter devices`. On Windows, use an existing Flutter installation with `flutter pub get` and `flutter run -d windows`, or run the bootstrap scripts in Git Bash with the Windows build tools installed.
+On Windows, use PowerShell:
 
-See [development](docs/development.md) for platform requirements, tests, and limitations.
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/bootstrap.ps1
+powershell -ExecutionPolicy Bypass -File scripts/flutter.ps1 run -d windows
+```
 
-## Privacy
-
-No OmniQuiz account, backend, or analytics. Documents are parsed locally; extracted text, questions, and progress are stored in SQLite. Original files are not copied into the app's storage. When you generate questions, selected excerpts are sent directly to your configured AI provider. Keys are stored using the operating system's secure storage.
-
-AI-generated answers can be wrong. Source matching validates the citation, not the reasoning. Check the original excerpt and hide questions that are incorrect or ambiguous.
-
-## Architecture
-
-Flutter + Dart + SQLite (Drift), with MVVM presentation, constructor injection, and separate domain, application, and infrastructure layers. See the [architecture](docs/architecture.md).
-
-## Contributing
-
-Issues and focused pull requests are welcome. Run formatting, static analysis, and relevant tests before submitting changes. Never commit API keys or personal study materials.
+Native build tools are required. The scripts keep Flutter and caches in `.tooling/`.
+Contributions are welcome: open an issue or a focused pull request against `dev`.
 
 ## License
 
-[GPL-3.0-only](LICENSE). Copyright (C) 2026 OmniQuiz contributors.
+[GPL-3.0-only](LICENSE).
