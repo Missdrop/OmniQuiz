@@ -143,6 +143,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       await capture('practice-mobile');
       expect(tester.takeException(), isNull);
+      await tester.runAsync(() async {
+        await deps.practice.next();
+        expect(deps.practice.current, isNotNull);
+        await deps.library.remove(deps.library.documents.single.id);
+        await deps.practice.refresh();
+        expect(deps.practice.current, isNull);
+        expect(deps.practice.readyCount, 0);
+      });
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.runAsync(deps.dispose);
     },

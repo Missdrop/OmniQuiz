@@ -43,6 +43,14 @@ class PracticeViewModel extends ChangeNotifier {
       final ready = await questions.ready(scope);
       if (version != _version || _disposed) return;
       readyCount = ready.length;
+      if (!busy &&
+          !answered &&
+          !reviewing &&
+          current != null &&
+          !ready.any((question) => question.id == current!.id)) {
+        current = null;
+        selected = null;
+      }
       if (current == null && !reviewing && ready.isNotEmpty) {
         _setQuestion(ready.first);
       }
