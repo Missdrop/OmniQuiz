@@ -9,7 +9,8 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
   const directory = fs.mkdtempSync('.tooling/release-test-');
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const names = ['OmniQuiz-android-debug.apk', 'OmniQuiz-linux-x64.tar.gz',
-    'OmniQuiz-windows-x64.zip', 'OmniQuiz-macos.tar.gz', 'OmniQuiz-ios-unsigned.tar.gz'];
+    'OmniQuiz-windows-x64.zip', 'OmniQuiz-windows-x64.msi',
+    'OmniQuiz-macos.tar.gz', 'OmniQuiz-macos.dmg', 'OmniQuiz-ios-unsigned.tar.gz'];
   for (const name of names) fs.writeFileSync(path.join(directory, name), name);
   const calls = [];
   const record = name => async args => { calls.push({ name, args }); return { data: { id: 7 } }; };
@@ -37,12 +38,12 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
   };
 }
 
-test('nightly replaces six assets on the same release without creating another', async t => {
+test('nightly replaces eight assets on the same release without creating another', async t => {
   const { calls, options } = fixture(t);
   await publish(options);
   assert.equal(calls.filter(c => c.name === 'createRelease').length, 0);
-  assert.equal(calls.filter(c => c.name === 'deleteReleaseAsset').length, 6);
-  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 6);
+  assert.equal(calls.filter(c => c.name === 'deleteReleaseAsset').length, 8);
+  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 8);
   const update = calls.at(-1).args;
   assert.equal(update.release_id, 7);
   assert.equal(update.prerelease, true);
@@ -85,4 +86,13 @@ test('incomplete artifacts and API failures do not create a release', async t =>
   };
   await assert.rejects(publish(options), /Forbidden/);
   assert.equal(calls.length, 0);
+});
+
+test('missing desktop installers block publication before any release changes', async t => {
+  for (const name of ['OmniQuiz-windows-x64.msi', 'OmniQuiz-macos.dmg']) {
+    const { calls, options } = fixture(t);
+    fs.unlinkSync(path.join(options.directory, name));
+    await assert.rejects(publish(options));
+    assert.equal(calls.length, 0);
+  }
 });

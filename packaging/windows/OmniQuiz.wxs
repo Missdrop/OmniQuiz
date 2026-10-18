@@ -1,0 +1,33 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="OmniQuiz" Manufacturer="OmniQuiz contributors"
+           Version="$(var.AppVersion)" Language="1033" Scope="perMachine"
+           UpgradeCode="720EB22B-328C-48AA-8FCF-98884F61EAB8">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of OmniQuiz is already installed."
+                  AllowSameVersionUpgrades="yes" />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+    <Icon Id="AppIcon" SourceFile="windows/runner/resources/app_icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/Missdrop/OmniQuiz/issues" />
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="OmniQuiz" />
+    </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="MenuFolder" Name="OmniQuiz">
+        <Component Id="StartMenu" Guid="*">
+          <Shortcut Id="AppShortcut" Name="OmniQuiz" Target="[INSTALLFOLDER]omniquiz.exe"
+                    WorkingDirectory="INSTALLFOLDER" Icon="AppIcon" />
+          <RemoveFolder Id="RemoveMenu" On="uninstall" />
+          <RegistryValue Root="HKLM" Key="Software\OmniQuiz" Name="Installed"
+                         Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+      </Directory>
+    </StandardDirectory>
+    <Feature Id="Main" Title="OmniQuiz" Level="1">
+      <ComponentGroupRef Id="AppFiles" />
+      <ComponentRef Id="StartMenu" />
+    </Feature>
+    <ui:WixUI Id="WixUI_Minimal" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.LicenseRtf)" />
+  </Package>
+</Wix>

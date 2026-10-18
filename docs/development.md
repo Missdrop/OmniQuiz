@@ -100,8 +100,9 @@ keys are stored in this repository.
 - Every push to `main` updates the single **Nightly** prerelease. Other branches
   do not publish. You can also run **Rolling prerelease** manually on `main`.
 - Both workflows require tests and all five native builds to pass. Each release
-  includes Android, Linux, Windows, macOS and unsigned iOS archives, plus SHA-256
-  checksums. Unix archives preserve permissions and symbolic links.
+  includes Android APK, Windows MSI and portable ZIP, macOS DMG and TAR.GZ,
+  Linux TAR.GZ, and unsigned iOS TAR.GZ, plus SHA-256 checksums.
+  Unix archives preserve permissions and symbolic links.
 - Nightly reuses the same release ID and asset names, and moves the `nightly`
   tag to the built commit. It does not delete and recreate the release. Existing
   assets are replaced individually, so replacement is not atomic; rerun a failed
@@ -117,6 +118,38 @@ Android APKs currently use temporary debug signing keys, so upgrading across
 builds may require uninstalling the previous app (which removes local data).
 Apple artifacts are unsigned/not notarized as described above. Release automation
 does not add distribution certificates or turn the iOS archive into an installable IPA.
+
+### Desktop installers
+
+After building, run `python scripts/package_release.py windows` or `macos` on
+the corresponding OS. Output goes to the ignored `dist/` directory.
+
+Windows packaging requires Python, .NET SDK 8, and WiX 5.0.2:
+
+```powershell
+dotnet tool install wix --version 5.0.2 --tool-path .tooling/wix
+.tooling/wix/wix.exe extension add WixToolset.UI.wixext/5.0.2
+python scripts/package_release.py windows
+```
+
+The MSI installs for all users under Program Files (administrator permission
+required), adds a Start menu shortcut, and supports Windows uninstall/repair.
+Both MSI and ZIP bundle the x64 C++ runtime DLLs from Visual Studio's
+redistributable directory. No prerequisite download is needed during installation.
+The ZIP is an alternative for users without administrator access.
+Uninstall removes installed application files, not the user's library or settings.
+The MSI is currently unsigned.
+
+The stable `UpgradeCode` in `packaging/windows/OmniQuiz.wxs` identifies the app
+across versions. MSI uses the three numeric fields from `pubspec.yaml` and
+allows same-version replacement for Nightly builds; build metadata after `+`
+is not an MSI version. Consequently, an older Nightly with the same version
+can replace a newer one. Increment the app version for numbered releases.
+
+macOS packaging uses the system `ditto` and `hdiutil` tools, preserves the app
+bundle, includes an Applications shortcut, and verifies the generated DMG.
+It does not add Developer ID signing or notarization. Linux and iOS keep their
+existing archives; no installer is generated for those targets.
 
 macOS uses the legacy system Keychain through flutter_secure_storage, avoiding
 cross-app Keychain Sharing. Test secure storage on your signed/distributed build.

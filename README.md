@@ -28,12 +28,13 @@ Get the available builds from [GitHub Releases](https://github.com/Missdrop/Omni
 
 | Platform | Release file |
 | --- | --- |
-| Windows | `OmniQuiz-windows-x64.zip` — extract and run `omniquiz.exe` |
+| Windows | `OmniQuiz-windows-x64.msi` — run the installer; `.zip` is also available for use without installation |
 | Android | `OmniQuiz-android-debug.apk` — install on your device |
-| macOS | `OmniQuiz-macos.tar.gz` |
+| macOS | `OmniQuiz-macos.dmg` — open and drag OmniQuiz into Applications |
 | Linux | `OmniQuiz-linux-x64.tar.gz` |
 
 For iOS, the release archive is unsigned; building and signing requires macOS and Xcode.
+Windows installers are not code-signed, and macOS builds are not notarized.
 See the [development guide](docs/development.md) for platform requirements.
 
 ## Get started

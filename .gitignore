@@ -22,6 +22,9 @@
 .pub-cache/
 .pub/
 /build/
+/dist/
+/.wix/
+__pycache__/
 **/Flutter/ephemeral/
 **/flutter/ephemeral/
 **/Pods/
