@@ -1,23 +1,28 @@
-# OmniQuiz · 万物一点通
+# OmniQuiz
 
-将自己的学习资料转化为可持续练习的题库。
+Turn your study materials into endless practice.
 
-## 项目方向
+A local-first, cross-platform quiz app powered by your own AI API.
 
-OmniQuiz 是计划支持手机和电脑的开源本地刷题软件，目前处于项目初始化阶段，尚未实现以下功能。
+> Early development. The features below are planned, not yet available.
 
-- 导入本地资料，根据资料生成选择题，并保留答案出处。
-- 用户自行配置 AI API 地址、密钥和模型，无需 OmniQuiz 服务端。
-- 小批量预生成并缓存题目，减少连续刷题时的等待。
-- 在本地保存题库、答题记录和错题，支持针对薄弱知识点复习。
-- 计划使用 Flutter 和 SQLite，分别适配桌面文件夹与手机文件导入。
+## Planned features
 
-资料默认保存在本地；调用远程 AI API 时，相关资料片段会发送给用户选择的服务商。
+- **Your materials, your questions.** Generate quizzes from local documents with references to the source.
+- **Practice without the wait.** Keep a buffer of questions ready as you study.
+- **Learn from mistakes.** Revisit missed questions and practice weak topics.
+- **Bring your own AI.** Choose your API endpoint, key, and model.
+- **Keep your data local.** Store documents, questions, and progress on your device.
+- **Study across platforms.** Planned for Android, iOS, Windows, macOS, and Linux.
 
-## 当前范围
+## Privacy
 
-先支持用户自带 API，不接入 ChatGPT 订阅授权。跨设备云同步不在首版范围内。
+No OmniQuiz server required. When using a remote AI provider, relevant excerpts from your materials are sent to that provider. API credentials stay on your device.
 
-## 开发约定
+## Stack
 
-每完成一个可独立验证的新功能，进行适当验证并创建一次 Git commit。
+Planned: Flutter, Dart, and SQLite.
+
+## Contributing
+
+The project is being initialized. Issues and ideas are welcome.
