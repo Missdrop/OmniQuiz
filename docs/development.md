@@ -4,6 +4,11 @@ Develop on `dev` and commit independently verified changes there. Promote to
 `main` only when a release build is needed: each push to `main` triggers the
 full build matrix and updates Nightly.
 
+Pushes to `dev` and pull requests whose source branch is `dev` do not run the
+automatic test/build jobs. Merge through a PR; the push to `main` runs the full
+matrix before publishing Nightly. Other source branches retain PR checks, and
+the Build and test workflow can still be started manually when needed.
+
 ## App icons
 
 The approved logo is `assets/branding/logo.png`. It is shared by the app UI,
