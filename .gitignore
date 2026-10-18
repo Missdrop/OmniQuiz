@@ -35,3 +35,6 @@
 .idea/
 *.iml
 *.log
+
+# Project-local toolchains and caches
+/.tooling/

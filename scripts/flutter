@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export PUB_CACHE="$PROJECT_ROOT/.tooling/pub-cache"
+export GRADLE_USER_HOME="$PROJECT_ROOT/.tooling/gradle"
+export ANDROID_HOME="$PROJECT_ROOT/.tooling/android-sdk"
+export XDG_CONFIG_HOME="$PROJECT_ROOT/.tooling/config"
+export XDG_CACHE_HOME="$PROJECT_ROOT/.tooling/cache"
+export CI=true
+export FLUTTER_SUPPRESS_ANALYTICS=true
+exec "$PROJECT_ROOT/.tooling/flutter/bin/flutter" "$@"

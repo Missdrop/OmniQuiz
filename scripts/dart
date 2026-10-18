@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export PUB_CACHE="$PROJECT_ROOT/.tooling/pub-cache"
+export XDG_CONFIG_HOME="$PROJECT_ROOT/.tooling/config"
+export XDG_CACHE_HOME="$PROJECT_ROOT/.tooling/cache"
+export CI=true
+export DART_SUPPRESS_ANALYTICS=true
+exec "$PROJECT_ROOT/.tooling/flutter/bin/dart" "$@"
