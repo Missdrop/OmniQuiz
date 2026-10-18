@@ -94,9 +94,20 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
       appBar: wide
           ? null
           : AppBar(
-              title: Text(
-                'OmniQuiz',
-                style: TextStyle(fontWeight: FontWeight.w800),
+              title: Row(
+                children: [
+                  Image.asset(
+                    'assets/branding/logo.png',
+                    width: 36,
+                    height: 36,
+                    excludeFromSemantics: true,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'OmniQuiz',
+                    style: TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ],
               ),
               centerTitle: false,
             ),
@@ -115,7 +126,12 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                         padding: EdgeInsets.fromLTRB(24, 36, 24, 4),
                         child: Row(
                           children: [
-                            Icon(Icons.spa, color: Color(0xFF245C46)),
+                            Image.asset(
+                              'assets/branding/logo.png',
+                              width: 32,
+                              height: 32,
+                              excludeFromSemantics: true,
+                            ),
                             SizedBox(width: 10),
                             Flexible(
                               child: Text(
