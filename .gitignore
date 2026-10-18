@@ -1,0 +1,37 @@
+# Credentials and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# User data
+/data/
+/imports/
+/exports/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+**/Flutter/ephemeral/
+**/flutter/ephemeral/
+**/Pods/
+**/.symlinks/
+**/.gradle/
+**/local.properties
+**/xcuserdata/
+
+# Editor / OS
+.DS_Store
+.idea/
+*.iml
+*.log
