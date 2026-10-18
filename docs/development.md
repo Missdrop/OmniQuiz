@@ -40,7 +40,10 @@ that the cached questions and review queue persist. No real API key is bundled.
 
 Use `./scripts/flutter` in place of `flutter` for the isolated local setup.
 The wrapper uses `.tooling/android-sdk` and `.tooling/gradle`; install Android
-SDK components there if using this workflow. It does not install Java.
+SDK components there if using this workflow. It also isolates Android user data
+and emulator data under `.tooling/`. A JDK extracted into
+`.tooling/jdk/Contents/Home` is detected automatically on macOS. The wrapper
+does not install Java or change the system PATH.
 
 GitHub Actions defines tests and builds for all five targets. Android artifacts
 are debug builds. Apple artifacts are not notarized/App Store releases; an
