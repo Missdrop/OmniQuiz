@@ -43,6 +43,8 @@ class GenerationCoordinator {
   String? _scope;
   Future<void>? _loop;
   GenerationJob? _job;
+  Timer? _retryTimer;
+  Completer<void>? _retryWait;
   bool get enabled => _enabled;
   void _emit(String message, {bool running = false, bool error = false}) {
     if (_disposed) return;
@@ -61,6 +63,8 @@ class GenerationCoordinator {
   Future<void> stop() async {
     _enabled = false;
     _token++;
+    _retryTimer?.cancel();
+    if (_retryWait != null && !_retryWait!.isCompleted) _retryWait!.complete();
     generator.cancel();
     final job = _job;
     if (job != null) {
@@ -71,6 +75,12 @@ class GenerationCoordinator {
       );
     }
     _emit('Generation paused · cached questions remain available');
+  }
+
+  /// Waits for any cancelled request to leave its loop before maintenance.
+  Future<void> quiesce() async {
+    await stop();
+    await _loop;
   }
 
   Future<void> replenish() async {
@@ -97,68 +107,17 @@ class GenerationCoordinator {
     var filling = false;
     try {
       while (_current(token)) {
-        final available = (await questions.ready(_scope)).length;
+        final available = await questions.readyCount(_scope);
         final count = policy.nextBatch(available, filling: filling);
         if (count == 0) {
           _emit('$available questions ready');
           return;
         }
-        final profile = await profiles.load();
-        if (profile == null) {
-          throw const AppFailure(
-            'Configure your AI provider in Settings first.',
-          );
-        }
-        final chunks = await materials.chunks(_scope);
-        if (chunks.isEmpty) {
-          throw const AppFailure('Import study materials first.');
-        }
-        final selected = List.generate(
-          min(3, chunks.length),
-          (i) => chunks[(_cursor + i) % chunks.length],
-        );
-        _cursor += selected.length;
-        final job = GenerationJob(
-          id: ids.next(),
-          epoch: await jobs.epoch(),
-          scope: _scope,
-          request: GenerationRequest(
-            profile: profile,
-            chunks: selected,
-            count: count,
-            recentPrompts: await questions.recentPrompts(_scope),
-          ),
-        );
+        final job = await _prepareJob(count);
         if (!_current(token)) return;
         _job = job;
         await jobs.enqueue(job);
-        var complete = false;
-        for (var attempt = 0; attempt < 3 && _current(token); attempt++) {
-          if (!await jobs.claim(job.id, clock.now())) return;
-          _emit(
-            attempt == 0
-                ? 'Preparing your next questions…'
-                : 'Retrying generation (${attempt + 1}/3)…',
-            running: true,
-          );
-          try {
-            final generated = await generator.generate(job.request);
-            if (!_current(token)) return;
-            complete = await jobs.complete(job, generated);
-            if (!complete) {
-              _emit('Materials or settings changed. Start generation again.');
-              _enabled = false;
-              return;
-            }
-            break;
-          } on AppFailure catch (e) {
-            if (!_current(token)) return;
-            if (!e.retryable || attempt == 2) rethrow;
-            final delay = Duration(seconds: 2 << attempt);
-            await jobs.retry(job.id, clock.now().add(delay));
-            await Future<void>.delayed(delay);
-          }
-        }
+        final complete = await _executeJob(job, token);
         if (!_current(token)) return;
         _job = null;
         if (!complete) return;
@@ -176,6 +135,70 @@ class GenerationCoordinator {
       _enabled = false;
       _emit(message, error: true);
     }
+  }
+
+  Future<GenerationJob> _prepareJob(int count) async {
+    final profile = await profiles.load();
+    if (profile == null) {
+      throw const AppFailure('Configure your AI provider in Settings first.');
+    }
+    final selected = await materials.generationChunks(_scope, _cursor, 3);
+    if (selected.isEmpty) {
+      throw const AppFailure('Import study materials first.');
+    }
+    _cursor += selected.length;
+    return GenerationJob(
+      id: ids.next(),
+      epoch: await jobs.epoch(),
+      scope: _scope,
+      request: GenerationRequest(
+        profile: profile,
+        chunks: selected,
+        count: count,
+        recentPrompts: await questions.recentPrompts(_scope),
+      ),
+    );
+  }
+
+  Future<bool> _executeJob(GenerationJob job, int token) async {
+    for (var attempt = 0; attempt < 3 && _current(token); attempt++) {
+      if (!await jobs.claim(job.id, clock.now())) return false;
+      _emit(
+        attempt == 0
+            ? 'Preparing your next questions…'
+            : 'Retrying generation (${attempt + 1}/3)…',
+        running: true,
+      );
+      try {
+        final generated = await generator.generate(job.request);
+        if (!_current(token)) return false;
+        final complete = await jobs.complete(job, generated);
+        if (!complete) {
+          _enabled = false;
+          _emit('Materials or settings changed. Start generation again.');
+        }
+        return complete;
+      } on AppFailure catch (error) {
+        if (!_current(token)) return false;
+        if (!error.retryable || attempt == 2) rethrow;
+        final delay = error.retryAfter ?? Duration(seconds: 2 << attempt);
+        // Long provider waits require a user restart, without blocking a switch.
+        if (delay > const Duration(minutes: 2)) rethrow;
+        await jobs.retry(job.id, clock.now().add(delay));
+        if (!_current(token)) return false;
+        await _waitBeforeRetry(delay);
+      }
+    }
+    return false;
+  }
+
+  Future<void> _waitBeforeRetry(Duration delay) async {
+    final wait = Completer<void>();
+    _retryWait = wait;
+    _retryTimer = Timer(delay, wait.complete);
+    await wait.future;
+    _retryTimer = null;
+    _retryWait = null;
   }
 
   Future<void> dispose() async {

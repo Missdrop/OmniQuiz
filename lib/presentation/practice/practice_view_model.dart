@@ -42,7 +42,9 @@ class PracticeViewModel extends ChangeNotifier {
     try {
       final ready = await questions.ready(scope);
       if (version != _version || _disposed) return;
-      readyCount = ready.length;
+      final total = await questions.readyCount(scope);
+      if (version != _version || _disposed) return;
+      readyCount = total;
       if (!busy &&
           !answered &&
           !reviewing &&

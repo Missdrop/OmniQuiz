@@ -6,10 +6,16 @@ abstract interface class MaterialRepository {
   Future<void> importDocument(StudyDocument document, List<SourceChunk> chunks);
   Future<void> removeDocument(String id);
   Future<List<SourceChunk>> chunks(String? documentId);
+  Future<List<SourceChunk>> generationChunks(
+    String? documentId,
+    int cursor,
+    int limit,
+  );
 }
 
 abstract interface class QuestionRepository {
   Future<List<Question>> ready(String? scope);
+  Future<int> readyCount(String? scope);
   Future<List<String>> recentPrompts(String? scope);
   Future<List<ReviewEntry>> reviews();
   Future<void> flagQuestion(String id);

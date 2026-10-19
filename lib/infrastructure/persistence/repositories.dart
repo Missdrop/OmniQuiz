@@ -85,6 +85,47 @@ class SqlMaterialRepository implements MaterialRepository {
         .map((r) => chunkFromJson(jsonDecode(r.read('payload'))))
         .toList();
   }
+
+  @override
+  Future<List<SourceChunk>> generationChunks(
+    String? documentId,
+    int cursor,
+    int limit,
+  ) async {
+    if (limit <= 0) return [];
+    final where = documentId == null ? '' : 'WHERE document_id=?';
+    final variables = [if (documentId != null) Variable(documentId)];
+    final total =
+        (await db
+                .customSelect(
+                  'SELECT COUNT(*) n FROM chunks $where',
+                  variables: variables,
+                )
+                .getSingle())
+            .read<int>('n');
+    if (total == 0) return [];
+    final start = cursor % total;
+    final count = limit.clamp(0, total);
+    final first = await db
+        .customSelect(
+          'SELECT payload FROM chunks $where ORDER BY rowid LIMIT ? OFFSET ?',
+          variables: [...variables, Variable(count), Variable(start)],
+        )
+        .get();
+    final remaining = count - first.length;
+    final wrapped = remaining == 0
+        ? <QueryRow>[]
+        : await db
+              .customSelect(
+                'SELECT payload FROM chunks $where ORDER BY rowid LIMIT ?',
+                variables: [...variables, Variable(remaining)],
+              )
+              .get();
+    return [
+      ...first,
+      ...wrapped,
+    ].map((r) => chunkFromJson(jsonDecode(r.read('payload')))).toList();
+  }
 }
 
 class SqlQuestionRepository implements QuestionRepository {
@@ -107,6 +148,18 @@ class SqlQuestionRepository implements QuestionRepository {
               .get())
           .map(_question)
           .toList();
+  @override
+  Future<int> readyCount(String? scope) async =>
+      (await db
+              .customSelect(
+                """SELECT COUNT(*) n FROM questions q WHERE stale=0 AND flagged=0
+    AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.question_id=q.id)
+    ${scope == null ? '' : 'AND document_id=?'}""",
+                variables: [if (scope != null) Variable(scope)],
+              )
+              .getSingle())
+          .read<int>('n');
+
   @override
   Future<List<String>> recentPrompts(String? scope) async =>
       (await db

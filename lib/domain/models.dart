@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 class AppFailure implements Exception {
-  const AppFailure(this.message, {this.retryable = false});
+  const AppFailure(this.message, {this.retryable = false, this.retryAfter});
+  final Duration? retryAfter;
   final String message;
   final bool retryable;
   @override
