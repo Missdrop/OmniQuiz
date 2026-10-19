@@ -110,8 +110,13 @@ def package(target):
     destination = pathlib.Path('dist')
     destination.mkdir(exist_ok=True)
     if target == 'android':
-        shutil.copyfile('build/app/outputs/flutter-apk/app-debug.apk',
-                        destination / 'OmniQuiz-android-debug.apk')
+        if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
+            shutil.copyfile('build/app/outputs/flutter-apk/app-debug.apk',
+                            destination / 'OmniQuiz-android-debug.apk')
+        else:
+            for abi in ('arm64-v8a', 'armeabi-v7a', 'x86_64'):
+                shutil.copyfile(f'build/app/outputs/flutter-apk/app-{abi}-release.apk',
+                                destination / f'OmniQuiz-android-{abi}.apk')
     elif target == 'windows':
         windows_package(destination)
     else:

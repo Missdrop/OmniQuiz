@@ -3,7 +3,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 
 const assets = [
-  'OmniQuiz-android-debug.apk',
+  'OmniQuiz-android-arm64-v8a.apk', 'OmniQuiz-android-armeabi-v7a.apk', 'OmniQuiz-android-x86_64.apk',
   'OmniQuiz-linux-x64.tar.gz',
   'OmniQuiz-windows-x64.zip',
   'OmniQuiz-windows-x64.msi',

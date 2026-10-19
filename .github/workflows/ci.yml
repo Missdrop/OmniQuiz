@@ -1,6 +1,15 @@
 name: Build and test
 on:
   workflow_call:
+    secrets:
+      ANDROID_KEYSTORE_BASE64:
+        required: true
+      ANDROID_STORE_PASSWORD:
+        required: true
+      ANDROID_KEY_PASSWORD:
+        required: true
+      ANDROID_KEY_ALIAS:
+        required: true
   pull_request:
   workflow_dispatch:
 permissions:
@@ -33,8 +42,8 @@ jobs:
         include:
           - os: ubuntu-latest
             target: android
-            command: flutter build apk --debug
-            artifact: build/app/outputs/flutter-apk/app-debug.apk
+            command: flutter build apk --release --split-per-abi
+            artifact: build/app/outputs/flutter-apk/*-release.apk
           - os: ubuntu-latest
             target: linux
             command: flutter build linux --release
@@ -67,7 +76,28 @@ jobs:
         if: matrix.target == 'linux'
         run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev libjsoncpp-dev
       - run: flutter pub get
-      - run: ${{ matrix.command }}
+      - name: Prepare Android signing
+        if: matrix.target == 'android' && github.event_name != 'pull_request'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: python scripts/android_signing.py prepare-ci
+      - name: Compile Android pull requests without release secrets
+        if: matrix.target == 'android' && github.event_name == 'pull_request'
+        run: flutter build apk --debug
+      - name: Build signed Android release APKs
+        if: matrix.target == 'android' && github.event_name != 'pull_request'
+        env:
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          omniquiz_build_number=$(($(date +%s) - 1704067200))
+          flutter build apk --release --split-per-abi --build-number "$omniquiz_build_number"
+      - if: matrix.target != 'android'
+        run: ${{ matrix.command }}
       - uses: actions/setup-dotnet@v4
         if: matrix.target == 'windows'
         with:

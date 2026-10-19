@@ -6,10 +6,33 @@ import unittest
 import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
-from package_release import app_version, windows_manifest, macos_dmg, wix_executable
+from package_release import app_version, windows_manifest, macos_dmg, wix_executable, package
 
 
 class PackagingTests(unittest.TestCase):
+    def test_android_releases_require_all_signed_abi_artifacts(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
+            build = pathlib.Path('build/app/outputs/flutter-apk')
+            build.mkdir(parents=True)
+            (build / 'app-debug.apk').write_bytes(b'debug')
+            with patch.dict(os.environ, {'GITHUB_EVENT_NAME': 'push'}):
+                with self.assertRaises(FileNotFoundError):
+                    package('android')
+                for abi in ('arm64-v8a', 'armeabi-v7a', 'x86_64'):
+                    (build / f'app-{abi}-release.apk').write_bytes(abi.encode())
+                package('android')
+            self.assertEqual(len(list(pathlib.Path('dist').glob('*.apk'))), 3)
+            self.assertFalse(pathlib.Path('dist/OmniQuiz-android-debug.apk').exists())
+
+    def test_pull_requests_package_debug_without_release_secrets(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
+            build = pathlib.Path('build/app/outputs/flutter-apk')
+            build.mkdir(parents=True)
+            (build / 'app-debug.apk').write_bytes(b'debug')
+            with patch.dict(os.environ, {'GITHUB_EVENT_NAME': 'pull_request'}):
+                package('android')
+            self.assertEqual(pathlib.Path('dist/OmniQuiz-android-debug.apk').read_bytes(), b'debug')
+
     def test_legacy_wix_environment_does_not_override_project_executable(self):
         with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
             legacy = pathlib.Path('WiX Toolset v3.14')

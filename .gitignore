@@ -47,3 +47,9 @@ __pycache__/
 /AGENTS.md
 /docs/architecture.md
 /docs/branding/proposals/
+
+# Android release identity (private, backed up separately)
+/android/key.properties
+*.jks
+*.keystore
+*.p12
