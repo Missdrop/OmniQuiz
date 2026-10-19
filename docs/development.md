@@ -27,6 +27,32 @@ application dependencies. `scripts/bootstrap`, `scripts/flutter`, and
 The bootstrap script does not install Xcode, Android Studio, Visual Studio,
 or operating-system libraries.
 
+On Linux, Android builds require a **full JDK 21**, including `javac`, plus
+Android platform 36, build-tools 36.0.0, NDK 28.2.13676358, and CMake 3.22.1.
+Plugins also request platform 35; Gradle installs it when SDK licenses are accepted.
+Install the SDK packages with Google's command-line tools under
+`.tooling/android-sdk`. A local Linux JDK can live at `.tooling/jdk`; the wrapper
+selects it automatically. A Java runtime alone cannot compile Android plugins.
+
+Linux desktop builds require Clang, CMake, Ninja, pkg-config, GTK 3 development
+headers, libsecret development headers, and jsoncpp development headers. For a
+rootless Debian environment, signed distribution packages may be extracted into
+`.tooling/linux-sysroot`. Rebase their pkg-config prefixes to that directory and
+ensure development-library symlinks resolve to the corresponding runtime
+libraries. `scripts/linux_environment.sh` activates this optional local prefix.
+It is specific to Debian x86-64; other hosts should install their native packages.
+Xvfb enables a headless startup smoke test. Toolchains and logs remain ignored.
+
+Build release artifacts with `./scripts/flutter build linux --release` and
+`./scripts/flutter build apk --release --split-per-abi --build-number NUMBER`
+(use a growing Android build number as described below). Package outputs with
+`python scripts/package_release.py linux` and
+`python scripts/package_release.py android`.
+Windows requires a Windows host; macOS and iOS require macOS/Xcode.
+Use the manually dispatched CI workflow on `dev` for those hosts without
+promoting changes to `main`. Running it requires GitHub Actions access and
+network access to `api.github.com`.
+
 ```sh
 ./scripts/bootstrap
 ./scripts/flutter devices
