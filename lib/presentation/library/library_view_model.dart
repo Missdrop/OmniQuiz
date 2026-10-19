@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../application/generation/coordinator.dart';
+import '../../application/libraries/library_files.dart';
 import '../../application/ports/repositories.dart';
 import '../../application/use_cases/import_materials.dart';
 import '../../domain/models.dart';
@@ -13,8 +14,10 @@ class LibraryViewModel extends ChangeNotifier {
     this.questions,
     this.access,
     this.importer,
-    this.coordinator,
-  );
+    this.coordinator, {
+    this.files,
+  });
+  final LibraryFiles? files;
   final MaterialRepository materials;
   final QuestionRepository questions;
   final DocumentAccess access;
@@ -26,6 +29,17 @@ class LibraryViewModel extends ChangeNotifier {
   bool busy = false;
   String? message;
   bool get supportsDirectories => access.supportsDirectories;
+  bool _disposed = false;
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> refresh() async {
     try {
       _documents = await materials.documents();
@@ -33,7 +47,7 @@ class LibraryViewModel extends ChangeNotifier {
     } catch (_) {
       message = 'Could not load your library.';
     }
-    notifyListeners();
+    _notify();
   }
 
   Future<void> import({
@@ -41,10 +55,10 @@ class LibraryViewModel extends ChangeNotifier {
     bool sample = false,
     bool chineseSample = false,
   }) async {
-    if (busy) return;
+    if (_disposed || busy) return;
     busy = true;
     message = null;
-    notifyListeners();
+    _notify();
     try {
       final inputs = sample
           ? [
@@ -57,7 +71,11 @@ class LibraryViewModel extends ChangeNotifier {
           : await (directory ? access.pickDirectory() : access.pickFiles());
       if (inputs.isEmpty) return;
       await coordinator.stop();
-      final result = await importer.execute(inputs);
+      final stored = <ImportInput>[];
+      for (final input in inputs) {
+        stored.add(files == null ? input : await files!.store(input));
+      }
+      final result = await importer.execute(stored);
       message =
           '${result.imported} imported · ${result.unchanged} unchanged'
           '${result.errors.isEmpty ? '' : '\n${result.errors.join('\n')}'}';
@@ -68,14 +86,61 @@ class LibraryViewModel extends ChangeNotifier {
           : 'Import failed. Check file permissions and try again.';
     } finally {
       busy = false;
-      notifyListeners();
+      _notify();
+    }
+  }
+
+  Future<void> scan() async {
+    final directory = files;
+    if (_disposed || busy || directory == null) return;
+    busy = true;
+    message = null;
+    _notify();
+    var imported = 0, unchanged = 0;
+    final errors = <String>[];
+    try {
+      await coordinator.stop();
+      final seen = <String>{};
+      var readFailed = false;
+      await for (final entry in directory.scan()) {
+        if (_disposed) return;
+        final input = entry.input;
+        if (input == null) {
+          readFailed = true;
+          errors.add(entry.error!);
+          continue;
+        }
+        seen.add(input.origin);
+        final result = await importer.execute([input]);
+        imported += result.imported;
+        unchanged += result.unchanged;
+        errors.addAll(result.errors);
+      }
+      // Only reconcile after a complete traversal, never on lost permissions.
+      if (!readFailed) {
+        for (final document in await materials.documents()) {
+          if (directory.containsOrigin(document.origin) &&
+              !seen.contains(document.origin)) {
+            await materials.removeDocument(document.id);
+          }
+        }
+      }
+      message =
+          '$imported imported · $unchanged unchanged'
+          '${errors.isEmpty ? '' : '\n${errors.join('\n')}'}';
+    } catch (_) {
+      message = 'Could not scan the library folder. Check that it is connected and grant folder access again.';
+    } finally {
+      await refresh();
+      busy = false;
+      _notify();
     }
   }
 
   Future<void> remove(String id) async {
-    if (busy) return;
+    if (_disposed || busy) return;
     busy = true;
-    notifyListeners();
+    _notify();
     try {
       await coordinator.stop();
       await materials.removeDocument(id);
@@ -84,7 +149,7 @@ class LibraryViewModel extends ChangeNotifier {
       message = 'Could not remove this document.';
     } finally {
       busy = false;
-      notifyListeners();
+      _notify();
     }
   }
 

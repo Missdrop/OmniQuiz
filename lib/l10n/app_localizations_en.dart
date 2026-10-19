@@ -564,4 +564,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get folderLimit =>
       'Import at most 100 files / 100 MB at once. Select a smaller folder.';
+
+  @override
+  String get currentLibrary => 'Current library';
+
+  @override
+  String get createLibrary => 'Create library';
+
+  @override
+  String get libraryName => 'Library name';
+
+  @override
+  String get useExistingFolder => 'Use an existing folder';
+
+  @override
+  String get chooseFolder => 'Choose folder';
+
+  @override
+  String get folderIncludesSubfolders =>
+      'Choose a folder, including its subfolders.';
+
+  @override
+  String get managedFolderDescription =>
+      'Create an app-managed folder. Imported files will be copied there.';
+
+  @override
+  String get mobileLibraryDescription =>
+      'This device uses app-managed folders. Add materials with Import files.';
+
+  @override
+  String get libraryNameRequired => 'Enter a name and choose a folder.';
+
+  @override
+  String get createLibraryError =>
+      'Could not create library. Check folder access and use non-overlapping folders.';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get scanFolder => 'Scan folder';
+
+  @override
+  String get libraryIsolationDescription =>
+      'Questions, mistakes and progress belong to this library. Folders scan on launch, switch and resume; scan manually anytime.';
+
+  @override
+  String get openLibraryError => 'Could not open this library. Try again.';
+
+  @override
+  String get scanFolderError =>
+      'Could not scan the library folder. Check that it is connected and grant folder access again.';
+
+  @override
+  String get folderUnavailable =>
+      'Library folder is unavailable. Reconnect it and scan again.';
+
+  @override
+  String get copyLibraryFileError =>
+      'Cannot copy this file into the library folder.';
+
+  @override
+  String get grantFolderAccess => 'Grant folder access';
+
+  @override
+  String get grantFolderError =>
+      'Choose the same library folder to restore access.';
+
+  @override
+  String get removeIndexedDocumentBody =>
+      'This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.';
 }

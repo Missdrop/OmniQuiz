@@ -77,7 +77,7 @@ class SqlMaterialRepository implements MaterialRepository {
   Future<List<SourceChunk>> chunks(String? documentId) async {
     final rows = await db
         .customSelect(
-          'SELECT payload FROM chunks ${documentId == null ? '' : 'WHERE document_id=?'} ORDER BY id',
+          'SELECT payload FROM chunks ${documentId == null ? '' : 'WHERE document_id=?'} ORDER BY rowid',
           variables: [if (documentId != null) Variable(documentId)],
         )
         .get();

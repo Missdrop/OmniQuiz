@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../application/generation/coordinator.dart';
+import '../application/libraries/library_files.dart';
 import '../application/generation/question_validator.dart';
 import '../application/ports/repositories.dart';
 import '../application/use_cases/configure_provider.dart';
@@ -30,8 +31,10 @@ class AppDependencies {
     this.review,
     this.settings,
     this.language,
+    this.ownsDatabase,
   );
   final QuizDatabase database;
+  final bool ownsDatabase;
   final GenerationCoordinator coordinator;
   final LibraryViewModel library;
   final PracticeViewModel practice;
@@ -41,15 +44,20 @@ class AppDependencies {
 
   static Future<AppDependencies> create({
     required QuizDatabase database,
+    QuizDatabase? settingsDatabase,
+    bool ownsDatabase = true,
+    LibraryFiles? libraryFiles,
     DocumentAccess? documentAccess,
     CredentialStore? credentialStore,
     AiQuestionGenerator? ai,
   }) async {
     final materials = SqlMaterialRepository(database);
-    final language = LanguageViewModel(SqlPreferencesRepository(database));
+    final language = LanguageViewModel(
+      SqlPreferencesRepository(settingsDatabase ?? database),
+    );
     await language.load();
     final questions = SqlQuestionRepository(database);
-    final profiles = SqlProfileRepository(database);
+    final profiles = SqlProfileRepository(settingsDatabase ?? database);
     final credentials =
         credentialStore ??
         PlatformCredentialStore(
@@ -88,6 +96,7 @@ class AppDependencies {
           clock,
         ),
         coordinator,
+        files: libraryFiles,
       ),
       PracticeViewModel(
         questions,
@@ -105,16 +114,20 @@ class AppDependencies {
         coordinator,
       ),
       language,
+      ownsDatabase,
     );
   }
 
-  Future<void> dispose() async {
+  Future<void>? _disposeFuture;
+  Future<void> dispose() => _disposeFuture ??= _dispose();
+
+  Future<void> _dispose() async {
     practice.dispose();
     await coordinator.dispose();
     library.dispose();
     review.dispose();
     settings.dispose();
     language.dispose();
-    await database.close();
+    if (ownsDatabase) await database.close();
   }
 }

@@ -7,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-import 'app/app.dart';
+import 'app/library_host.dart';
+import 'infrastructure/persistence/library_catalog.dart';
+import 'infrastructure/platform/library_files.dart';
 import 'app/dependencies.dart';
 import 'app/theme.dart';
 import 'infrastructure/persistence/database.dart';
@@ -28,8 +30,23 @@ Future<void> main() async {
         File(p.join(directory.path, 'omniquiz.sqlite')),
       ),
     );
-    final dependencies = await AppDependencies.create(database: database);
-    runApp(OmniQuizApp(dependencies: dependencies));
+    final catalog = LibraryCatalog(database, directory.path);
+    await catalog.load();
+    final selected = catalog.selected;
+    final studyDatabase = selected.legacy
+        ? database
+        : QuizDatabase(
+            NativeDatabase.createInBackground(
+              File(catalog.databasePath(selected)),
+            ),
+          );
+    final dependencies = await AppDependencies.create(
+      database: studyDatabase,
+      settingsDatabase: database,
+      ownsDatabase: !selected.legacy,
+      libraryFiles: DirectoryLibraryFiles(selected.directory),
+    );
+    runApp(LibraryHost(catalog: catalog, initial: dependencies));
   } catch (_) {
     runApp(
       MaterialApp(

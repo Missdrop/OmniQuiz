@@ -21,6 +21,17 @@ class SettingsViewModel extends ChangeNotifier {
   ProviderProfile? profile;
   bool busy = false, loaded = false;
   String? message;
+  bool _disposed = false;
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> load() async {
     try {
       profile = await profiles.load();
@@ -28,7 +39,7 @@ class SettingsViewModel extends ChangeNotifier {
       message = 'Could not load provider settings.';
     }
     loaded = true;
-    notifyListeners();
+    _notify();
   }
 
   Future<bool> save(
@@ -42,7 +53,7 @@ class SettingsViewModel extends ChangeNotifier {
     if (busy) return false;
     busy = true;
     message = null;
-    notifyListeners();
+    _notify();
     try {
       await coordinator.stop();
       await configure.save(
@@ -61,7 +72,7 @@ class SettingsViewModel extends ChangeNotifier {
       return false;
     } finally {
       busy = false;
-      notifyListeners();
+      _notify();
     }
   }
 
@@ -75,7 +86,7 @@ class SettingsViewModel extends ChangeNotifier {
     if (busy) return;
     busy = true;
     message = null;
-    notifyListeners();
+    _notify();
     try {
       final candidate = ProviderProfile(
         baseUrl: url.trim(),
@@ -99,7 +110,7 @@ class SettingsViewModel extends ChangeNotifier {
           : 'Connection test failed. Check secure storage and connectivity.';
     } finally {
       busy = false;
-      notifyListeners();
+      _notify();
     }
   }
 }

@@ -16,6 +16,11 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Could not scan the library folder. Check that it is connected and grant folder access again.':
+          scanFolderError,
+      'Library folder is unavailable. Reconnect it and scan again.':
+          folderUnavailable,
+      'Cannot copy this file into the library folder.': copyLibraryFileError,
       "The provider returned an invalid question.": invalidQuestion,
       "Enter an HTTPS API base URL and a model name. HTTP is allowed only for localhost.":
           invalidProfile,

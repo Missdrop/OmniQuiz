@@ -1057,6 +1057,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import at most 100 files / 100 MB at once. Select a smaller folder.'**
   String get folderLimit;
+
+  /// No description provided for @currentLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Current library'**
+  String get currentLibrary;
+
+  /// No description provided for @createLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Create library'**
+  String get createLibrary;
+
+  /// No description provided for @libraryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Library name'**
+  String get libraryName;
+
+  /// No description provided for @useExistingFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an existing folder'**
+  String get useExistingFolder;
+
+  /// No description provided for @chooseFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder'**
+  String get chooseFolder;
+
+  /// No description provided for @folderIncludesSubfolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder, including its subfolders.'**
+  String get folderIncludesSubfolders;
+
+  /// No description provided for @managedFolderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an app-managed folder. Imported files will be copied there.'**
+  String get managedFolderDescription;
+
+  /// No description provided for @mobileLibraryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This device uses app-managed folders. Add materials with Import files.'**
+  String get mobileLibraryDescription;
+
+  /// No description provided for @libraryNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name and choose a folder.'**
+  String get libraryNameRequired;
+
+  /// No description provided for @createLibraryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create library. Check folder access and use non-overlapping folders.'**
+  String get createLibraryError;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @scanFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan folder'**
+  String get scanFolder;
+
+  /// No description provided for @libraryIsolationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions, mistakes and progress belong to this library. Folders scan on launch, switch and resume; scan manually anytime.'**
+  String get libraryIsolationDescription;
+
+  /// No description provided for @openLibraryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this library. Try again.'**
+  String get openLibraryError;
+
+  /// No description provided for @scanFolderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not scan the library folder. Check that it is connected and grant folder access again.'**
+  String get scanFolderError;
+
+  /// No description provided for @folderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Library folder is unavailable. Reconnect it and scan again.'**
+  String get folderUnavailable;
+
+  /// No description provided for @copyLibraryFileError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot copy this file into the library folder.'**
+  String get copyLibraryFileError;
+
+  /// No description provided for @grantFolderAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant folder access'**
+  String get grantFolderAccess;
+
+  /// No description provided for @grantFolderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the same library folder to restore access.'**
+  String get grantFolderError;
+
+  /// No description provided for @removeIndexedDocumentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.'**
+  String get removeIndexedDocumentBody;
 }
 
 class _AppLocalizationsDelegate

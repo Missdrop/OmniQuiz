@@ -8,7 +8,8 @@ import 'library_view_model.dart';
 import '../shared/widgets.dart';
 
 class LibraryPage extends StatelessWidget {
-  const LibraryPage({super.key});
+  const LibraryPage({super.key, this.controls});
+  final Widget? controls;
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<LibraryViewModel>();
@@ -18,6 +19,7 @@ class LibraryPage extends StatelessWidget {
       title: context.l10n.libraryTitle,
       subtitle: context.l10n.librarySubtitle,
       children: [
+        ?controls,
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -58,7 +60,7 @@ class LibraryPage extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: Text(context.l10n.importFiles),
             ),
-            if (vm.supportsDirectories)
+            if (vm.supportsDirectories && vm.files == null)
               OutlinedButton.icon(
                 onPressed: vm.busy ? null : () => vm.import(directory: true),
                 icon: const Icon(Icons.create_new_folder_outlined),
@@ -163,7 +165,11 @@ class LibraryPage extends StatelessWidget {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: Text(context.l10n.removeDocumentTitle),
-                            content: Text(context.l10n.removeDocumentBody),
+                            content: Text(
+                              vm.files == null
+                                  ? context.l10n.removeDocumentBody
+                                  : context.l10n.removeIndexedDocumentBody,
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),

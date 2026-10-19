@@ -516,4 +516,66 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get folderLimit => '单次最多导入 100 个文件、总计 100 MB，请选择更小的文件夹。';
+
+  @override
+  String get currentLibrary => '当前资料库';
+
+  @override
+  String get createLibrary => '创建资料库';
+
+  @override
+  String get libraryName => '资料库名称';
+
+  @override
+  String get useExistingFolder => '使用现有目录';
+
+  @override
+  String get chooseFolder => '选择目录';
+
+  @override
+  String get folderIncludesSubfolders => '请选择目录，包含子目录中的资料。';
+
+  @override
+  String get managedFolderDescription => '在应用管理的目录中创建。导入的文件会复制到此目录。';
+
+  @override
+  String get mobileLibraryDescription => '此设备使用应用内目录，可通过导入文件添加资料。';
+
+  @override
+  String get libraryNameRequired => '请输入名称并选择目录。';
+
+  @override
+  String get createLibraryError => '无法创建资料库。请检查目录权限，且各资料库的目录不能重叠。';
+
+  @override
+  String get create => '创建';
+
+  @override
+  String get scanFolder => '扫描目录';
+
+  @override
+  String get libraryIsolationDescription =>
+      '题目、错题和进度仅属于当前库。启动、切换及返回应用时扫描；也可手动扫描。';
+
+  @override
+  String get openLibraryError => '无法打开资料库，请重试。';
+
+  @override
+  String get scanFolderError => '无法扫描资料库目录。请检查目录是否已连接，并重新授权目录访问。';
+
+  @override
+  String get folderUnavailable => '资料库目录不可用，请重新连接后扫描。';
+
+  @override
+  String get copyLibraryFileError => '无法将文件复制到资料库目录。';
+
+  @override
+  String get grantFolderAccess => '重新授权目录';
+
+  @override
+  String get grantFolderError => '请选择当前资料库的同一目录以恢复授权。';
+
+  @override
+  String get removeIndexedDocumentBody =>
+      '这会移除当前资料索引并停用相关题目，保留原文件。扫描目录时会重新导入；如需永久排除，请将文件移出该目录。';
 }

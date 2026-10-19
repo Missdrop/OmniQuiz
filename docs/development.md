@@ -158,13 +158,22 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 
 ## Initial scope
 
-- One local library, with all-materials or per-document practice scope.
+- Multiple local libraries, each with all-materials or per-document practice scope.
 - Single-choice questions with four distinct options.
 - UTF-8 TXT/Markdown and text PDFs, up to 20 MB per file and one million extracted
   characters. Scanned PDFs need external OCR; office formats are not supported.
-- Folder import is a manual recursive scan; hidden files and symlinks are skipped.
-  Removing a file from the original directory does not delete its imported copy
-  of extracted text. Remove it explicitly from Library.
+- Each library binds to an existing desktop folder or an app-managed folder.
+  Recursive scans run on startup, switch, resume, and manually; hidden entries and
+  symlinks are skipped. Mobile platforms use managed folders and file import.
+  Scans read one file at a time (no 100-file directory cap). The 20 MB per-file and
+  extracted-text limits still apply. A failed file does not block other imports.
+- Imported files are copied into the current material folder. Different content
+  with the same filename gets a hash suffix; existing files are never overwritten.
+  Changed sources invalidate old questions. A successful scan removes missing
+  source indexes and stops using their questions, preserving attempts. An
+  unavailable folder or incomplete traversal never clears the cached library.
+  Removing a source in the UI only removes its index; a later scan reimports a
+  file still present on disk.
 - The model assigns a topic to each question. Review is question-based; a separate
   knowledge graph and adaptive topic mastery model are not implemented.
 - Provider JSON mode is optional. Not every "OpenAI-compatible" endpoint accepts
@@ -181,6 +190,31 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
   accumulate. "Review early" explicitly allows practice before the due time.
 - Data stays on one device. Cloud sync, backups/exports, OCR, folder watching,
   and ChatGPT subscription authorization are not included in this release.
+
+## Library storage and lifecycle
+
+`omniquiz.sqlite` remains the default library database. Existing documents,
+questions, attempts and reviews stay in place. Its `settings` table also stores
+the library catalog, active library, global AI profile and interface language.
+Other libraries use `libraries/<uuid>/quiz.sqlite` under application support;
+managed source folders use `libraries/<uuid>/materials`. External source folders
+contain only the user's materials. Library names never become file paths.
+Overlapping source directories are rejected to keep copied files in one library.
+
+Each session receives its own material, question, progress and job repositories.
+Only AI preferences and language use the global database; API secrets remain in
+system secure storage. Switching stops the old generator, replaces the router
+and all study view models, then disposes the old session after detaching widgets.
+Delayed model responses cannot publish into the next library. A global database
+handle is shared intentionally and is never closed by a study session.
+
+macOS uses the `omniquiz/folders` platform channel to retain security-scoped
+bookmarks in app preferences and restore access after restart. Both macOS builds
+require user-selected read/write and app-scope bookmark entitlements. Use
+**Grant folder access** to reselect the same directory if authorization expires.
+Native bookmark behavior must be checked in a sandboxed macOS build. Android and
+iOS do not request unrestricted directory access; users import into managed folders.
+This does not implement continuous filesystem watching or cross-device sync.
 
 ## Code map
 
