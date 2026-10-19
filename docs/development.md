@@ -114,8 +114,10 @@ keys are stored in this repository.
   the repository. Keep `nightly` mutable if you enable immutable releases or tag
   protection rules. The rolling workflow cannot update an immutable release.
 
-Android APKs currently use temporary debug signing keys, so upgrading across
-builds may require uninstalling the previous app (which removes local data).
+Android published APKs use a fixed release identity. PR checks compile debug
+APKs without exposing release keys. Existing previews used temporary debug keys;
+switching to the release identity may require uninstalling once. Export an app
+backup first, reinstall, and restore it. Subsequent releases use the same key.
 Apple artifacts are unsigned/not notarized as described above. Release automation
 does not add distribution certificates or turn the iOS archive into an installable IPA.
 
@@ -182,13 +184,16 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 - The buffer uses one request at a time, at most ten questions per request, a low
   watermark of five, and a target of twenty. Small sources may run out of useful
   non-duplicate questions; generation then stops with an explanation.
-- Network/server/rate-limit failures get at most two retries. A timeout can still
-  incur provider charges. Interrupted jobs are cancelled on restart and a user
+- Only explicit server/rate-limit responses get at most two retries. Retry-After
+  seconds/dates are respected; waits longer than two minutes require a user restart.
+  Timeout/ambiguous transport errors require manual retry because they may have
+  incurred provider charges. Cancellation interrupts a scheduled wait immediately. Interrupted jobs are cancelled on restart and a user
   starts a new fill; paid requests are not replayed automatically.
 - Correct answers on the first attempt do not enter Review. Wrong answers are due
-  again in ten minutes, then after one, three, and seven days as correct reviews
-  accumulate. "Review early" explicitly allows practice before the due time.
-- Data stays on one device. Cloud sync, backups/exports, OCR, folder watching,
+  again in ten minutes, then after one and three days. Three due-time correct
+  reviews graduate a question. Early correct practice records the attempt without
+  changing the review streak or due date; an incorrect answer resets the streak.
+- Data stays on one device. Cloud sync, OCR, folder watching,
   and ChatGPT subscription authorization are not included in this release.
 
 ## ZIP material import
@@ -258,3 +263,65 @@ Drift adapters currently use parameterized SQL and explicit schema migrations,
 with JSON snapshots for question content and source references. Do not import
 infrastructure classes from the domain/application layers. Add behavioral tests
 for new invariants and external boundaries; avoid a base-class hierarchy.
+
+## Android release identity
+
+Generate a new identity only for a new app signing lineage:
+
+```sh
+python scripts/android_signing.py create
+```
+
+This writes ignored private files under `.tooling/android-signing/`, installs local
+`android/key.properties`, and creates a private ZIP containing the key and its
+passwords. Keep that ZIP in secure storage outside this checkout. Never commit it.
+To reuse a key on another machine, restore `release.p12` and `key.properties` to
+those same locations. The default store type is PKCS12.
+
+For repository releases, configure `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, and `ANDROID_KEY_ALIAS` as
+GitHub Actions secrets. From an authenticated maintainer machine holding the
+private `github-secrets.json`, run:
+
+```sh
+python scripts/android_signing.py install-secrets
+```
+
+The reusable workflow inherits the secrets from main/tag workflows. Missing keys
+stop publication; release builds never fall back to a debug key. Signed APKs are
+split by ABI. CI uses seconds since 2024-01-01 as the base Android version code,
+so main and tag builds share a growing version-code sequence. Flutter adds ABI
+codes when splitting. Local release builds must likewise choose an increasing
+`--build-number` to cover an existing installed release. No signing secrets are
+provided to pull-request builds.
+
+## Backups and restore
+
+The Settings panel exports all library snapshots and supported original materials
+as a versioned OmniQuiz ZIP. It excludes AI configuration and secure-storage
+credentials. Missing legacy original files are reported; extracted text and
+learning records are still backed up. A disconnected library folder fails export
+instead of silently producing an incomplete backup. Limits: 100 MB compressed,
+512 MB expanded, 128 MB per database, 20 MB per material, 10,000 archive entries,
+and 100 libraries. Mobile file-save APIs require bounded in-memory output bytes.
+
+Restore stages and validates every archive entry and SQLite snapshot first, then
+creates app-managed copies with new library IDs and rebases source origins. A
+single catalog write publishes the result; failures remove only staged/new data.
+Existing libraries, active selection and AI settings remain unchanged. Running
+jobs are cancelled in snapshots; paid requests never replay after restore.
+
+Modules in `lib/infrastructure/backup/` separate the versioned manifest, archive
+I/O, source collection, database hygiene, restore staging, and orchestration. The
+presentation depends on backup ports; platform dialogs are separate adapters.
+During backup/restore, the host pauses generation and blocks app writes. Live
+filesystem edits outside OmniQuiz can still change original files while copying;
+normal revision checks reconcile them when a restored library is scanned.
+
+## Large libraries
+
+Generation reads a bounded three-chunk window directly from SQLite, rotating in
+source order and wrapping at the end. A schema-v2 index supports per-document
+selection. Only those chunks are decoded into Dart objects. Ready-question counts
+use COUNT independently of the 40-question display window. `generationChunks`
+and `readyCount` are repository operations rather than SQL in view models.

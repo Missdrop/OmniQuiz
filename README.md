@@ -19,7 +19,8 @@ OmniQuiz keeps your library and progress on your device. No account needed.
 - **Import a ZIP.** Bring a folder of notes to your phone, keeping subfolders intact.
 - **Study a whole folder.** Connect an existing desktop folder or create an app-managed one. Scan TXT, Markdown, and PDFs with selectable text, including subfolders.
 - **Understand each answer.** Read explanations alongside excerpts from your materials.
-- **Review your mistakes.** Missed questions come back for spaced review.
+- **Review your mistakes.** Missed questions come back for spaced review; early practice does not fast-track mastery.
+- **Back up your progress.** Export all libraries and restore them as separate copies.
 - **Keep practicing offline.** Previously generated questions stay available.
 - **Choose your language.** English and Simplified Chinese interfaces, with a separate language setting for AI questions.
 
@@ -31,7 +32,7 @@ Get the available builds from [GitHub Releases](https://github.com/Missdrop/Omni
 | Platform | Release file |
 | --- | --- |
 | Windows | `OmniQuiz-windows-x64.msi` — run the installer; `.zip` is also available for use without installation |
-| Android | `OmniQuiz-android-debug.apk` — install on your device |
+| Android | `OmniQuiz-android-arm64-v8a.apk` — signed release for most phones; `armeabi-v7a` and `x86_64` builds are also available |
 | macOS | `OmniQuiz-macos.dmg` — open and drag OmniQuiz into Applications |
 | Linux | `OmniQuiz-linux-x64.tar.gz` |
 
@@ -55,6 +56,10 @@ files and symbolic links are skipped. Mobile devices use app-managed folders and
 file or ZIP import. ZIP imports preserve subfolders and skip hidden/unsupported
 files. Use an unencrypted ZIP (up to 100 MB compressed and expanded, 1,000 entries,
 20 MB per material). API settings and interface language are shared across libraries.
+
+In **Settings → Back up your libraries**, save an OmniQuiz backup before moving
+to another device or reinstalling. Restoring adds libraries without replacing
+existing data. AI settings and API keys are excluded. Keep backups private.
 
 ## Your data
 
