@@ -16,8 +16,11 @@ class LibraryViewModel extends ChangeNotifier {
     this.importer,
     this.coordinator, {
     this.files,
+    this.archives,
   });
   final LibraryFiles? files;
+  final ArchiveAccess? archives;
+  bool get canImportZip => files != null && archives != null;
   final MaterialRepository materials;
   final QuestionRepository questions;
   final DocumentAccess access;
@@ -85,6 +88,48 @@ class LibraryViewModel extends ChangeNotifier {
           ? e.message
           : 'Import failed. Check file permissions and try again.';
     } finally {
+      busy = false;
+      _notify();
+    }
+  }
+
+  Future<void> importZip() async {
+    final archiveAccess = archives;
+    final destination = files;
+    if (_disposed || busy || archiveAccess == null || destination == null) {
+      return;
+    }
+    busy = true;
+    message = null;
+    _notify();
+    var imported = 0, unchanged = 0;
+    final errors = <String>[];
+    try {
+      await coordinator.stop();
+      var received = false;
+      await for (final input in archiveAccess.pickZip()) {
+        if (_disposed) return;
+        received = true;
+        final stored = await destination.store(
+          input,
+          preserveDirectories: true,
+        );
+        final result = await importer.execute([stored]);
+        imported += result.imported;
+        unchanged += result.unchanged;
+        errors.addAll(result.errors);
+      }
+      if (received) {
+        message =
+            '$imported imported · $unchanged unchanged'
+            '${errors.isEmpty ? '' : '\n${errors.join('\n')}'}';
+      }
+    } catch (error) {
+      message = error is AppFailure
+          ? error.message
+          : 'Could not import ZIP. Check storage space and file permissions.';
+    } finally {
+      await refresh();
       busy = false;
       _notify();
     }

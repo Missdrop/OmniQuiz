@@ -60,6 +60,12 @@ class LibraryPage extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: Text(context.l10n.importFiles),
             ),
+            if (vm.canImportZip)
+              OutlinedButton.icon(
+                onPressed: vm.busy ? null : vm.importZip,
+                icon: const Icon(Icons.folder_zip_outlined),
+                label: Text(context.l10n.importZip),
+              ),
             if (vm.supportsDirectories && vm.files == null)
               OutlinedButton.icon(
                 onPressed: vm.busy ? null : () => vm.import(directory: true),
@@ -75,7 +81,9 @@ class LibraryPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          context.l10n.supportedFiles,
+          vm.canImportZip
+              ? context.l10n.zipSupportedFiles
+              : context.l10n.supportedFiles,
           style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
         const SizedBox(height: 20),

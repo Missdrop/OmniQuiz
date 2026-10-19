@@ -72,3 +72,8 @@ abstract interface class DocumentParser {
   bool supports(String filename);
   Future<List<ParsedSection>> parse(ImportInput input);
 }
+
+/// Expands a selected archive into a bounded, temporary stream of materials.
+abstract interface class ArchiveAccess {
+  Stream<ImportInput> pickZip();
+}

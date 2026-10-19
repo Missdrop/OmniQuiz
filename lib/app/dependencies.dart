@@ -15,6 +15,7 @@ import '../infrastructure/persistence/database.dart';
 import '../infrastructure/persistence/repositories.dart';
 import '../infrastructure/platform/credentials.dart';
 import '../infrastructure/platform/document_access.dart';
+import '../infrastructure/platform/zip_document_access.dart';
 import '../presentation/library/library_view_model.dart';
 import '../presentation/practice/practice_view_model.dart';
 import '../presentation/review/review_view_model.dart';
@@ -48,6 +49,7 @@ class AppDependencies {
     bool ownsDatabase = true,
     LibraryFiles? libraryFiles,
     DocumentAccess? documentAccess,
+    ArchiveAccess? archiveAccess,
     CredentialStore? credentialStore,
     AiQuestionGenerator? ai,
   }) async {
@@ -97,6 +99,7 @@ class AppDependencies {
         ),
         coordinator,
         files: libraryFiles,
+        archives: archiveAccess ?? ZipDocumentAccess(),
       ),
       PracticeViewModel(
         questions,

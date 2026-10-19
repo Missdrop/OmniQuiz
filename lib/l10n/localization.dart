@@ -16,6 +16,23 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Could not read this ZIP. Use an unencrypted ZIP with standard compression.':
+          zipReadError,
+      'The selected ZIP could not be read.': zipSelectedReadError,
+      'ZIP exceeds the 100 MB archive limit.': zipArchiveLimit,
+      'ZIP contains more than 1000 entries. Split the archive.': zipEntryLimit,
+      'ZIP contains unsafe paths or links. Nothing was imported.':
+          zipUnsafePaths,
+      'ZIP contains invalid file sizes.': zipInvalidSizes,
+      'ZIP expands beyond the 100 MB limit.': zipExpandedLimit,
+      'ZIP contains unsafe or duplicate file paths.': zipDuplicatePaths,
+      'A material in the ZIP exceeds the 20 MB file limit.': zipMaterialLimit,
+      'No supported materials in ZIP. Include TXT, Markdown or text PDF.':
+          zipNoMaterials,
+      'ZIP is damaged. Nothing was imported.': zipDamaged,
+      'Could not import ZIP. Check storage space and file permissions.':
+          zipImportError,
+
       'Could not scan the library folder. Check that it is connected and grant folder access again.':
           scanFolderError,
       'Library folder is unavailable. Reconnect it and scan again.':

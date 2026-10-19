@@ -281,5 +281,19 @@
   "copyLibraryFileError": "Cannot copy this file into the library folder.",
   "grantFolderAccess": "Grant folder access",
   "grantFolderError": "Choose the same library folder to restore access.",
-  "removeIndexedDocumentBody": "This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder."
+  "removeIndexedDocumentBody": "This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.",
+  "importZip": "Import ZIP",
+  "zipSupportedFiles": "TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries",
+  "zipReadError": "Could not read this ZIP. Use an unencrypted ZIP with standard compression.",
+  "zipSelectedReadError": "The selected ZIP could not be read.",
+  "zipArchiveLimit": "ZIP exceeds the 100 MB archive limit.",
+  "zipEntryLimit": "ZIP contains more than 1000 entries. Split the archive.",
+  "zipUnsafePaths": "ZIP contains unsafe paths or links. Nothing was imported.",
+  "zipInvalidSizes": "ZIP contains invalid file sizes.",
+  "zipExpandedLimit": "ZIP expands beyond the 100 MB limit.",
+  "zipDuplicatePaths": "ZIP contains unsafe or duplicate file paths.",
+  "zipMaterialLimit": "A material in the ZIP exceeds the 20 MB file limit.",
+  "zipNoMaterials": "No supported materials in ZIP. Include TXT, Markdown or text PDF.",
+  "zipDamaged": "ZIP is damaged. Nothing was imported.",
+  "zipImportError": "Could not import ZIP. Check storage space and file permissions."
 }

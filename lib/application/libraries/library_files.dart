@@ -12,5 +12,8 @@ abstract interface class LibraryFiles {
   String get directory;
   bool containsOrigin(String origin);
   Stream<LibraryScanEntry> scan();
-  Future<ImportInput> store(ImportInput input);
+  Future<ImportInput> store(
+    ImportInput input, {
+    bool preserveDirectories = false,
+  });
 }

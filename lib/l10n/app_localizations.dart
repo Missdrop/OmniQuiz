@@ -1177,6 +1177,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.'**
   String get removeIndexedDocumentBody;
+
+  /// No description provided for @importZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Import ZIP'**
+  String get importZip;
+
+  /// No description provided for @zipSupportedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries'**
+  String get zipSupportedFiles;
+
+  /// No description provided for @zipReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this ZIP. Use an unencrypted ZIP with standard compression.'**
+  String get zipReadError;
+
+  /// No description provided for @zipSelectedReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected ZIP could not be read.'**
+  String get zipSelectedReadError;
+
+  /// No description provided for @zipArchiveLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP exceeds the 100 MB archive limit.'**
+  String get zipArchiveLimit;
+
+  /// No description provided for @zipEntryLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains more than 1000 entries. Split the archive.'**
+  String get zipEntryLimit;
+
+  /// No description provided for @zipUnsafePaths.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains unsafe paths or links. Nothing was imported.'**
+  String get zipUnsafePaths;
+
+  /// No description provided for @zipInvalidSizes.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains invalid file sizes.'**
+  String get zipInvalidSizes;
+
+  /// No description provided for @zipExpandedLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP expands beyond the 100 MB limit.'**
+  String get zipExpandedLimit;
+
+  /// No description provided for @zipDuplicatePaths.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains unsafe or duplicate file paths.'**
+  String get zipDuplicatePaths;
+
+  /// No description provided for @zipMaterialLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'A material in the ZIP exceeds the 20 MB file limit.'**
+  String get zipMaterialLimit;
+
+  /// No description provided for @zipNoMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'No supported materials in ZIP. Include TXT, Markdown or text PDF.'**
+  String get zipNoMaterials;
+
+  /// No description provided for @zipDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP is damaged. Nothing was imported.'**
+  String get zipDamaged;
+
+  /// No description provided for @zipImportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import ZIP. Check storage space and file permissions.'**
+  String get zipImportError;
 }
 
 class _AppLocalizationsDelegate

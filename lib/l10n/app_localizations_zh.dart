@@ -578,4 +578,47 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get removeIndexedDocumentBody =>
       '这会移除当前资料索引并停用相关题目，保留原文件。扫描目录时会重新导入；如需永久排除，请将文件移出该目录。';
+
+  @override
+  String get importZip => '导入 ZIP';
+
+  @override
+  String get zipSupportedFiles =>
+      'TXT、Markdown、文字型 PDF · 每文件 20 MB · ZIP：压缩及解压后各限 100 MB，最多 1000 个条目';
+
+  @override
+  String get zipReadError => '无法读取此 ZIP。请使用未加密、采用标准压缩方式的 ZIP。';
+
+  @override
+  String get zipSelectedReadError => '无法读取所选 ZIP 文件。';
+
+  @override
+  String get zipArchiveLimit => 'ZIP 文件超过 100 MB 上限。';
+
+  @override
+  String get zipEntryLimit => 'ZIP 条目过多或目录元数据过大，请拆分为较小的压缩包（最多 1000 个条目）。';
+
+  @override
+  String get zipUnsafePaths => 'ZIP 包含不安全的路径或链接，未导入任何文件。';
+
+  @override
+  String get zipInvalidSizes => 'ZIP 中的文件大小信息无效。';
+
+  @override
+  String get zipExpandedLimit => 'ZIP 解压后超过 100 MB 上限。';
+
+  @override
+  String get zipDuplicatePaths => 'ZIP 包含不安全或重复的文件路径。';
+
+  @override
+  String get zipMaterialLimit => 'ZIP 中的某个资料文件超过 20 MB 上限。';
+
+  @override
+  String get zipNoMaterials => 'ZIP 中没有支持的资料。请包含 TXT、Markdown 或文字型 PDF。';
+
+  @override
+  String get zipDamaged => 'ZIP 已损坏，未导入任何文件。';
+
+  @override
+  String get zipImportError => '无法导入 ZIP，请检查存储空间和文件权限。';
 }

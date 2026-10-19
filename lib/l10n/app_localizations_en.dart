@@ -634,4 +634,54 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get removeIndexedDocumentBody =>
       'This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.';
+
+  @override
+  String get importZip => 'Import ZIP';
+
+  @override
+  String get zipSupportedFiles =>
+      'TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries';
+
+  @override
+  String get zipReadError =>
+      'Could not read this ZIP. Use an unencrypted ZIP with standard compression.';
+
+  @override
+  String get zipSelectedReadError => 'The selected ZIP could not be read.';
+
+  @override
+  String get zipArchiveLimit => 'ZIP exceeds the 100 MB archive limit.';
+
+  @override
+  String get zipEntryLimit =>
+      'ZIP contains more than 1000 entries. Split the archive.';
+
+  @override
+  String get zipUnsafePaths =>
+      'ZIP contains unsafe paths or links. Nothing was imported.';
+
+  @override
+  String get zipInvalidSizes => 'ZIP contains invalid file sizes.';
+
+  @override
+  String get zipExpandedLimit => 'ZIP expands beyond the 100 MB limit.';
+
+  @override
+  String get zipDuplicatePaths =>
+      'ZIP contains unsafe or duplicate file paths.';
+
+  @override
+  String get zipMaterialLimit =>
+      'A material in the ZIP exceeds the 20 MB file limit.';
+
+  @override
+  String get zipNoMaterials =>
+      'No supported materials in ZIP. Include TXT, Markdown or text PDF.';
+
+  @override
+  String get zipDamaged => 'ZIP is damaged. Nothing was imported.';
+
+  @override
+  String get zipImportError =>
+      'Could not import ZIP. Check storage space and file permissions.';
 }

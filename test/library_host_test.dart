@@ -110,6 +110,7 @@ void main() {
       await tester.pump();
       await settleWork();
       expect(catalog.selected.name, 'Biology');
+      expect(find.text('Import ZIP'), findsOneWidget);
       expect(find.text('Physics notes.md'), findsNothing);
       expect(tester.takeException(), isNull);
 

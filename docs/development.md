@@ -191,6 +191,27 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 - Data stays on one device. Cloud sync, backups/exports, OCR, folder watching,
   and ChatGPT subscription authorization are not included in this release.
 
+## ZIP material import
+
+**Import ZIP** is available for each directory-backed library, including managed
+mobile libraries. It imports into the current library; it is not a database or
+progress backup format. TXT, Markdown and text PDFs retain their relative paths.
+Hidden files, macOS metadata, unsupported formats and nested archives are skipped.
+Unencrypted stored/deflate ZIPs are supported, up to 100 MB compressed, 100 MB
+expanded in total, 1,000 entries and 20 MB per supported material. ZIP64 and
+multi-volume archives are outside these bounds. Central-directory metadata is
+also bounded before decoding.
+
+`ZipDocumentAccess` stages and verifies all selected entries in temporary storage
+on a worker isolate before yielding materials one at a time. It rejects traversal,
+absolute paths, symlinks, ambiguous duplicate paths, invalid sizes and bad CRCs.
+Temporary files are removed on success, failure or stream cancellation. The
+library writer refuses existing links in parent directories and gives conflicting
+filenames a content hash suffix. Reimporting unchanged materials is idempotent.
+Existing sources are not reconciled/deleted during ZIP import. A valid archive
+can still contain an unreadable document; document parsing reports these per file,
+while other valid documents are imported normally.
+
 ## Library storage and lifecycle
 
 `omniquiz.sqlite` remains the default library database. Existing documents,

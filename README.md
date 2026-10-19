@@ -16,6 +16,7 @@ OmniQuiz keeps your library and progress on your device. No account needed.
 ## What you can do
 
 - **Keep subjects separate.** Create libraries with independent questions, mistakes, and progress.
+- **Import a ZIP.** Bring a folder of notes to your phone, keeping subfolders intact.
 - **Study a whole folder.** Connect an existing desktop folder or create an app-managed one. Scan TXT, Markdown, and PDFs with selectable text, including subfolders.
 - **Understand each answer.** Read explanations alongside excerpts from your materials.
 - **Review your mistakes.** Missed questions come back for spaced review.
@@ -51,7 +52,9 @@ Folders scan on launch, library switch, and return to the app. Use **Scan folder
 after editing files while OmniQuiz stays open. Each scan imports new and changed
 files; removed sources leave practice, while answer history is retained. Hidden
 files and symbolic links are skipped. Mobile devices use app-managed folders and
-file import. API settings and interface language are shared across libraries.
+file or ZIP import. ZIP imports preserve subfolders and skip hidden/unsupported
+files. Use an unencrypted ZIP (up to 100 MB compressed and expanded, 1,000 entries,
+20 MB per material). API settings and interface language are shared across libraries.
 
 ## Your data
 

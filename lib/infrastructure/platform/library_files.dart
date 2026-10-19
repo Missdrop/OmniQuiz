@@ -62,7 +62,10 @@ class DirectoryLibraryFiles implements LibraryFiles {
   }
 
   @override
-  Future<ImportInput> store(ImportInput input) async {
+  Future<ImportInput> store(
+    ImportInput input, {
+    bool preserveDirectories = false,
+  }) async {
     if (input.bytes.length > PlatformDocumentAccess.maxBytes) {
       throw const AppFailure('File exceeds 20 MB.');
     }
@@ -73,14 +76,40 @@ class DirectoryLibraryFiles implements LibraryFiles {
         'Library folder is unavailable. Reconnect it and scan again.',
       );
     }
-    final name = p.basename(input.name);
-    var target = File(p.join(directory, name));
+    final name = preserveDirectories
+        ? input.name.replaceAll('\\', '/')
+        : p.basename(input.name);
+    final parts = name.split('/');
+    if (p.posix.isAbsolute(name) ||
+        p.windows.isAbsolute(name) ||
+        parts.any(
+          (part) =>
+              part.isEmpty || part == '.' || part == '..' || part.contains(':'),
+        )) {
+      throw const AppFailure('Cannot copy this file into the library folder.');
+    }
+    var parent = directory;
+    // Existing links inside a selected directory must not redirect an import.
+    for (final part in parts.take(parts.length - 1)) {
+      parent = p.join(parent, part);
+      final type = await FileSystemEntity.type(parent, followLinks: false);
+      if (type == FileSystemEntityType.notFound) {
+        await Directory(parent).create();
+      } else if (type != FileSystemEntityType.directory) {
+        throw const AppFailure(
+          'Cannot copy this file into the library folder.',
+        );
+      }
+    }
+    final filename = parts.last;
+    var target = File(p.join(parent, filename));
     // Do not overwrite a user's different file with a matching name.
     if (await FileSystemEntity.type(target.path, followLinks: false) !=
         FileSystemEntityType.notFound) {
       final digest = sha256.convert(input.bytes).toString();
       if (await FileSystemEntity.type(target.path, followLinks: false) ==
               FileSystemEntityType.file &&
+          await target.length() == input.bytes.length &&
           sha256.convert(await target.readAsBytes()).toString() == digest) {
         return ImportInput(
           name: name,
@@ -90,14 +119,15 @@ class DirectoryLibraryFiles implements LibraryFiles {
       }
       target = File(
         p.join(
-          directory,
-          '${p.basenameWithoutExtension(name)}-$digest${p.extension(name)}',
+          parent,
+          '${p.basenameWithoutExtension(filename)}-$digest${p.extension(filename)}',
         ),
       );
       if (await FileSystemEntity.type(target.path, followLinks: false) !=
           FileSystemEntityType.notFound) {
         if (await FileSystemEntity.type(target.path, followLinks: false) !=
                 FileSystemEntityType.file ||
+            await target.length() != input.bytes.length ||
             sha256.convert(await target.readAsBytes()).toString() != digest) {
           throw const AppFailure(
             'Cannot copy this file into the library folder.',
@@ -107,7 +137,7 @@ class DirectoryLibraryFiles implements LibraryFiles {
     }
     await target.writeAsBytes(input.bytes, flush: true);
     return ImportInput(
-      name: p.basename(target.path),
+      name: p.relative(target.path, from: directory),
       origin: p.normalize(p.absolute(target.path)),
       bytes: input.bytes,
     );
