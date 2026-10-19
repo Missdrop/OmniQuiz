@@ -23,10 +23,12 @@ class OmniQuizApp extends StatefulWidget {
     super.key,
     required this.dependencies,
     this.libraryControls,
+    this.settingsControls,
     this.currentLibraryName,
   });
   final AppDependencies dependencies;
   final Widget? libraryControls;
+  final Widget? settingsControls;
   final String? currentLibraryName;
   @override
   State<OmniQuizApp> createState() => _OmniQuizAppState();
@@ -52,7 +54,11 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
             ),
             GoRoute(path: '/practice', builder: (_, _) => const PracticePage()),
             GoRoute(path: '/review', builder: (_, _) => const ReviewPage()),
-            GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
+            GoRoute(
+              path: '/settings',
+              builder: (_, _) =>
+                  SettingsPage(controls: widget.settingsControls),
+            ),
           ],
         ),
       ],

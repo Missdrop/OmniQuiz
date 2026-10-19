@@ -86,6 +86,12 @@ class LibraryCatalog {
     selectedId = library.id;
   }
 
+  Future<void> addRestored(List<StudyLibrary> restored) async {
+    final next = [...libraries, ...restored];
+    await _save(next, selectedId);
+    libraries = next;
+  }
+
   Future<void> _save(List<StudyLibrary> items, String selected) =>
       database.customStatement(
         "INSERT OR REPLACE INTO settings VALUES ('libraries', ?)",

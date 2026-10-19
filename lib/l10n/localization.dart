@@ -16,6 +16,14 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Finish the current operation before backing up or restoring.':
+          maintenanceBusy,
+      'Backup is too large.': backupTooLarge,
+      'A source file could not be backed up.': backupSourceError,
+      'Backup could not be read.': backupReadError,
+      'Backup is invalid or could not be restored. Your existing libraries were kept.':
+          backupRestoreError,
+
       'Could not read this ZIP. Use an unencrypted ZIP with standard compression.':
           zipReadError,
       'The selected ZIP could not be read.': zipSelectedReadError,

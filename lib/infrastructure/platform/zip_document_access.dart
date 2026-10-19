@@ -59,7 +59,7 @@ class ZipDocumentAccess implements ArchiveAccess {
   static List<String> _extract(String path, String destination) {
     final input = InputFileStream(path);
     try {
-      _checkDirectoryBudget(input);
+      checkDirectoryBudget(input);
       final directory = ZipDirectory()..read(input);
       if (directory.fileHeaders.length > maxEntries) {
         throw const AppFailure(
@@ -155,7 +155,10 @@ class ZipDocumentAccess implements ArchiveAccess {
     }
   }
 
-  static void _checkDirectoryBudget(InputFileStream input) {
+  static void checkDirectoryBudget(
+    InputFileStream input, {
+    int maxEntryCount = maxEntries,
+  }) {
     // ZIP64 is unnecessary within these limits. Check EOCD before the archive
     // library allocates an object for every central-directory entry.
     final tail = input
@@ -167,7 +170,7 @@ class ZipDocumentAccess implements ArchiveAccess {
           i + 22 + data.getUint16(i + 20, Endian.little) != tail.length) {
         continue;
       }
-      if (data.getUint16(i + 10, Endian.little) > maxEntries ||
+      if (data.getUint16(i + 10, Endian.little) > maxEntryCount ||
           data.getUint32(i + 12, Endian.little) > 8 * 1024 * 1024) {
         throw const AppFailure(
           'ZIP contains more than 1000 entries. Split the archive.',

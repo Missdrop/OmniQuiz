@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 import '../domain/study_library.dart';
+import '../domain/models.dart';
 import '../infrastructure/persistence/database.dart';
 import '../infrastructure/persistence/library_catalog.dart';
 import '../infrastructure/platform/document_access.dart';
@@ -16,6 +17,9 @@ import '../presentation/library/create_library_dialog.dart';
 import '../infrastructure/platform/folder_permissions.dart';
 import 'app.dart';
 import 'dependencies.dart';
+import '../infrastructure/backup/library_backup.dart';
+import '../infrastructure/platform/backup_actions.dart';
+import '../presentation/backup/backup_panel.dart';
 
 /// Replaces the complete study session on a switch, including its view models.
 class LibraryHost extends StatefulWidget {
@@ -146,6 +150,25 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _maintenance(Future<void> Function() action) async {
+    if (_switching ||
+        _dependencies.library.busy ||
+        _dependencies.practice.busy ||
+        _dependencies.settings.busy ||
+        _dependencies.language.saving) {
+      throw const AppFailure(
+        'Finish the current operation before backing up or restoring.',
+      );
+    }
+    setState(() => _switching = true);
+    try {
+      await _dependencies.coordinator.quiesce();
+      await action();
+    } finally {
+      if (mounted) setState(() => _switching = false);
+    }
+  }
+
   Widget _controls(BuildContext context) {
     final locked =
         _switching ||
@@ -251,6 +274,16 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
             builder: (context, _) => _controls(context),
           ),
           currentLibraryName: widget.catalog.selected.name,
+          settingsControls: BackupPanel(
+            actions: PlatformBackupActions(
+              LibraryBackup(
+                widget.catalog,
+                activeDatabase: _dependencies.database,
+                activeId: widget.catalog.selectedId,
+              ),
+            ),
+            runExclusive: _maintenance,
+          ),
         ),
         if (_switching)
           const Positioned.fill(

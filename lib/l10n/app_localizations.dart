@@ -1261,6 +1261,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not import ZIP. Check storage space and file permissions.'**
   String get zipImportError;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your libraries'**
+  String get backupTitle;
+
+  /// No description provided for @backupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all libraries, materials, questions and progress. AI settings and API keys are excluded. Backups contain your private study data.'**
+  String get backupHelp;
+
+  /// No description provided for @exportBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Export backup'**
+  String get exportBackup;
+
+  /// No description provided for @restoreBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup'**
+  String get restoreBackup;
+
+  /// No description provided for @restoreBackupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore a previously exported OmniQuiz backup as new libraries. Your existing libraries and AI settings will be kept.'**
+  String get restoreBackupHelp;
+
+  /// No description provided for @backupSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved.'**
+  String get backupSaved;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed. Check storage space and folder access.'**
+  String get backupFailed;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored {count} libraries. Switch libraries to open them.'**
+  String backupRestored(int count);
+
+  /// No description provided for @backupMissingOriginals.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved. {count} original files were unavailable; their extracted text and learning records were preserved.'**
+  String backupMissingOriginals(int count);
+
+  /// No description provided for @backupTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is too large.'**
+  String get backupTooLarge;
+
+  /// No description provided for @backupSourceError.
+  ///
+  /// In en, this message translates to:
+  /// **'A source file could not be backed up.'**
+  String get backupSourceError;
+
+  /// No description provided for @backupReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup could not be read.'**
+  String get backupReadError;
+
+  /// No description provided for @backupRestoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is invalid or could not be restored. Your existing libraries were kept.'**
+  String get backupRestoreError;
+
+  /// No description provided for @maintenanceBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the current operation before backing up or restoring.'**
+  String get maintenanceBusy;
 }
 
 class _AppLocalizationsDelegate

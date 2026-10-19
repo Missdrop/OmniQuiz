@@ -193,5 +193,33 @@
   "zipMaterialLimit": "ZIP 中的某个资料文件超过 20 MB 上限。",
   "zipNoMaterials": "ZIP 中没有支持的资料。请包含 TXT、Markdown 或文字型 PDF。",
   "zipDamaged": "ZIP 已损坏，未导入任何文件。",
-  "zipImportError": "无法导入 ZIP，请检查存储空间和文件权限。"
+  "zipImportError": "无法导入 ZIP，请检查存储空间和文件权限。",
+  "backupTitle": "资料库备份",
+  "backupHelp": "备份全部资料库、资料、题目和进度，不包含 AI 配置和 API 密钥。备份文件包含你的私人学习资料。",
+  "exportBackup": "导出备份",
+  "restoreBackup": "恢复备份",
+  "restoreBackupHelp": "将 OmniQuiz 备份恢复为新的资料库，保留现有资料库和 AI 配置。",
+  "backupSaved": "备份已保存。",
+  "backupFailed": "备份失败，请检查存储空间和目录权限。",
+  "backupRestored": "已恢复 {count} 个资料库，请切换资料库查看。",
+  "backupMissingOriginals": "备份已保存。有 {count} 份原文件不可用，已保留其提取文本和学习记录。",
+  "backupTooLarge": "备份超过大小限制。",
+  "backupSourceError": "某份资料无法备份，请检查文件大小及读取权限。",
+  "backupReadError": "无法读取备份文件。",
+  "backupRestoreError": "备份无效或无法恢复，现有资料库已保留。",
+  "@backupRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backupMissingOriginals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "maintenanceBusy": "请先等待当前操作完成，再备份或恢复。"
 }

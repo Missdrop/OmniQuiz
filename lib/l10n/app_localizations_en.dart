@@ -684,4 +684,55 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get zipImportError =>
       'Could not import ZIP. Check storage space and file permissions.';
+
+  @override
+  String get backupTitle => 'Back up your libraries';
+
+  @override
+  String get backupHelp =>
+      'Save all libraries, materials, questions and progress. AI settings and API keys are excluded. Backups contain your private study data.';
+
+  @override
+  String get exportBackup => 'Export backup';
+
+  @override
+  String get restoreBackup => 'Restore backup';
+
+  @override
+  String get restoreBackupHelp =>
+      'Restore a previously exported OmniQuiz backup as new libraries. Your existing libraries and AI settings will be kept.';
+
+  @override
+  String get backupSaved => 'Backup saved.';
+
+  @override
+  String get backupFailed =>
+      'Backup failed. Check storage space and folder access.';
+
+  @override
+  String backupRestored(int count) {
+    return 'Restored $count libraries. Switch libraries to open them.';
+  }
+
+  @override
+  String backupMissingOriginals(int count) {
+    return 'Backup saved. $count original files were unavailable; their extracted text and learning records were preserved.';
+  }
+
+  @override
+  String get backupTooLarge => 'Backup is too large.';
+
+  @override
+  String get backupSourceError => 'A source file could not be backed up.';
+
+  @override
+  String get backupReadError => 'Backup could not be read.';
+
+  @override
+  String get backupRestoreError =>
+      'Backup is invalid or could not be restored. Your existing libraries were kept.';
+
+  @override
+  String get maintenanceBusy =>
+      'Finish the current operation before backing up or restoring.';
 }

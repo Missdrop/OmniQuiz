@@ -295,5 +295,33 @@
   "zipMaterialLimit": "A material in the ZIP exceeds the 20 MB file limit.",
   "zipNoMaterials": "No supported materials in ZIP. Include TXT, Markdown or text PDF.",
   "zipDamaged": "ZIP is damaged. Nothing was imported.",
-  "zipImportError": "Could not import ZIP. Check storage space and file permissions."
+  "zipImportError": "Could not import ZIP. Check storage space and file permissions.",
+  "backupTitle": "Back up your libraries",
+  "backupHelp": "Save all libraries, materials, questions and progress. AI settings and API keys are excluded. Backups contain your private study data.",
+  "exportBackup": "Export backup",
+  "restoreBackup": "Restore backup",
+  "restoreBackupHelp": "Restore a previously exported OmniQuiz backup as new libraries. Your existing libraries and AI settings will be kept.",
+  "backupSaved": "Backup saved.",
+  "backupFailed": "Backup failed. Check storage space and folder access.",
+  "backupRestored": "Restored {count} libraries. Switch libraries to open them.",
+  "backupMissingOriginals": "Backup saved. {count} original files were unavailable; their extracted text and learning records were preserved.",
+  "backupTooLarge": "Backup is too large.",
+  "backupSourceError": "A source file could not be backed up.",
+  "backupReadError": "Backup could not be read.",
+  "backupRestoreError": "Backup is invalid or could not be restored. Your existing libraries were kept.",
+  "@backupRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backupMissingOriginals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "maintenanceBusy": "Finish the current operation before backing up or restoring."
 }

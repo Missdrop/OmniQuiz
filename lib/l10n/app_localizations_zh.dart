@@ -621,4 +621,50 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get zipImportError => '无法导入 ZIP，请检查存储空间和文件权限。';
+
+  @override
+  String get backupTitle => '资料库备份';
+
+  @override
+  String get backupHelp => '备份全部资料库、资料、题目和进度，不包含 AI 配置和 API 密钥。备份文件包含你的私人学习资料。';
+
+  @override
+  String get exportBackup => '导出备份';
+
+  @override
+  String get restoreBackup => '恢复备份';
+
+  @override
+  String get restoreBackupHelp => '将 OmniQuiz 备份恢复为新的资料库，保留现有资料库和 AI 配置。';
+
+  @override
+  String get backupSaved => '备份已保存。';
+
+  @override
+  String get backupFailed => '备份失败，请检查存储空间和目录权限。';
+
+  @override
+  String backupRestored(int count) {
+    return '已恢复 $count 个资料库，请切换资料库查看。';
+  }
+
+  @override
+  String backupMissingOriginals(int count) {
+    return '备份已保存。有 $count 份原文件不可用，已保留其提取文本和学习记录。';
+  }
+
+  @override
+  String get backupTooLarge => '备份超过大小限制。';
+
+  @override
+  String get backupSourceError => '某份资料无法备份，请检查文件大小及读取权限。';
+
+  @override
+  String get backupReadError => '无法读取备份文件。';
+
+  @override
+  String get backupRestoreError => '备份无效或无法恢复，现有资料库已保留。';
+
+  @override
+  String get maintenanceBusy => '请先等待当前操作完成，再备份或恢复。';
 }

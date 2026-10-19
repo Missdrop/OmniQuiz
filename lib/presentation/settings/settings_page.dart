@@ -8,7 +8,8 @@ import 'language_view_model.dart';
 import '../shared/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.controls});
+  final Widget? controls;
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
@@ -229,6 +230,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 20),
+        ?widget.controls,
         Notice(context.l10n.privacyNotice),
         Text(
           'OmniQuiz 0.1.0 · GPL-3.0-only',
