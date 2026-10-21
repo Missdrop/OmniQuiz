@@ -5,9 +5,9 @@ import 'package:path/path.dart' as p;
 
 import '../../application/ports/backup.dart';
 import '../../domain/models.dart';
+import 'backup_file_saver.dart';
 
-/// SaveFile writes the bytes through the platform API, including mobile SAF /
-/// document providers. Do not assume its returned URI is a filesystem path.
+/// Owns staging lifetime until the platform provider finishes copying the file.
 class PlatformBackupActions implements BackupActions {
   PlatformBackupActions(this.backups);
   final BackupPort backups;
@@ -18,12 +18,8 @@ class PlatformBackupActions implements BackupActions {
     try {
       final file = File(p.join(directory.path, 'OmniQuiz-backup.zip'));
       final missing = await backups.exportTo(file.path);
-      final saved = await FilePicker.saveFile(
-        fileName: 'OmniQuiz-backup.zip',
-        mimeType: 'application/zip',
-        bytes: await file.readAsBytes(),
-      );
-      return saved == null ? null : missing;
+      final saved = await BackupFileSaver().save(file);
+      return saved ? missing : null;
     } finally {
       await directory.delete(recursive: true);
     }

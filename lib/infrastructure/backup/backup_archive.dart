@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:path/path.dart' as p;
@@ -95,8 +96,23 @@ class BackupArchive {
       output.closeSync();
     }
     if (target.lengthSync() != header.uncompressedSize ||
-        getCrc32(target.readAsBytesSync()) != header.crc32) {
+        _crc(target) != header.crc32) {
       throw const FormatException('Damaged backup entry');
+    }
+  }
+
+  static int _crc(File file) {
+    final input = file.openSync();
+    final buffer = Uint8List(64 * 1024);
+    var crc = 0;
+    try {
+      while (true) {
+        final count = input.readIntoSync(buffer);
+        if (count == 0) return crc;
+        crc = getCrc32(Uint8List.sublistView(buffer, 0, count), crc);
+      }
+    } finally {
+      input.closeSync();
     }
   }
 }

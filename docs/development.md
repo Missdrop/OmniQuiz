@@ -335,7 +335,11 @@ credentials. Missing legacy original files are reported; extracted text and
 learning records are still backed up. A disconnected library folder fails export
 instead of silently producing an incomplete backup. Limits: 100 MB compressed,
 512 MB expanded, 128 MB per database, 20 MB per material, 10,000 archive entries,
-and 100 libraries. Mobile file-save APIs require bounded in-memory output bytes.
+and 100 libraries. Android exports the staged archive through SAF with a 64 KB
+copy buffer, and iOS exports its file URL through the document picker. Neither
+mobile path loads the whole ZIP into a Flutter method payload. Desktop saving
+still uses the file-picker bytes API under the 100 MB compressed limit. Archive
+CRC checks use a bounded buffer, including database snapshots.
 
 Restore stages and validates every archive entry and SQLite snapshot first, then
 creates app-managed copies with new library IDs and rebases source origins. A
