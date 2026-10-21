@@ -2,7 +2,7 @@ import Flutter
 import UIKit
 
 /// Lets the system export an existing archive without a second in-memory copy.
-final class BackupExporter: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
+final class BackupExporter: NSObject, FlutterPlugin, UIDocumentPickerDelegate, UIAdaptivePresentationControllerDelegate {
   private weak var registrar: FlutterPluginRegistrar?
   private var pending: FlutterResult?
 
@@ -46,6 +46,7 @@ final class BackupExporter: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
     picker.delegate = self
     pending = result
     presenter.present(picker, animated: true)
+    picker.presentationController?.delegate = self
   }
 
   func documentPicker(_ controller: UIDocumentPickerViewController,
@@ -54,6 +55,11 @@ final class BackupExporter: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
   }
 
   func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+    finish(nil)
+  }
+
+  // Swiping away a sheet must release the Dart export just like Cancel does.
+  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
     finish(nil)
   }
 
