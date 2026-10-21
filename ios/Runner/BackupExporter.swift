@@ -8,6 +8,7 @@ final class BackupExporter: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
 
   init(registrar: FlutterPluginRegistrar) {
     self.registrar = registrar
+    super.init()
   }
 
   static func register(with registrar: FlutterPluginRegistrar) {
@@ -32,7 +33,7 @@ final class BackupExporter: NSObject, FlutterPlugin, UIDocumentPickerDelegate {
     guard url.path.hasPrefix(prefix),
       url.lastPathComponent == "OmniQuiz-backup.zip",
       FileManager.default.fileExists(atPath: url.path),
-      var presenter = registrar?.viewController() else {
+      var presenter = registrar?.viewController else {
       fail(result); return
     }
     while let presented = presenter.presentedViewController { presenter = presented }

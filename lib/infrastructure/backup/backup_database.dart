@@ -1,6 +1,7 @@
 import 'dart:isolate';
 
 import 'package:sqlite3/sqlite3.dart' as sqlite;
+import 'package:path/path.dart' as p;
 
 import '../persistence/database.dart';
 import '../persistence/scan_state_store.dart';
@@ -91,6 +92,7 @@ class BackupDatabase {
     String path,
     String libraryId,
     Map<String, String> origins,
+    String materialDirectory,
   ) {
     final db = sqlite.sqlite3.open(path);
     try {
@@ -114,14 +116,7 @@ class BackupDatabase {
         );
         // Restored files have new paths/timestamps. Preserve exclusions, but
         // discard scan hints so the independent copy verifies content afresh.
-        final rebased = <String, ScanRecord>{
-          for (final entry in records.entries)
-            if (origins.containsKey(entry.key) && entry.value.ignored)
-              origins[entry.key]!: ScanRecord(
-                name: entry.value.name,
-                ignored: true,
-              ),
-        };
+        final rebased = _rebaseExclusions(records, origins, materialDirectory);
         db.execute("UPDATE settings SET value=? WHERE key='library_scan'", [
           SqlScanStateStore.encode(rebased),
         ]);
@@ -130,5 +125,39 @@ class BackupDatabase {
     } finally {
       db.close();
     }
+  }
+
+  static Map<String, ScanRecord> _rebaseExclusions(
+    Map<String, ScanRecord> records,
+    Map<String, String> origins,
+    String root,
+  ) {
+    final rebased = <String, ScanRecord>{};
+    for (final entry in records.entries) {
+      if (!entry.value.ignored) continue;
+      final name = entry.value.name.replaceAll('\\', '/');
+      if (p.posix.isAbsolute(name) ||
+          p.windows.isAbsolute(name) ||
+          name
+              .split('/')
+              .any(
+                (part) =>
+                    part.isEmpty ||
+                    part == '.' ||
+                    part == '..' ||
+                    RegExp(r'[<>:"|?*\x00-\x1f]').hasMatch(part),
+              )) {
+        throw const FormatException('Invalid excluded source path');
+      }
+      // A missing excluded file has no archived material mapping. Its relative
+      // path still has to stay excluded if the user later adds that file again.
+      final target =
+          origins[entry.key] ?? p.join(root, p.joinAll(name.split('/')));
+      rebased[target] = ScanRecord(
+        name: p.relative(target, from: root).replaceAll('\\', '/'),
+        ignored: true,
+      );
+    }
+    return rebased;
   }
 }

@@ -50,7 +50,7 @@ class BackupRestore {
     final copy = await File(p.join(stage, record.database))
         .copy(catalog.databasePath(library));
     final origins = await _materials(record.files, materials.path);
-    BackupDatabase.rebaseOrigins(copy.path, id, origins);
+    BackupDatabase.rebaseOrigins(copy.path, id, origins, materials.path);
     return library;
   }
 

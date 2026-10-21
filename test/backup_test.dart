@@ -204,4 +204,35 @@ void main() {
       }
     },
   );
+  test('an absent excluded source stays excluded after restore and later reappears', () async {
+    await deps.library.refresh();
+    final original = deps.library.documents.single;
+    await deps.library.remove(original.id);
+    await File(original.origin).delete();
+    final service = LibraryBackup(catalog);
+    final archive = p.join(root.path, 'missing-excluded.zip');
+    await service.exportTo(archive);
+    await service.restoreFrom(archive);
+    final restored = catalog.libraries.last;
+    final copy = await AppDependencies.create(
+      database: QuizDatabase(
+        NativeDatabase(File(catalog.databasePath(restored))),
+      ),
+      settingsDatabase: global,
+      libraryFiles: DirectoryLibraryFiles(restored.directory),
+      credentialStore: MemoryCredentials(),
+      ai: FakeGenerator(),
+    );
+    try {
+      await copy.library.refresh();
+      final origin = copy.library.excluded.keys.single;
+      await File(origin).writeAsString('This file was intentionally excluded.');
+      await copy.library.scan(full: true);
+      expect(copy.library.documents, isEmpty);
+      await copy.library.include(origin);
+      expect(copy.library.documents, hasLength(1));
+    } finally {
+      await copy.dispose();
+    }
+  });
 }
