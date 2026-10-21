@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/generation/coordinator.dart';
 import '../../application/libraries/library_files.dart';
+import '../../application/libraries/library_scanner.dart';
 import '../../application/ports/repositories.dart';
 import '../../application/use_cases/import_materials.dart';
 import '../../domain/models.dart';
@@ -17,8 +18,22 @@ class LibraryViewModel extends ChangeNotifier {
     this.coordinator, {
     this.files,
     this.archives,
+    this.scanner,
   });
   final LibraryFiles? files;
+  final LibraryScanner? scanner;
+  Future<void>? _scanFuture;
+  ScanCancellation? _scanCancellation;
+  ScanProgress? scanProgress;
+  Map<String, String> excluded = {};
+  Set<String> missingOrigins = {};
+  bool get scanning => _scanFuture != null;
+  void cancelScan() => _scanCancellation?.cancel();
+  Future<void> stopScan() async {
+    cancelScan();
+    await _scanFuture;
+  }
+
   final ArchiveAccess? archives;
   bool get canImportZip => files != null && archives != null;
   final MaterialRepository materials;
@@ -47,6 +62,7 @@ class LibraryViewModel extends ChangeNotifier {
     try {
       _documents = await materials.documents();
       stats = await questions.stats();
+      excluded = await scanner?.exclusions() ?? {};
     } catch (_) {
       message = 'Could not load your library.';
     }
@@ -79,6 +95,9 @@ class LibraryViewModel extends ChangeNotifier {
         stored.add(files == null ? input : await files!.store(input));
       }
       final result = await importer.execute(stored);
+      for (final input in stored) {
+        await _allowImported(input);
+      }
       message =
           '${result.imported} imported · ${result.unchanged} unchanged'
           '${result.errors.isEmpty ? '' : '\n${result.errors.join('\n')}'}';
@@ -115,6 +134,7 @@ class LibraryViewModel extends ChangeNotifier {
           preserveDirectories: true,
         );
         final result = await importer.execute([stored]);
+        if (result.errors.isEmpty) await _allowImported(stored);
         imported += result.imported;
         unchanged += result.unchanged;
         errors.addAll(result.errors);
@@ -135,51 +155,77 @@ class LibraryViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> scan() async {
-    final directory = files;
-    if (_disposed || busy || directory == null) return;
+  Future<void> _allowImported(ImportInput input) async {
+    if (scanner != null && await materials.byOrigin(input.origin) != null) {
+      await scanner!.include(input.origin);
+    }
+  }
+
+  Future<void> scan({bool full = false}) async {
+    if (_disposed || busy || scanner == null) return;
+    _scanCancellation = ScanCancellation();
+    final work = _runScan(full);
+    _scanFuture = work;
+    _notify();
+    try {
+      await work;
+    } finally {
+      _scanFuture = null;
+      _notify();
+    }
+  }
+
+  Future<void> _runScan(bool full) async {
     busy = true;
     message = null;
+    scanProgress = const ScanProgress(0, '');
     _notify();
-    var imported = 0, unchanged = 0;
-    final errors = <String>[];
     try {
       await coordinator.stop();
-      final seen = <String>{};
-      var readFailed = false;
-      await for (final entry in directory.scan()) {
-        if (_disposed) return;
-        final input = entry.input;
-        if (input == null) {
-          readFailed = true;
-          errors.add(entry.error!);
-          continue;
-        }
-        seen.add(input.origin);
-        final result = await importer.execute([input]);
-        imported += result.imported;
-        unchanged += result.unchanged;
-        errors.addAll(result.errors);
-      }
-      // Only reconcile after a complete traversal, never on lost permissions.
-      if (!readFailed) {
-        for (final document in await materials.documents()) {
-          if (directory.containsOrigin(document.origin) &&
-              !seen.contains(document.origin)) {
-            await materials.removeDocument(document.id);
+      final updates = Stopwatch()..start();
+      final result = await scanner!.scan(
+        full: full,
+        cancellation: _scanCancellation!,
+        onProgress: (progress) {
+          scanProgress = progress;
+          if (progress.checked == 1 || updates.elapsedMilliseconds >= 100) {
+            _notify();
+            updates.reset();
           }
-        }
+        },
+      );
+      if (!result.cancelled && result.errors.isEmpty) {
+        missingOrigins = result.missing;
       }
       message =
-          '$imported imported · $unchanged unchanged'
-          '${errors.isEmpty ? '' : '\n${errors.join('\n')}'}';
+          '${result.imported} imported · ${result.unchanged} unchanged'
+          '\n${result.ignored} excluded · ${missingOrigins.length} missing sources'
+          '${result.cancelled ? '\nScan cancelled. Completed imports were kept.' : ''}'
+          '${result.errors.isEmpty ? '' : '\n${result.errors.join('\n')}'}';
     } catch (_) {
       message = 'Could not scan the library folder. Check that it is connected and grant folder access again.';
     } finally {
       await refresh();
       busy = false;
+      scanProgress = null;
       _notify();
     }
+  }
+
+  Future<void> include(String origin) async {
+    if (_disposed || busy || scanner == null) return;
+    busy = true;
+    _notify();
+    try {
+      await scanner!.include(origin);
+    } catch (_) {
+      message = 'Could not restore this excluded file.';
+      return;
+    } finally {
+      busy = false;
+      _notify();
+    }
+    await scan();
   }
 
   Future<void> remove(String id) async {
@@ -188,7 +234,13 @@ class LibraryViewModel extends ChangeNotifier {
     _notify();
     try {
       await coordinator.stop();
-      await materials.removeDocument(id);
+      final document = _documents.firstWhere((doc) => doc.id == id);
+      if (scanner != null) {
+        await scanner!.exclude(document);
+      } else {
+        await materials.removeDocument(id);
+      }
+      missingOrigins.remove(document.origin);
       await refresh();
     } catch (_) {
       message = 'Could not remove this document.';

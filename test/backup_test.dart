@@ -100,6 +100,7 @@ void main() {
   test(
     'backup omits API profile and credentials even from SQLite freelist pages',
     () async {
+      await deps.library.scan();
       final archive = p.join(root.path, 'backup.zip');
       await LibraryBackup(catalog).exportTo(archive);
       final stage = await Directory(p.join(root.path, 'unpacked')).create();
@@ -109,6 +110,7 @@ void main() {
       try {
         expect(db.select('SELECT key FROM settings').map((r) => r['key']), [
           'epoch',
+          'library_scan',
         ]);
         expect(
           db.select(
@@ -170,4 +172,36 @@ void main() {
       await db.close();
     }
   });
+  test(
+    'backup preserves exclusions and rebases them to the restored folder',
+    () async {
+      await deps.library.refresh();
+      await deps.library.remove(deps.library.documents.single.id);
+      final service = LibraryBackup(catalog);
+      final archive = p.join(root.path, 'excluded.zip');
+      await service.exportTo(archive);
+      await service.restoreFrom(archive);
+      final restored = catalog.libraries.last;
+      final copy = await AppDependencies.create(
+        database: QuizDatabase(
+          NativeDatabase(File(catalog.databasePath(restored))),
+        ),
+        settingsDatabase: global,
+        libraryFiles: DirectoryLibraryFiles(restored.directory),
+        credentialStore: MemoryCredentials(),
+        ai: FakeGenerator(),
+      );
+      try {
+        await copy.library.scan();
+        expect(copy.library.documents, isEmpty);
+        expect(copy.library.excluded, hasLength(1));
+        final origin = copy.library.excluded.keys.single;
+        expect(p.isWithin(restored.directory, origin), true);
+        await copy.library.include(origin);
+        expect(copy.library.documents, hasLength(1));
+      } finally {
+        await copy.dispose();
+      }
+    },
+  );
 }

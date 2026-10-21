@@ -633,7 +633,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeIndexedDocumentBody =>
-      'This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.';
+      'This removes the imported document from practice and excludes its file from future scans. The original file is kept. Use Excluded files to import it again.';
 
   @override
   String get importZip => 'Import ZIP';
@@ -735,4 +735,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get maintenanceBusy =>
       'Finish the current operation before backing up or restoring.';
+
+  @override
+  String get fullScan => 'Verify all files';
+
+  @override
+  String get cancelScan => 'Stop scanning';
+
+  @override
+  String get scanCancelled => 'Scan cancelled. Completed imports were kept.';
+
+  @override
+  String get sourceMissing =>
+      'Source file unavailable; imported content and progress are retained.';
+
+  @override
+  String get restoreImport => 'Import again';
+
+  @override
+  String get restoreExcludedError => 'Could not restore this excluded file.';
+
+  @override
+  String excludedFiles(int count) {
+    return 'Excluded files ($count)';
+  }
+
+  @override
+  String scanProgress(int count, String name) {
+    return 'Checked $count files · $name';
+  }
+
+  @override
+  String scanSourceSummary(int excluded, int missing) {
+    return '$excluded excluded · $missing missing sources';
+  }
 }

@@ -193,15 +193,21 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 - Each library binds to an existing desktop folder or an app-managed folder.
   Recursive scans run on startup, switch, resume, and manually; hidden entries and
   symlinks are skipped. Mobile platforms use managed folders and file import.
-  Scans read one file at a time (no 100-file directory cap). The 20 MB per-file and
+  Scans process one file at a time (no 100-file directory cap). Automatic scans
+  reuse per-library size/mtime hints only for successfully imported revisions;
+  **Verify all files** rereads every non-excluded file to catch changes that kept
+  their metadata. Progress shows the current file and checked count; stopping
+  keeps completed imports. The 20 MB per-file and
   extracted-text limits still apply. A failed file does not block other imports.
 - Imported files are copied into the current material folder. Different content
   with the same filename gets a hash suffix; existing files are never overwritten.
-  Changed sources invalidate old questions. A successful scan removes missing
-  source indexes and stops using their questions, preserving attempts. An
-  unavailable folder or incomplete traversal never clears the cached library.
-  Removing a source in the UI only removes its index; a later scan reimports a
-  file still present on disk.
+  Changed sources invalidate old questions. Missing sources are reported without
+  deleting extracted text, questions, wrong answers or progress. An unavailable
+  folder or incomplete/cancelled traversal never clears the cached library.
+  Removing a source in the UI keeps its original file and persistently excludes
+  its path from future scans. **Excluded files** restores selected paths to the
+  import flow. Exclusions belong to each library, survive restart and are rebased
+  when a backup is restored; scan hints are discarded in restored copies.
 - The model assigns a topic to each question. Review is question-based; a separate
   knowledge graph and adaptive topic mastery model are not implemented.
 - Provider JSON mode is optional. Not every "OpenAI-compatible" endpoint accepts

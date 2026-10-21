@@ -281,7 +281,7 @@
   "copyLibraryFileError": "Cannot copy this file into the library folder.",
   "grantFolderAccess": "Grant folder access",
   "grantFolderError": "Choose the same library folder to restore access.",
-  "removeIndexedDocumentBody": "This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.",
+  "removeIndexedDocumentBody": "This removes the imported document from practice and excludes its file from future scans. The original file is kept. Use Excluded files to import it again.",
   "importZip": "Import ZIP",
   "zipSupportedFiles": "TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries",
   "zipReadError": "Could not read this ZIP. Use an unencrypted ZIP with standard compression.",
@@ -323,5 +323,41 @@
       }
     }
   },
-  "maintenanceBusy": "Finish the current operation before backing up or restoring."
+  "maintenanceBusy": "Finish the current operation before backing up or restoring.",
+  "fullScan": "Verify all files",
+  "cancelScan": "Stop scanning",
+  "scanCancelled": "Scan cancelled. Completed imports were kept.",
+  "sourceMissing": "Source file unavailable; imported content and progress are retained.",
+  "restoreImport": "Import again",
+  "restoreExcludedError": "Could not restore this excluded file.",
+  "excludedFiles": "Excluded files ({count})",
+  "scanProgress": "Checked {count} files · {name}",
+  "scanSourceSummary": "{excluded} excluded · {missing} missing sources",
+  "@excludedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scanProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@scanSourceSummary": {
+    "placeholders": {
+      "excluded": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  }
 }

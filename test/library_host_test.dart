@@ -11,6 +11,9 @@ import 'package:omniquiz/infrastructure/persistence/database.dart';
 import 'package:omniquiz/infrastructure/persistence/library_catalog.dart';
 import 'package:omniquiz/infrastructure/platform/library_files.dart';
 import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
+import 'package:omniquiz/presentation/library/library_page.dart';
+import 'package:omniquiz/presentation/library/library_view_model.dart';
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
@@ -65,13 +68,26 @@ void main() {
             .writeAsString('Energy is conserved.');
       });
       await tester.pumpWidget(LibraryHost(catalog: catalog, initial: initial));
-      Future<void> settleWork() async {
-        for (var i = 0; i < 40; i++) {
+      Future<void> settleWork({String? library}) async {
+        for (var i = 0; i < 200; i++) {
           await tester.runAsync(
             () => Future<void>.delayed(const Duration(milliseconds: 40)),
           );
           await tester.pump(const Duration(milliseconds: 100));
+          final page = find.byType(LibraryPage);
+          if (i > 1 && page.evaluate().isNotEmpty) {
+            final vm = tester.element(page).read<LibraryViewModel>();
+            final selector = tester.widget<DropdownButtonFormField<String>>(
+              find.byType(DropdownButtonFormField<String>),
+            );
+            if (!vm.busy &&
+                selector.onChanged != null &&
+                (library == null || catalog.selected.name == library)) {
+              return;
+            }
+          }
         }
+        fail('Library operation did not finish.');
       }
 
       await settleWork();
@@ -85,7 +101,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Physics').last);
       await tester.pump();
-      await settleWork();
+      await settleWork(library: 'Physics');
       await tester.runAsync(() async {
         await generating;
       });
@@ -100,6 +116,23 @@ void main() {
       );
       expect(tester.takeException(), isNull);
 
+      // Exclusion is reversible through the real page, including its dialog.
+      await tester.ensureVisible(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Remove'));
+      await tester.pump();
+      await settleWork(library: 'Physics');
+      expect(find.text('Physics notes.md'), findsNothing);
+      final excluded = find.text('Excluded files (1)');
+      await tester.ensureVisible(excluded);
+      await tester.tap(excluded);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Import again'));
+      await tester.pump();
+      await settleWork(library: 'Physics');
+      expect(find.text('Physics notes.md'), findsOneWidget);
+
       tester.view.physicalSize = const Size(390, 844);
       await tester.pump();
       await tester.ensureVisible(find.text('Create library'));
@@ -108,7 +141,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'Biology');
       await tester.tap(find.widgetWithText(FilledButton, 'Create'));
       await tester.pump();
-      await settleWork();
+      await settleWork(library: 'Biology');
       expect(catalog.selected.name, 'Biology');
       expect(find.text('Import ZIP'), findsOneWidget);
       expect(find.text('Physics notes.md'), findsNothing);

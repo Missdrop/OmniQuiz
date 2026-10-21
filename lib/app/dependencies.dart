@@ -4,6 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../application/generation/coordinator.dart';
 import '../application/libraries/library_files.dart';
+import '../application/libraries/library_scanner.dart';
+import '../infrastructure/persistence/scan_state_store.dart';
 import '../application/generation/question_validator.dart';
 import '../application/ports/repositories.dart';
 import '../application/use_cases/configure_provider.dart';
@@ -84,6 +86,12 @@ class AppDependencies {
       ids: ids,
       clock: clock,
     );
+    final importer = ImportMaterials(
+      materials,
+      ParserRegistry([TextDocumentParser(), PdfDocumentParser()]),
+      ids,
+      clock,
+    );
     return AppDependencies._(
       database,
       coordinator,
@@ -91,14 +99,17 @@ class AppDependencies {
         materials,
         questions,
         documentAccess ?? PlatformDocumentAccess(),
-        ImportMaterials(
-          materials,
-          ParserRegistry([TextDocumentParser(), PdfDocumentParser()]),
-          ids,
-          clock,
-        ),
+        importer,
         coordinator,
         files: libraryFiles,
+        scanner: libraryFiles == null
+            ? null
+            : LibraryScanner(
+                libraryFiles,
+                materials,
+                importer,
+                SqlScanStateStore(database),
+              ),
         archives: archiveAccess ?? ZipDocumentAccess(),
       ),
       PracticeViewModel(
@@ -125,6 +136,7 @@ class AppDependencies {
   Future<void> dispose() => _disposeFuture ??= _dispose();
 
   Future<void> _dispose() async {
+    await library.stopScan();
     practice.dispose();
     await coordinator.dispose();
     library.dispose();

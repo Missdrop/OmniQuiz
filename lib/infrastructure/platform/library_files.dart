@@ -4,6 +4,7 @@ import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
 import '../../application/libraries/library_files.dart';
+import '../../application/libraries/scan_state.dart';
 import '../../application/ports/repositories.dart';
 import '../../domain/models.dart';
 import 'document_access.dart';
@@ -19,7 +20,10 @@ class DirectoryLibraryFiles implements LibraryFiles {
       p.isWithin(p.normalize(p.absolute(directory)), origin);
 
   @override
-  Stream<LibraryScanEntry> scan() async* {
+  Stream<LibraryScanEntry> scan({
+    bool Function(FileStamp)? skip,
+    bool Function()? cancelled,
+  }) async* {
     await FolderPermissions.restore(directory);
     // Never recreate a missing external volume or follow links outside the root.
     if (!await Directory(directory).exists()) {
@@ -27,7 +31,8 @@ class DirectoryLibraryFiles implements LibraryFiles {
         'Library folder is unavailable. Reconnect it and scan again.',
       );
     }
-    await for (final entry in _files(Directory(directory))) {
+    await for (final entry in _files(Directory(directory), cancelled)) {
+      if (cancelled?.call() == true) return;
       final relative = p.relative(entry.path, from: directory);
       if (p.split(relative).any((part) => part.startsWith('.'))) continue;
       if (!PlatformDocumentAccess.extensions.contains(
@@ -35,9 +40,24 @@ class DirectoryLibraryFiles implements LibraryFiles {
       )) {
         continue;
       }
+      FileStamp? stamp;
       try {
-        if (await entry.length() > PlatformDocumentAccess.maxBytes) {
-          yield LibraryScanEntry.failed('$relative: File exceeds 20 MB.');
+        final stat = await entry.stat();
+        stamp = FileStamp(
+          p.normalize(p.absolute(entry.path)),
+          relative,
+          stat.size,
+          stat.modified.microsecondsSinceEpoch,
+        );
+        if (skip?.call(stamp) == true) {
+          yield LibraryScanEntry.skipped(stamp);
+          continue;
+        }
+        if (stat.size > PlatformDocumentAccess.maxBytes) {
+          yield LibraryScanEntry.failed(
+            '$relative: File exceeds 20 MB.',
+            stamp: stamp,
+          );
           continue;
         }
         yield LibraryScanEntry.read(
@@ -46,18 +66,29 @@ class DirectoryLibraryFiles implements LibraryFiles {
             origin: p.normalize(p.absolute(entry.path)),
             bytes: await entry.readAsBytes(),
           ),
+          // If a file changed while reading it, discard the hint so the next
+          // scan reads it again instead of trusting mixed metadata/content.
+          stamp:
+              await entry.lastModified() == stat.modified &&
+                  await entry.length() == stat.size
+              ? stamp
+              : null,
         );
       } catch (_) {
-        yield LibraryScanEntry.failed('$relative: Could not read this file.');
+        yield LibraryScanEntry.failed(
+          '$relative: Could not read this file.',
+          stamp: stamp,
+        );
       }
     }
   }
 
-  Stream<File> _files(Directory folder) async* {
+  Stream<File> _files(Directory folder, bool Function()? cancelled) async* {
     await for (final entry in folder.list(followLinks: false)) {
+      if (cancelled?.call() == true) return;
       if (p.basename(entry.path).startsWith('.')) continue;
       if (entry is File) yield entry;
-      if (entry is Directory) yield* _files(entry);
+      if (entry is Directory) yield* _files(entry, cancelled);
     }
   }
 

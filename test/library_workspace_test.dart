@@ -146,7 +146,7 @@ void main() {
     await first.dispose();
   });
 
-  test('recursively scans over 100 files, updates revisions, removes deleted sources and retains cache on missing volume', () async {
+  test('recursively scans over 100 files, updates revisions, retains missing sources and retains cache on missing volume', () async {
     final item = await catalog.create('Directory');
     final directory = Directory(item.directory);
     await Directory(p.join(item.directory, 'chapter')).create();
@@ -182,11 +182,12 @@ void main() {
     expect(updated.revision, isNot(original.revision));
     await note.delete();
     await deps.library.scan();
-    expect(deps.library.documents, hasLength(101));
+    expect(deps.library.documents, hasLength(102));
+    expect(deps.library.missingOrigins, contains(original.origin));
     final moved = await directory.rename('${directory.path}-disconnected');
     await deps.library.scan();
     expect(deps.library.message, contains('Could not scan'));
-    expect(deps.library.documents, hasLength(101));
+    expect(deps.library.documents, hasLength(102));
     expect(await directory.exists(), false);
     await moved.rename(directory.path);
     await deps.dispose();

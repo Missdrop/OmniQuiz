@@ -16,6 +16,8 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Scan cancelled. Completed imports were kept.': scanCancelled,
+      'Could not restore this excluded file.': restoreExcludedError,
       'Finish the current operation before backing up or restoring.':
           maintenanceBusy,
       'Backup is too large.': backupTooLarge,
@@ -131,6 +133,11 @@ extension LocalizedDiagnostics on AppLocalizations {
         .firstMatch(message);
     if (match != null) {
       return importSummary(int.parse(match[1]!), int.parse(match[2]!));
+    }
+    match = RegExp(r'^(\d+) excluded · (\d+) missing sources$')
+        .firstMatch(message);
+    if (match != null) {
+      return scanSourceSummary(int.parse(match[1]!), int.parse(match[2]!));
     }
     match = RegExp(r'^(\d+) questions ready$').firstMatch(message);
     if (match != null) return bufferReady(int.parse(match[1]!));

@@ -179,7 +179,7 @@
   "copyLibraryFileError": "无法将文件复制到资料库目录。",
   "grantFolderAccess": "重新授权目录",
   "grantFolderError": "请选择当前资料库的同一目录以恢复授权。",
-  "removeIndexedDocumentBody": "这会移除当前资料索引并停用相关题目，保留原文件。扫描目录时会重新导入；如需永久排除，请将文件移出该目录。",
+  "removeIndexedDocumentBody": "这会移除已导入资料并停用相关题目，同时将原文件加入扫描排除列表。原文件不会删除，可在“已排除文件”中恢复导入。",
   "importZip": "导入 ZIP",
   "zipSupportedFiles": "TXT、Markdown、文字型 PDF · 每文件 20 MB · ZIP：压缩及解压后各限 100 MB，最多 1000 个条目",
   "zipReadError": "无法读取此 ZIP。请使用未加密、采用标准压缩方式的 ZIP。",
@@ -221,5 +221,41 @@
       }
     }
   },
-  "maintenanceBusy": "请先等待当前操作完成，再备份或恢复。"
+  "maintenanceBusy": "请先等待当前操作完成，再备份或恢复。",
+  "fullScan": "完整扫描",
+  "cancelScan": "停止扫描",
+  "scanCancelled": "扫描已停止，已完成的导入已保留。",
+  "sourceMissing": "原文件暂不可用，已保留导入内容和学习进度。",
+  "restoreImport": "恢复导入",
+  "restoreExcludedError": "无法恢复此文件的导入，请重试。",
+  "excludedFiles": "已排除文件（{count}）",
+  "scanProgress": "已检查 {count} 个文件 · {name}",
+  "scanSourceSummary": "{excluded} 个已排除 · {missing} 个原文件暂不可用",
+  "@excludedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scanProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@scanSourceSummary": {
+    "placeholders": {
+      "excluded": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  }
 }

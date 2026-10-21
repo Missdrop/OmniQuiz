@@ -1175,7 +1175,7 @@ abstract class AppLocalizations {
   /// No description provided for @removeIndexedDocumentBody.
   ///
   /// In en, this message translates to:
-  /// **'This removes the document and its questions from practice, but keeps the original file. Scanning the folder will import it again. To exclude it permanently, move the file out of this folder.'**
+  /// **'This removes the imported document from practice and excludes its file from future scans. The original file is kept. Use Excluded files to import it again.'**
   String get removeIndexedDocumentBody;
 
   /// No description provided for @importZip.
@@ -1345,6 +1345,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Finish the current operation before backing up or restoring.'**
   String get maintenanceBusy;
+
+  /// No description provided for @fullScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify all files'**
+  String get fullScan;
+
+  /// No description provided for @cancelScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop scanning'**
+  String get cancelScan;
+
+  /// No description provided for @scanCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan cancelled. Completed imports were kept.'**
+  String get scanCancelled;
+
+  /// No description provided for @sourceMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Source file unavailable; imported content and progress are retained.'**
+  String get sourceMissing;
+
+  /// No description provided for @restoreImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import again'**
+  String get restoreImport;
+
+  /// No description provided for @restoreExcludedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore this excluded file.'**
+  String get restoreExcludedError;
+
+  /// No description provided for @excludedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded files ({count})'**
+  String excludedFiles(int count);
+
+  /// No description provided for @scanProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {count} files · {name}'**
+  String scanProgress(int count, String name);
+
+  /// No description provided for @scanSourceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{excluded} excluded · {missing} missing sources'**
+  String scanSourceSummary(int excluded, int missing);
 }
 
 class _AppLocalizationsDelegate

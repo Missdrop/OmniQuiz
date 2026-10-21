@@ -234,6 +234,13 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
               icon: const Icon(Icons.sync),
               label: Text(context.l10n.scanFolder),
             ),
+            TextButton.icon(
+              onPressed: locked
+                  ? null
+                  : () => _dependencies.library.scan(full: true),
+              icon: const Icon(Icons.fact_check_outlined),
+              label: Text(context.l10n.fullScan),
+            ),
           ],
         ),
         const SizedBox(height: 8),

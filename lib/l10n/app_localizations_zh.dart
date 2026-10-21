@@ -577,7 +577,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get removeIndexedDocumentBody =>
-      '这会移除当前资料索引并停用相关题目，保留原文件。扫描目录时会重新导入；如需永久排除，请将文件移出该目录。';
+      '这会移除已导入资料并停用相关题目，同时将原文件加入扫描排除列表。原文件不会删除，可在“已排除文件”中恢复导入。';
 
   @override
   String get importZip => '导入 ZIP';
@@ -667,4 +667,37 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get maintenanceBusy => '请先等待当前操作完成，再备份或恢复。';
+
+  @override
+  String get fullScan => '完整扫描';
+
+  @override
+  String get cancelScan => '停止扫描';
+
+  @override
+  String get scanCancelled => '扫描已停止，已完成的导入已保留。';
+
+  @override
+  String get sourceMissing => '原文件暂不可用，已保留导入内容和学习进度。';
+
+  @override
+  String get restoreImport => '恢复导入';
+
+  @override
+  String get restoreExcludedError => '无法恢复此文件的导入，请重试。';
+
+  @override
+  String excludedFiles(int count) {
+    return '已排除文件（$count）';
+  }
+
+  @override
+  String scanProgress(int count, String name) {
+    return '已检查 $count 个文件 · $name';
+  }
+
+  @override
+  String scanSourceSummary(int excluded, int missing) {
+    return '$excluded 个已排除 · $missing 个原文件暂不可用';
+  }
 }

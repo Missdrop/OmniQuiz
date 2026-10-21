@@ -72,6 +72,12 @@ class LibraryPage extends StatelessWidget {
                 icon: const Icon(Icons.create_new_folder_outlined),
                 label: Text(context.l10n.importFolder),
               ),
+            if (vm.excluded.isNotEmpty)
+              OutlinedButton.icon(
+                onPressed: vm.busy ? null : () => _showExcluded(context, vm),
+                icon: const Icon(Icons.restore_page_outlined),
+                label: Text(context.l10n.excludedFiles(vm.excluded.length)),
+              ),
             TextButton.icon(
               onPressed: () => context.go('/practice'),
               icon: const Icon(Icons.arrow_forward),
@@ -92,6 +98,21 @@ class LibraryPage extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 16),
             child: LinearProgressIndicator(),
           ),
+        if (vm.scanning && vm.scanProgress != null) ...[
+          Text(
+            context.l10n.scanProgress(
+              vm.scanProgress!.checked,
+              vm.scanProgress!.name,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          TextButton.icon(
+            onPressed: vm.cancelScan,
+            icon: const Icon(Icons.stop),
+            label: Text(context.l10n.cancelScan),
+          ),
+        ],
         if (vm.message != null) Notice(vm.message!),
         if (vm.documents.isEmpty)
           EmptyCard(
@@ -121,11 +142,14 @@ class LibraryPage extends StatelessWidget {
               ),
               title: Text(doc.name),
               subtitle: Text(
-                context.l10n.documentDetails(
-                  doc.chunkCount,
-                  MaterialLocalizations.of(context)
-                      .formatMediumDate(doc.importedAt.toLocal()),
-                ),
+                (vm.missingOrigins.contains(doc.origin)
+                        ? '${context.l10n.sourceMissing}\n'
+                        : '') +
+                    context.l10n.documentDetails(
+                      doc.chunkCount,
+                      MaterialLocalizations.of(context)
+                          .formatMediumDate(doc.importedAt.toLocal()),
+                    ),
               ),
               onTap: () async {
                 final chunks = await vm.source(doc.id);
@@ -198,6 +222,39 @@ class LibraryPage extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  Future<void> _showExcluded(BuildContext context, LibraryViewModel vm) async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.excludedFiles(vm.excluded.length)),
+        content: SizedBox(
+          width: 520,
+          height: vm.excluded.length > 4 ? 320 : vm.excluded.length * 72.0,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final entry in vm.excluded.entries)
+                ListTile(
+                  title: Text(entry.value),
+                  trailing: TextButton(
+                    onPressed: () => Navigator.pop(context, entry.key),
+                    child: Text(context.l10n.restoreImport),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.close),
+          ),
+        ],
+      ),
+    );
+    if (selected != null) await vm.include(selected);
   }
 
   Widget _stat(

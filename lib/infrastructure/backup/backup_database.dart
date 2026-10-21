@@ -3,6 +3,8 @@ import 'dart:isolate';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 import '../persistence/database.dart';
+import '../persistence/scan_state_store.dart';
+import '../../application/libraries/scan_state.dart';
 
 /// SQLite snapshot hygiene and validation are independent of ZIP/file picking.
 class BackupDatabase {
@@ -24,7 +26,9 @@ class BackupDatabase {
   static void _sanitize(String target) {
     final copy = sqlite.sqlite3.open(target);
     try {
-      copy.execute("DELETE FROM settings WHERE key != 'epoch'");
+      copy.execute(
+        "DELETE FROM settings WHERE key NOT IN ('epoch', 'library_scan')",
+      );
       copy.execute(
         "UPDATE jobs SET state='cancelled', request='{}' WHERE state!='completed'",
       );
@@ -47,7 +51,17 @@ class BackupDatabase {
         throw const FormatException('Invalid backup database');
       }
       _validateSchema(db);
-      if (db.select("SELECT key FROM settings WHERE key!='epoch'").isNotEmpty) {
+      final scan = db.select(
+        "SELECT value FROM settings WHERE key='library_scan'",
+      );
+      if (scan.isNotEmpty) {
+        SqlScanStateStore.decode(scan.single['value'] as String);
+      }
+      if (db
+          .select(
+            "SELECT key FROM settings WHERE key NOT IN ('epoch', 'library_scan')",
+          )
+          .isNotEmpty) {
         throw const FormatException('Unexpected settings in backup');
       }
     } finally {
@@ -89,6 +103,27 @@ class BackupDatabase {
         db.execute('UPDATE documents SET origin=? WHERE id=?', [
           origin,
           document['id'],
+        ]);
+      }
+      final scan = db.select(
+        "SELECT value FROM settings WHERE key='library_scan'",
+      );
+      if (scan.isNotEmpty) {
+        final records = SqlScanStateStore.decode(
+          scan.single['value'] as String,
+        );
+        // Restored files have new paths/timestamps. Preserve exclusions, but
+        // discard scan hints so the independent copy verifies content afresh.
+        final rebased = <String, ScanRecord>{
+          for (final entry in records.entries)
+            if (origins.containsKey(entry.key) && entry.value.ignored)
+              origins[entry.key]!: ScanRecord(
+                name: entry.value.name,
+                ignored: true,
+              ),
+        };
+        db.execute("UPDATE settings SET value=? WHERE key='library_scan'", [
+          SqlScanStateStore.encode(rebased),
         ]);
       }
       db.execute('COMMIT');
