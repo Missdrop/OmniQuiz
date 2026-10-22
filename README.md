@@ -42,7 +42,7 @@ See the [development guide](docs/development.md) for platform requirements.
 
 ## Get started
 
-1. **Connect your AI.** In **Settings**, use experimental **Continue with ChatGPT**, or enter your provider's API base URL, model, and key and select **Test connection**.
+1. **Connect your AI.** In **Settings**, use experimental **Continue with ChatGPT**, or enter your provider's API base URL, model, and key, select **Test connection**, then **Save settings**.
 2. **Create a library.** In **Library**, choose **Create library**. Use an existing desktop folder or let OmniQuiz create one. Import files, or try the included sample notes.
 3. **Start practicing.** In **Practice**, choose your material and select **Generate questions**. Visit **Review** later to revisit mistakes.
 
