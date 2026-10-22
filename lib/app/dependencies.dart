@@ -3,17 +3,25 @@ import 'dart:io';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../application/generation/coordinator.dart';
+import '../application/libraries/library_files.dart';
+import '../application/libraries/library_scanner.dart';
+import '../infrastructure/persistence/scan_state_store.dart';
 import '../application/generation/question_validator.dart';
 import '../application/ports/repositories.dart';
 import '../application/use_cases/configure_provider.dart';
 import '../application/use_cases/import_materials.dart';
 import '../domain/policies.dart';
 import '../infrastructure/ai/chat_completions_generator.dart';
+import '../infrastructure/ai/compatible_model_catalog.dart';
+import '../infrastructure/ai/chatgpt_sessions.dart';
+import '../infrastructure/ai/chatgpt_responses.dart';
+import '../application/ports/model_catalog.dart';
 import '../infrastructure/documents/parsers.dart';
 import '../infrastructure/persistence/database.dart';
 import '../infrastructure/persistence/repositories.dart';
 import '../infrastructure/platform/credentials.dart';
 import '../infrastructure/platform/document_access.dart';
+import '../infrastructure/platform/zip_document_access.dart';
 import '../presentation/library/library_view_model.dart';
 import '../presentation/practice/practice_view_model.dart';
 import '../presentation/review/review_view_model.dart';
@@ -30,8 +38,10 @@ class AppDependencies {
     this.review,
     this.settings,
     this.language,
+    this.ownsDatabase,
   );
   final QuizDatabase database;
+  final bool ownsDatabase;
   final GenerationCoordinator coordinator;
   final LibraryViewModel library;
   final PracticeViewModel practice;
@@ -41,15 +51,22 @@ class AppDependencies {
 
   static Future<AppDependencies> create({
     required QuizDatabase database,
+    QuizDatabase? settingsDatabase,
+    bool ownsDatabase = true,
+    LibraryFiles? libraryFiles,
     DocumentAccess? documentAccess,
+    ArchiveAccess? archiveAccess,
     CredentialStore? credentialStore,
     AiQuestionGenerator? ai,
+    ModelCatalog? modelCatalog,
   }) async {
     final materials = SqlMaterialRepository(database);
-    final language = LanguageViewModel(SqlPreferencesRepository(database));
+    final language = LanguageViewModel(
+      SqlPreferencesRepository(settingsDatabase ?? database),
+    );
     await language.load();
     final questions = SqlQuestionRepository(database);
-    final profiles = SqlProfileRepository(database);
+    final profiles = SqlProfileRepository(settingsDatabase ?? database);
     final credentials =
         credentialStore ??
         PlatformCredentialStore(
@@ -63,8 +80,14 @@ class AppDependencies {
     final clock = SystemClock();
     final jobs = SqlJobRepository(database, clock);
     await jobs.recover();
+    final chatGpt = ChatGptSessions(credentials);
     final generator =
-        ai ?? ChatCompletionsGenerator(credentials, QuestionValidator(ids));
+        ai ??
+        ChatCompletionsGenerator(
+          credentials,
+          QuestionValidator(ids),
+          chatGpt: ChatGptResponses(chatGpt),
+        );
     final coordinator = GenerationCoordinator(
       materials: materials,
       questions: questions,
@@ -74,6 +97,12 @@ class AppDependencies {
       ids: ids,
       clock: clock,
     );
+    final importer = ImportMaterials(
+      materials,
+      ParserRegistry([TextDocumentParser(), PdfDocumentParser()]),
+      ids,
+      clock,
+    );
     return AppDependencies._(
       database,
       coordinator,
@@ -81,13 +110,18 @@ class AppDependencies {
         materials,
         questions,
         documentAccess ?? PlatformDocumentAccess(),
-        ImportMaterials(
-          materials,
-          ParserRegistry([TextDocumentParser(), PdfDocumentParser()]),
-          ids,
-          clock,
-        ),
+        importer,
         coordinator,
+        files: libraryFiles,
+        scanner: libraryFiles == null
+            ? null
+            : LibraryScanner(
+                libraryFiles,
+                materials,
+                importer,
+                SqlScanStateStore(database),
+              ),
+        archives: archiveAccess ?? ZipDocumentAccess(),
       ),
       PracticeViewModel(
         questions,
@@ -103,18 +137,25 @@ class AppDependencies {
         ConfigureProvider(profiles, credentials, ids),
         generator,
         coordinator,
+        catalog: modelCatalog ?? CompatibleModelCatalog(),
+        chatGpt: chatGpt,
       ),
       language,
+      ownsDatabase,
     );
   }
 
-  Future<void> dispose() async {
+  Future<void>? _disposeFuture;
+  Future<void> dispose() => _disposeFuture ??= _dispose();
+
+  Future<void> _dispose() async {
+    await library.stopScan();
     practice.dispose();
     await coordinator.dispose();
     library.dispose();
     review.dispose();
     settings.dispose();
     language.dispose();
-    await database.close();
+    if (ownsDatabase) await database.close();
   }
 }

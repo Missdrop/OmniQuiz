@@ -140,4 +140,60 @@ void main() {
       ),
     );
   });
+  test(
+    'timeouts and ambiguous transport failures require manual retries',
+    () async {
+      final keys = MemoryCredentials();
+      await keys.write('key', 'secret');
+      for (final timeout in [true, false]) {
+        var calls = 0;
+        final generator = ChatCompletionsGenerator(
+          keys,
+          validator,
+          requestTimeout: const Duration(milliseconds: 5),
+          clientFactory: () => MockClient((_) async {
+            calls++;
+            if (timeout) {
+              await Future<void>.delayed(const Duration(milliseconds: 20));
+            }
+            throw http.ClientException('connection lost');
+          }),
+        );
+        await expectLater(
+          generator.generate(request()),
+          throwsA(
+            isA<AppFailure>().having((e) => e.retryable, 'retryable', false),
+          ),
+        );
+        expect(calls, 1);
+      }
+    },
+  );
+  test(
+    'rate limits preserve Retry-After without exposing response bodies',
+    () async {
+      final keys = MemoryCredentials();
+      await keys.write('key', 'secret');
+      final generator = ChatCompletionsGenerator(
+        keys,
+        validator,
+        clientFactory: () => MockClient(
+          (_) async =>
+              http.Response('private', 429, headers: {'retry-after': '75'}),
+        ),
+      );
+      await expectLater(
+        generator.generate(request()),
+        throwsA(
+          isA<AppFailure>()
+              .having((e) => e.retryable, 'retryable', true)
+              .having(
+                (e) => e.retryAfter,
+                'retryAfter',
+                const Duration(seconds: 75),
+              ),
+        ),
+      );
+    },
+  );
 }

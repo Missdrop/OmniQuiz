@@ -164,6 +164,7 @@ void main() {
         find.widgetWithText(TextField, 'Model ID'),
         'unsaved-model',
       );
+      await tester.ensureVisible(find.byKey(const ValueKey('interface-en')));
       await tester.tap(find.byKey(const ValueKey('interface-en')));
       await settle();
       await tester.tap(find.text('简体中文').last);
@@ -240,6 +241,25 @@ void main() {
       ];
       await settle();
       expect(find.text('Worth another look.'), findsOneWidget);
+      // Keep navigation reachable in a short desktop window and on a small
+      // phone with accessibility text, including populated practice/review.
+      for (final size in [const Size(900, 360), const Size(320, 568)]) {
+        tester.view.physicalSize = size;
+        tester.binding.platformDispatcher.textScaleFactorTestValue = 1.5;
+        for (final icon in [
+          Icons.auto_stories_outlined,
+          Icons.play_circle_outline,
+          Icons.history_rounded,
+          Icons.tune_rounded,
+        ]) {
+          await settle();
+          await tester.ensureVisible(find.byIcon(icon).first);
+          await tester.tap(find.byIcon(icon).first);
+          await settle();
+          expect(tester.takeException(), isNull, reason: '$size $icon');
+        }
+      }
+      tester.binding.platformDispatcher.clearTextScaleFactorTestValue();
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.runAsync(deps.dispose);
     },

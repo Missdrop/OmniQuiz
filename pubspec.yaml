@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.1.6
   path: ^1.9.1
   http: ^1.6.0
+  archive: ^4.5.2
   crypto: ^3.0.7
   uuid: ^4.6.0
   file_picker: ^13.1.0
@@ -50,7 +51,11 @@ dependencies:
   pdfrx: ^2.6.5
 
   intl: ^0.20.3
+  url_launcher: 6.3.3
+  jose: 0.3.5+2
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
 

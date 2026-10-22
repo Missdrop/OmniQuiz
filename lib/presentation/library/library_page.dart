@@ -8,7 +8,8 @@ import 'library_view_model.dart';
 import '../shared/widgets.dart';
 
 class LibraryPage extends StatelessWidget {
-  const LibraryPage({super.key});
+  const LibraryPage({super.key, this.controls});
+  final Widget? controls;
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<LibraryViewModel>();
@@ -18,6 +19,7 @@ class LibraryPage extends StatelessWidget {
       title: context.l10n.libraryTitle,
       subtitle: context.l10n.librarySubtitle,
       children: [
+        ?controls,
         Wrap(
           spacing: 12,
           runSpacing: 12,
@@ -58,11 +60,23 @@ class LibraryPage extends StatelessWidget {
               icon: const Icon(Icons.add),
               label: Text(context.l10n.importFiles),
             ),
-            if (vm.supportsDirectories)
+            if (vm.canImportZip)
+              OutlinedButton.icon(
+                onPressed: vm.busy ? null : vm.importZip,
+                icon: const Icon(Icons.folder_zip_outlined),
+                label: Text(context.l10n.importZip),
+              ),
+            if (vm.supportsDirectories && vm.files == null)
               OutlinedButton.icon(
                 onPressed: vm.busy ? null : () => vm.import(directory: true),
                 icon: const Icon(Icons.create_new_folder_outlined),
                 label: Text(context.l10n.importFolder),
+              ),
+            if (vm.excluded.isNotEmpty)
+              OutlinedButton.icon(
+                onPressed: vm.busy ? null : () => _showExcluded(context, vm),
+                icon: const Icon(Icons.restore_page_outlined),
+                label: Text(context.l10n.excludedFiles(vm.excluded.length)),
               ),
             TextButton.icon(
               onPressed: () => context.go('/practice'),
@@ -73,7 +87,9 @@ class LibraryPage extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          context.l10n.supportedFiles,
+          vm.canImportZip
+              ? context.l10n.zipSupportedFiles
+              : context.l10n.supportedFiles,
           style: TextStyle(fontSize: 12, color: Colors.black54),
         ),
         const SizedBox(height: 20),
@@ -82,6 +98,21 @@ class LibraryPage extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 16),
             child: LinearProgressIndicator(),
           ),
+        if (vm.scanning && vm.scanProgress != null) ...[
+          Text(
+            context.l10n.scanProgress(
+              vm.scanProgress!.checked,
+              vm.scanProgress!.name,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          TextButton.icon(
+            onPressed: vm.cancelScan,
+            icon: const Icon(Icons.stop),
+            label: Text(context.l10n.cancelScan),
+          ),
+        ],
         if (vm.message != null) Notice(vm.message!),
         if (vm.documents.isEmpty)
           EmptyCard(
@@ -111,11 +142,14 @@ class LibraryPage extends StatelessWidget {
               ),
               title: Text(doc.name),
               subtitle: Text(
-                context.l10n.documentDetails(
-                  doc.chunkCount,
-                  MaterialLocalizations.of(context)
-                      .formatMediumDate(doc.importedAt.toLocal()),
-                ),
+                (vm.missingOrigins.contains(doc.origin)
+                        ? '${context.l10n.sourceMissing}\n'
+                        : '') +
+                    context.l10n.documentDetails(
+                      doc.chunkCount,
+                      MaterialLocalizations.of(context)
+                          .formatMediumDate(doc.importedAt.toLocal()),
+                    ),
               ),
               onTap: () async {
                 final chunks = await vm.source(doc.id);
@@ -123,6 +157,7 @@ class LibraryPage extends StatelessWidget {
                 showDialog<void>(
                   context: context,
                   builder: (context) => AlertDialog(
+                    scrollable: true,
                     title: Text(doc.name),
                     content: SizedBox(
                       width: 640,
@@ -162,8 +197,13 @@ class LibraryPage extends StatelessWidget {
                         final remove = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
+                            scrollable: true,
                             title: Text(context.l10n.removeDocumentTitle),
-                            content: Text(context.l10n.removeDocumentBody),
+                            content: Text(
+                              vm.files == null
+                                  ? context.l10n.removeDocumentBody
+                                  : context.l10n.removeIndexedDocumentBody,
+                            ),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -184,6 +224,40 @@ class LibraryPage extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  Future<void> _showExcluded(BuildContext context, LibraryViewModel vm) async {
+    final selected = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        scrollable: true,
+        title: Text(context.l10n.excludedFiles(vm.excluded.length)),
+        content: SizedBox(
+          width: 520,
+          height: vm.excluded.length > 4 ? 320 : vm.excluded.length * 72.0,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final entry in vm.excluded.entries)
+                ListTile(
+                  title: Text(entry.value),
+                  trailing: TextButton(
+                    onPressed: () => Navigator.pop(context, entry.key),
+                    child: Text(context.l10n.restoreImport),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(context.l10n.close),
+          ),
+        ],
+      ),
+    );
+    if (selected != null) await vm.include(selected);
   }
 
   Widget _stat(

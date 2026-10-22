@@ -10,6 +10,32 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get gatewayTitle => '通过 CLIProxyAPI 使用 ChatGPT 等账号';
+
+  @override
+  String get gatewayHelp =>
+      '先在你自己的 CLIProxyAPI 网关中登录服务商账号。在下方填写网关兼容 OpenAI 的接口地址和客户端密钥，获取可用模型，再测试并保存。请使用网关客户端密钥，不是 ChatGPT 密码、OAuth 令牌或网关管理密钥。可用模型和用量限制取决于所连接的账号。生成题目时，所选资料片段会经过该网关。';
+
+  @override
+  String get gatewayAddressHelp =>
+      '本机电脑：http://127.0.0.1:8317/v1\n手机：填写手机可访问的 HTTPS 网关地址，以 /v1 结尾。手机上的 localhost 指手机自身，不是你的电脑。使用时需保持网关运行。独立使用请选上方实验性 ChatGPT 登录。';
+
+  @override
+  String get loadModels => '获取可用模型';
+
+  @override
+  String get chooseModel => '选择模型';
+
+  @override
+  String get searchModels => '搜索模型';
+
+  @override
+  String get loadModelsError => '无法获取模型。请检查接口地址和密钥，或手动填写模型名称。';
+
+  @override
+  String get noModelsError => '没有可用模型。请先在网关中登录服务商账号，或手动填写模型名称。';
+
+  @override
   String get library => '资料库';
 
   @override
@@ -120,7 +146,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generateBody =>
-      '相关资料片段将发送给你配置的 AI 服务商，并消耗 API 额度。练习期间会自动补充题目，最多缓存 20 道，你可以随时暂停。';
+      '相关资料片段将发送至所选 AI 连接，并消耗订阅或 API 额度。练习期间会自动补充题目，最多缓存 20 道，你可以随时暂停。';
 
   @override
   String get start => '开始';
@@ -220,7 +246,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsSubtitle =>
-      '连接兼容 OpenAI Chat Completions 的 API，无需 OmniQuiz 账号或服务器。';
+      '使用 ChatGPT 订阅或兼容 OpenAI 的 API，无需 OmniQuiz 账号或服务器。';
 
   @override
   String get aiProvider => 'AI 服务商';
@@ -272,7 +298,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacyNotice =>
-      '生成题目会将选中的资料片段发送给你的 AI 服务商。连接测试会发起少量付费 API 请求。密钥存放在系统安全存储中，资料和学习进度保存在本地。';
+      '生成题目会将选中的资料片段发送至所选 AI 连接。连接测试会使用少量订阅或 API 额度。凭据存放在系统安全存储中，资料和学习进度保存在本地。';
 
   @override
   String get licenses => '开源许可证';
@@ -516,4 +542,262 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get folderLimit => '单次最多导入 100 个文件、总计 100 MB，请选择更小的文件夹。';
+
+  @override
+  String get currentLibrary => '当前资料库';
+
+  @override
+  String get createLibrary => '创建资料库';
+
+  @override
+  String get libraryName => '资料库名称';
+
+  @override
+  String get useExistingFolder => '使用现有目录';
+
+  @override
+  String get chooseFolder => '选择目录';
+
+  @override
+  String get folderIncludesSubfolders => '请选择目录，包含子目录中的资料。';
+
+  @override
+  String get managedFolderDescription => '在应用管理的目录中创建。导入的文件会复制到此目录。';
+
+  @override
+  String get mobileLibraryDescription => '此设备使用应用内目录，可通过导入文件添加资料。';
+
+  @override
+  String get libraryNameRequired => '请输入名称并选择目录。';
+
+  @override
+  String get createLibraryError => '无法创建资料库。请检查目录权限，且各资料库的目录不能重叠。';
+
+  @override
+  String get create => '创建';
+
+  @override
+  String get scanFolder => '扫描目录';
+
+  @override
+  String get libraryIsolationDescription =>
+      '题目、错题和进度仅属于当前库。启动、切换及返回应用时扫描；也可手动扫描。';
+
+  @override
+  String get openLibraryError => '无法打开资料库，请重试。';
+
+  @override
+  String get scanFolderError => '无法扫描资料库目录。请检查目录是否已连接，并重新授权目录访问。';
+
+  @override
+  String get folderUnavailable => '资料库目录不可用，请重新连接后扫描。';
+
+  @override
+  String get copyLibraryFileError => '无法将文件复制到资料库目录。';
+
+  @override
+  String get grantFolderAccess => '重新授权目录';
+
+  @override
+  String get grantFolderError => '请选择当前资料库的同一目录以恢复授权。';
+
+  @override
+  String get removeIndexedDocumentBody =>
+      '这会移除已导入资料并停用相关题目，同时将原文件加入扫描排除列表。原文件不会删除，可在“已排除文件”中恢复导入。';
+
+  @override
+  String get importZip => '导入 ZIP';
+
+  @override
+  String get zipSupportedFiles =>
+      'TXT、Markdown、文字型 PDF · 每文件 20 MB · ZIP：压缩及解压后各限 100 MB，最多 1000 个条目';
+
+  @override
+  String get zipReadError => '无法读取此 ZIP。请使用未加密、采用标准压缩方式的 ZIP。';
+
+  @override
+  String get zipSelectedReadError => '无法读取所选 ZIP 文件。';
+
+  @override
+  String get zipArchiveLimit => 'ZIP 文件超过 100 MB 上限。';
+
+  @override
+  String get zipEntryLimit => 'ZIP 条目过多或目录元数据过大，请拆分为较小的压缩包（最多 1000 个条目）。';
+
+  @override
+  String get zipUnsafePaths => 'ZIP 包含不安全的路径或链接，未导入任何文件。';
+
+  @override
+  String get zipInvalidSizes => 'ZIP 中的文件大小信息无效。';
+
+  @override
+  String get zipExpandedLimit => 'ZIP 解压后超过 100 MB 上限。';
+
+  @override
+  String get zipDuplicatePaths => 'ZIP 包含不安全或重复的文件路径。';
+
+  @override
+  String get zipMaterialLimit => 'ZIP 中的某个资料文件超过 20 MB 上限。';
+
+  @override
+  String get zipNoMaterials => 'ZIP 中没有支持的资料。请包含 TXT、Markdown 或文字型 PDF。';
+
+  @override
+  String get zipDamaged => 'ZIP 已损坏，未导入任何文件。';
+
+  @override
+  String get zipImportError => '无法导入 ZIP，请检查存储空间和文件权限。';
+
+  @override
+  String get backupTitle => '资料库备份';
+
+  @override
+  String get backupHelp => '备份全部资料库、资料、题目和进度，不包含 AI 配置和 API 密钥。备份文件包含你的私人学习资料。';
+
+  @override
+  String get exportBackup => '导出备份';
+
+  @override
+  String get restoreBackup => '恢复备份';
+
+  @override
+  String get restoreBackupHelp => '将 OmniQuiz 备份恢复为新的资料库，保留现有资料库和 AI 配置。';
+
+  @override
+  String get backupSaved => '备份已保存。';
+
+  @override
+  String get backupFailed => '备份失败，请检查存储空间和目录权限。';
+
+  @override
+  String backupRestored(int count) {
+    return '已恢复 $count 个资料库，请切换资料库查看。';
+  }
+
+  @override
+  String backupMissingOriginals(int count) {
+    return '备份已保存。有 $count 份原文件不可用，已保留其提取文本和学习记录。';
+  }
+
+  @override
+  String get backupTooLarge => '备份超过大小限制。';
+
+  @override
+  String get backupSourceError => '某份资料无法备份，请检查文件大小及读取权限。';
+
+  @override
+  String get backupReadError => '无法读取备份文件。';
+
+  @override
+  String get backupRestoreError => '备份无效或无法恢复，现有资料库已保留。';
+
+  @override
+  String get maintenanceBusy => '请先等待当前操作完成，再备份或恢复。';
+
+  @override
+  String get fullScan => '完整扫描';
+
+  @override
+  String get cancelScan => '停止扫描';
+
+  @override
+  String get scanCancelled => '扫描已停止，已完成的导入已保留。';
+
+  @override
+  String get sourceMissing => '原文件暂不可用，已保留导入内容和学习进度。';
+
+  @override
+  String get restoreImport => '恢复导入';
+
+  @override
+  String get restoreExcludedError => '无法恢复此文件的导入，请重试。';
+
+  @override
+  String excludedFiles(int count) {
+    return '已排除文件（$count）';
+  }
+
+  @override
+  String scanProgress(int count, String name) {
+    return '已检查 $count 个文件 · $name';
+  }
+
+  @override
+  String scanSourceSummary(int excluded, int missing) {
+    return '$excluded 个已排除 · $missing 个原文件暂不可用';
+  }
+
+  @override
+  String get chatGptTitle => 'ChatGPT 订阅 · 实验性功能';
+
+  @override
+  String get chatGptHelp =>
+      '在本设备登录并授权使用符合条件的 ChatGPT 订阅，无需 API 密钥、电脑或网关。在浏览器完成授权后返回这里。手机登录属于实验性功能，仍需实机验证。';
+
+  @override
+  String get chatGptActive => '当前出题连接';
+
+  @override
+  String get chatGptAccount => 'ChatGPT 账号';
+
+  @override
+  String get continueChatGpt => '继续使用 ChatGPT';
+
+  @override
+  String get chatGptAddAccount => '添加其他账号';
+
+  @override
+  String get chatGptSignOut => '退出登录';
+
+  @override
+  String get chatGptUseModel => '测试并使用此模型';
+
+  @override
+  String get chatGptTestHelp => '测试会发送少量请求并使用订阅额度。仅登录不会切换当前的出题连接。';
+
+  @override
+  String get chatGptUsage => '管理 ChatGPT 用量';
+
+  @override
+  String get chatGptRequestError => 'ChatGPT 请求失败。请重新登录或检查订阅授权。';
+
+  @override
+  String get chatGptIdentityError => '无法验证 ChatGPT 身份。请重新登录。';
+
+  @override
+  String get chatGptLoginCancelled => 'ChatGPT 登录已取消或超时。请重试。';
+
+  @override
+  String get chatGptLoginBusy => 'ChatGPT 登录正在进行中。';
+
+  @override
+  String get chatGptScopeError => '尚未授权使用 ChatGPT 订阅。请在登录时启用此权限。';
+
+  @override
+  String get chatGptSignInFirst => '请先在设置中登录 ChatGPT。';
+
+  @override
+  String get chatGptInterrupted => 'ChatGPT 请求被中断。请重试。';
+
+  @override
+  String get chatGptIncomplete => 'ChatGPT 未能完成回复。请检查订阅用量后重试。';
+
+  @override
+  String get chatGptReady => 'ChatGPT 已就绪。新题目将使用所选账号生成。';
+
+  @override
+  String get chatGptSignedOut => '已退出 ChatGPT。';
+
+  @override
+  String get chatGptRevocationUnconfirmed =>
+      '已在本地退出。请在 ChatGPT 设置中断开 OmniQuiz，以确认撤销授权。';
+
+  @override
+  String get libraryStorageDetails => '存储位置与资料库说明';
+
+  @override
+  String get chatGptSignInAgain => '重新登录';
+
+  @override
+  String get chatGptDetails => '订阅接入说明';
 }

@@ -15,9 +15,11 @@ import 'persistence_test.dart' show chunk;
 class FakeGenerator implements AiQuestionGenerator {
   int calls = 0, active = 0, maxActive = 0;
   Completer<void>? gate;
+  AppFailure? failure;
   @override
   Future<List<Question>> generate(GenerationRequest request) async {
     calls++;
+    if (failure != null) throw failure!;
     active++;
     if (active > maxActive) maxActive = active;
     await gate?.future;
@@ -114,6 +116,23 @@ void main() {
     await coordinator.stop();
     await work;
     expect(await questions.ready(null), isEmpty);
+    expect(coordinator.enabled, false);
+  });
+  test('stopping cancels a provider retry wait immediately', () async {
+    ai.failure = const AppFailure(
+      'rate limited',
+      retryable: true,
+      retryAfter: Duration(seconds: 90),
+    );
+    final work = coordinator.start(null);
+    while (ai.calls == 0) {
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+    }
+    // Let the failed request enter its scheduled retry state.
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    await coordinator.quiesce().timeout(const Duration(seconds: 1));
+    await work;
+    expect(ai.calls, 1);
     expect(coordinator.enabled, false);
   });
 }

@@ -1,5 +1,13 @@
 {
   "@@locale": "en",
+  "gatewayTitle": "Use ChatGPT or other accounts through CLIProxyAPI",
+  "gatewayHelp": "Sign in to your provider in your own CLIProxyAPI gateway first. Enter its OpenAI-compatible base URL and client API key below, load the available models, then test and save. Use the gateway client key, not a ChatGPT password, OAuth token, or gateway management key. Model access and usage limits depend on the connected account. The gateway receives the study excerpts you send for generation.",
+  "gatewayAddressHelp": "On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway's reachable HTTPS address ending in /v1. A phone's localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.",
+  "loadModels": "Load available models",
+  "chooseModel": "Choose a model",
+  "searchModels": "Search models",
+  "loadModelsError": "Could not load models. Check the endpoint and key, or enter a model manually.",
+  "noModelsError": "No models are available. Sign in to a provider on your gateway, or enter a model manually.",
   "library": "Library",
   "practice": "Practice",
   "review": "Review",
@@ -36,7 +44,7 @@
   "allMaterials": "All materials",
   "pauseGeneration": "Pause generation",
   "generateTitle": "Generate practice questions?",
-  "generateBody": "Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.",
+  "generateBody": "Relevant excerpts will be sent to your selected AI connection and consume its plan allowance or API usage. Questions refill automatically up to 20 while practicing. You can pause at any time.",
   "start": "Start",
   "generateQuestions": "Generate questions",
   "backToFresh": "Back to fresh questions",
@@ -69,7 +77,7 @@
   "reviewNow": "Review now",
   "settingsEyebrow": "Make it yours",
   "settingsTitle": "Your AI. Your choice.",
-  "settingsSubtitle": "Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.",
+  "settingsSubtitle": "Use your ChatGPT plan or an OpenAI-compatible API. No OmniQuiz account or server required.",
   "aiProvider": "AI provider",
   "apiBaseUrl": "API base URL",
   "apiBaseUrlHelp": "Include /v1 if your provider requires it. Do not append /chat/completions.",
@@ -86,7 +94,7 @@
   "questionLanguage": "Question language",
   "saveSettings": "Save settings",
   "testConnection": "Test connection",
-  "privacyNotice": "Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.",
+  "privacyNotice": "Generation sends selected excerpts to your AI connection. Connection tests use a small amount of plan allowance or API usage. Credentials stay in OS secure storage; materials and progress stay local.",
   "licenses": "Open-source licenses",
   "appLanguage": "Interface language",
   "systemLanguage": "Follow system",
@@ -261,5 +269,127 @@
   "invalidBatch": "No valid, new questions were returned. Try another model or add more material.",
   "fileReadError": "The selected file could not be read. Try copying it to this device first.",
   "useFiles": "Use Import files on this device.",
-  "folderLimit": "Import at most 100 files / 100 MB at once. Select a smaller folder."
+  "folderLimit": "Import at most 100 files / 100 MB at once. Select a smaller folder.",
+  "currentLibrary": "Current library",
+  "createLibrary": "Create library",
+  "libraryName": "Library name",
+  "useExistingFolder": "Use an existing folder",
+  "chooseFolder": "Choose folder",
+  "folderIncludesSubfolders": "Choose a folder, including its subfolders.",
+  "managedFolderDescription": "Create an app-managed folder. Imported files will be copied there.",
+  "mobileLibraryDescription": "This device uses app-managed folders. Add materials with Import files.",
+  "libraryNameRequired": "Enter a name and choose a folder.",
+  "createLibraryError": "Could not create library. Check folder access and use non-overlapping folders.",
+  "create": "Create",
+  "scanFolder": "Scan folder",
+  "libraryIsolationDescription": "Questions, mistakes and progress belong to this library. Folders scan on launch, switch and resume; scan manually anytime.",
+  "openLibraryError": "Could not open this library. Try again.",
+  "scanFolderError": "Could not scan the library folder. Check that it is connected and grant folder access again.",
+  "folderUnavailable": "Library folder is unavailable. Reconnect it and scan again.",
+  "copyLibraryFileError": "Cannot copy this file into the library folder.",
+  "grantFolderAccess": "Grant folder access",
+  "grantFolderError": "Choose the same library folder to restore access.",
+  "removeIndexedDocumentBody": "This removes the imported document from practice and excludes its file from future scans. The original file is kept. Use Excluded files to import it again.",
+  "importZip": "Import ZIP",
+  "zipSupportedFiles": "TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries",
+  "zipReadError": "Could not read this ZIP. Use an unencrypted ZIP with standard compression.",
+  "zipSelectedReadError": "The selected ZIP could not be read.",
+  "zipArchiveLimit": "ZIP exceeds the 100 MB archive limit.",
+  "zipEntryLimit": "ZIP contains more than 1000 entries. Split the archive.",
+  "zipUnsafePaths": "ZIP contains unsafe paths or links. Nothing was imported.",
+  "zipInvalidSizes": "ZIP contains invalid file sizes.",
+  "zipExpandedLimit": "ZIP expands beyond the 100 MB limit.",
+  "zipDuplicatePaths": "ZIP contains unsafe or duplicate file paths.",
+  "zipMaterialLimit": "A material in the ZIP exceeds the 20 MB file limit.",
+  "zipNoMaterials": "No supported materials in ZIP. Include TXT, Markdown or text PDF.",
+  "zipDamaged": "ZIP is damaged. Nothing was imported.",
+  "zipImportError": "Could not import ZIP. Check storage space and file permissions.",
+  "backupTitle": "Back up your libraries",
+  "backupHelp": "Save all libraries, materials, questions and progress. AI settings and API keys are excluded. Backups contain your private study data.",
+  "exportBackup": "Export backup",
+  "restoreBackup": "Restore backup",
+  "restoreBackupHelp": "Restore a previously exported OmniQuiz backup as new libraries. Your existing libraries and AI settings will be kept.",
+  "backupSaved": "Backup saved.",
+  "backupFailed": "Backup failed. Check storage space and folder access.",
+  "backupRestored": "Restored {count} libraries. Switch libraries to open them.",
+  "backupMissingOriginals": "Backup saved. {count} original files were unavailable; their extracted text and learning records were preserved.",
+  "backupTooLarge": "Backup is too large.",
+  "backupSourceError": "A source file could not be backed up.",
+  "backupReadError": "Backup could not be read.",
+  "backupRestoreError": "Backup is invalid or could not be restored. Your existing libraries were kept.",
+  "@backupRestored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@backupMissingOriginals": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "maintenanceBusy": "Finish the current operation before backing up or restoring.",
+  "fullScan": "Verify all files",
+  "cancelScan": "Stop scanning",
+  "scanCancelled": "Scan cancelled. Completed imports were kept.",
+  "sourceMissing": "Source file unavailable; imported content and progress are retained.",
+  "restoreImport": "Import again",
+  "restoreExcludedError": "Could not restore this excluded file.",
+  "excludedFiles": "Excluded files ({count})",
+  "scanProgress": "Checked {count} files · {name}",
+  "scanSourceSummary": "{excluded} excluded · {missing} missing sources",
+  "@excludedFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@scanProgress": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@scanSourceSummary": {
+    "placeholders": {
+      "excluded": {
+        "type": "int"
+      },
+      "missing": {
+        "type": "int"
+      }
+    }
+  },
+  "chatGptTitle": "ChatGPT subscription · experimental",
+  "chatGptHelp": "Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.",
+  "chatGptActive": "Selected for generation",
+  "chatGptAccount": "ChatGPT account",
+  "continueChatGpt": "Continue with ChatGPT",
+  "chatGptAddAccount": "Add another account",
+  "chatGptSignOut": "Sign out",
+  "chatGptUseModel": "Test and use this model",
+  "chatGptTestHelp": "Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.",
+  "chatGptUsage": "Manage ChatGPT usage",
+  "chatGptRequestError": "ChatGPT request failed. Sign in again or check your plan access.",
+  "chatGptIdentityError": "ChatGPT identity could not be verified. Please sign in again.",
+  "chatGptLoginCancelled": "ChatGPT sign-in was cancelled or expired. Please try again.",
+  "chatGptLoginBusy": "ChatGPT sign-in is already running.",
+  "chatGptScopeError": "ChatGPT plan access was not granted. Enable it when signing in.",
+  "chatGptSignInFirst": "Sign in to ChatGPT in Settings first.",
+  "chatGptInterrupted": "ChatGPT request was interrupted. Please try again.",
+  "chatGptIncomplete": "ChatGPT could not complete the response. Check your plan usage and try again.",
+  "chatGptReady": "ChatGPT is ready. New questions will use your selected account.",
+  "chatGptSignedOut": "Signed out of ChatGPT.",
+  "chatGptRevocationUnconfirmed": "Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.",
+  "libraryStorageDetails": "Storage and library details",
+  "chatGptSignInAgain": "Sign in again",
+  "chatGptDetails": "How subscription access works"
 }

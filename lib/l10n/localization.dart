@@ -16,6 +16,60 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      "ChatGPT request failed. Sign in again or check your plan access.":
+          chatGptRequestError,
+      "ChatGPT identity could not be verified. Please sign in again.":
+          chatGptIdentityError,
+      "ChatGPT sign-in was cancelled or expired. Please try again.":
+          chatGptLoginCancelled,
+      "ChatGPT sign-in is already running.": chatGptLoginBusy,
+      "ChatGPT plan access was not granted. Enable it when signing in.":
+          chatGptScopeError,
+      "Sign in to ChatGPT in Settings first.": chatGptSignInFirst,
+      "ChatGPT request was interrupted. Please try again.": chatGptInterrupted,
+      "ChatGPT could not complete the response. Check your plan usage and try again.":
+          chatGptIncomplete,
+      "ChatGPT is ready. New questions will use your selected account.":
+          chatGptReady,
+      "Signed out of ChatGPT.": chatGptSignedOut,
+      "Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.":
+          chatGptRevocationUnconfirmed,
+      'Could not load models. Check the endpoint and key, or enter a model manually.':
+          loadModelsError,
+      'No models are available. Sign in to a provider on your gateway, or enter a model manually.':
+          noModelsError,
+      'Scan cancelled. Completed imports were kept.': scanCancelled,
+      'Could not restore this excluded file.': restoreExcludedError,
+      'Finish the current operation before backing up or restoring.':
+          maintenanceBusy,
+      'Backup is too large.': backupTooLarge,
+      'A source file could not be backed up.': backupSourceError,
+      'Backup could not be read.': backupReadError,
+      'Backup is invalid or could not be restored. Your existing libraries were kept.':
+          backupRestoreError,
+
+      'Could not read this ZIP. Use an unencrypted ZIP with standard compression.':
+          zipReadError,
+      'The selected ZIP could not be read.': zipSelectedReadError,
+      'ZIP exceeds the 100 MB archive limit.': zipArchiveLimit,
+      'ZIP contains more than 1000 entries. Split the archive.': zipEntryLimit,
+      'ZIP contains unsafe paths or links. Nothing was imported.':
+          zipUnsafePaths,
+      'ZIP contains invalid file sizes.': zipInvalidSizes,
+      'ZIP expands beyond the 100 MB limit.': zipExpandedLimit,
+      'ZIP contains unsafe or duplicate file paths.': zipDuplicatePaths,
+      'A material in the ZIP exceeds the 20 MB file limit.': zipMaterialLimit,
+      'No supported materials in ZIP. Include TXT, Markdown or text PDF.':
+          zipNoMaterials,
+      'ZIP is damaged. Nothing was imported.': zipDamaged,
+      'Could not import ZIP. Check storage space and file permissions.':
+          zipImportError,
+
+      'Could not scan the library folder. Check that it is connected and grant folder access again.':
+          scanFolderError,
+      'Library folder is unavailable. Reconnect it and scan again.':
+          folderUnavailable,
+      'Cannot copy this file into the library folder.': copyLibraryFileError,
       "The provider returned an invalid question.": invalidQuestion,
       "Enter an HTTPS API base URL and a model name. HTTP is allowed only for localhost.":
           invalidProfile,
@@ -101,6 +155,11 @@ extension LocalizedDiagnostics on AppLocalizations {
         .firstMatch(message);
     if (match != null) {
       return importSummary(int.parse(match[1]!), int.parse(match[2]!));
+    }
+    match = RegExp(r'^(\d+) excluded · (\d+) missing sources$')
+        .firstMatch(message);
+    if (match != null) {
+      return scanSourceSummary(int.parse(match[1]!), int.parse(match[2]!));
     }
     match = RegExp(r'^(\d+) questions ready$').firstMatch(message);
     if (match != null) return bufferReady(int.parse(match[1]!));

@@ -3,8 +3,9 @@ import 'package:drift/drift.dart';
 /// SQL is confined to persistence adapters. Schema changes require a migration.
 class QuizDatabase extends GeneratedDatabase {
   QuizDatabase(super.executor);
+  static const currentSchemaVersion = 2;
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => currentSchemaVersion;
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => const [];
   @override
@@ -14,6 +15,13 @@ class QuizDatabase extends GeneratedDatabase {
     onCreate: (_) async {
       for (final statement in _schema) {
         await customStatement(statement);
+      }
+    },
+    onUpgrade: (_, from, to) async {
+      if (from < 2) {
+        await customStatement(
+          'CREATE INDEX chunk_document ON chunks(document_id)',
+        );
       }
     },
     beforeOpen: (_) async {
@@ -39,6 +47,7 @@ class QuizDatabase extends GeneratedDatabase {
     '''CREATE TABLE jobs (id TEXT PRIMARY KEY, epoch INTEGER NOT NULL, scope TEXT,
        request TEXT NOT NULL, state TEXT NOT NULL, attempt INTEGER NOT NULL DEFAULT 0,
        lease_until INTEGER, retry_at INTEGER, message TEXT)''',
+    'CREATE INDEX chunk_document ON chunks(document_id)',
     'CREATE INDEX question_scope ON questions(document_id, stale, flagged)',
     'CREATE INDEX attempt_question ON attempts(question_id)',
     'CREATE INDEX review_due ON reviews(due_at)',

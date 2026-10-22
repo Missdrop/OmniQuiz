@@ -27,6 +27,32 @@ application dependencies. `scripts/bootstrap`, `scripts/flutter`, and
 The bootstrap script does not install Xcode, Android Studio, Visual Studio,
 or operating-system libraries.
 
+On Linux, Android builds require a **full JDK 21**, including `javac`, plus
+Android platform 36, build-tools 36.0.0, NDK 28.2.13676358, and CMake 3.22.1.
+Plugins also request platform 35; Gradle installs it when SDK licenses are accepted.
+Install the SDK packages with Google's command-line tools under
+`.tooling/android-sdk`. A local Linux JDK can live at `.tooling/jdk`; the wrapper
+selects it automatically. A Java runtime alone cannot compile Android plugins.
+
+Linux desktop builds require Clang, CMake, Ninja, pkg-config, GTK 3 development
+headers, libsecret development headers, and jsoncpp development headers. For a
+rootless Debian environment, signed distribution packages may be extracted into
+`.tooling/linux-sysroot`. Rebase their pkg-config prefixes to that directory and
+ensure development-library symlinks resolve to the corresponding runtime
+libraries. `scripts/linux_environment.sh` activates this optional local prefix.
+It is specific to Debian x86-64; other hosts should install their native packages.
+Xvfb enables a headless startup smoke test. Toolchains and logs remain ignored.
+
+Build release artifacts with `./scripts/flutter build linux --release` and
+`./scripts/flutter build apk --release --split-per-abi --build-number NUMBER`
+(use a growing Android build number as described below). Package outputs with
+`python scripts/package_release.py linux` and
+`python scripts/package_release.py android`.
+Windows requires a Windows host; macOS and iOS require macOS/Xcode.
+Use the manually dispatched CI workflow on `dev` for those hosts without
+promoting changes to `main`. Running it requires GitHub Actions access and
+network access to `api.github.com`.
+
 ```sh
 ./scripts/bootstrap
 ./scripts/flutter devices
@@ -114,8 +140,10 @@ keys are stored in this repository.
   the repository. Keep `nightly` mutable if you enable immutable releases or tag
   protection rules. The rolling workflow cannot update an immutable release.
 
-Android APKs currently use temporary debug signing keys, so upgrading across
-builds may require uninstalling the previous app (which removes local data).
+Android published APKs use a fixed release identity. PR checks compile debug
+APKs without exposing release keys. Existing previews used temporary debug keys;
+switching to the release identity may require uninstalling once. Export an app
+backup first, reinstall, and restore it. Subsequent releases use the same key.
 Apple artifacts are unsigned/not notarized as described above. Release automation
 does not add distribution certificates or turn the iOS archive into an installable IPA.
 
@@ -158,13 +186,28 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 
 ## Initial scope
 
-- One local library, with all-materials or per-document practice scope.
+- Multiple local libraries, each with all-materials or per-document practice scope.
 - Single-choice questions with four distinct options.
 - UTF-8 TXT/Markdown and text PDFs, up to 20 MB per file and one million extracted
   characters. Scanned PDFs need external OCR; office formats are not supported.
-- Folder import is a manual recursive scan; hidden files and symlinks are skipped.
-  Removing a file from the original directory does not delete its imported copy
-  of extracted text. Remove it explicitly from Library.
+- Each library binds to an existing desktop folder or an app-managed folder.
+  Recursive scans run on startup, switch, resume, and manually; hidden entries and
+  symlinks are skipped. Mobile platforms use managed folders and file import.
+  Scans process one file at a time (no 100-file directory cap). Automatic scans
+  reuse per-library size/mtime hints only for successfully imported revisions;
+  **Verify all files** rereads every non-excluded file to catch changes that kept
+  their metadata. Progress shows the current file and checked count; stopping
+  keeps completed imports. The 20 MB per-file and
+  extracted-text limits still apply. A failed file does not block other imports.
+- Imported files are copied into the current material folder. Different content
+  with the same filename gets a hash suffix; existing files are never overwritten.
+  Changed sources invalidate old questions. Missing sources are reported without
+  deleting extracted text, questions, wrong answers or progress. An unavailable
+  folder or incomplete/cancelled traversal never clears the cached library.
+  Removing a source in the UI keeps its original file and persistently excludes
+  its path from future scans. **Excluded files** restores selected paths to the
+  import flow. Exclusions belong to each library, survive restart and are rebased
+  when a backup is restored; scan hints are discarded in restored copies.
 - The model assigns a topic to each question. Review is question-based; a separate
   knowledge graph and adaptive topic mastery model are not implemented.
 - Provider JSON mode is optional. Not every "OpenAI-compatible" endpoint accepts
@@ -173,14 +216,63 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
 - The buffer uses one request at a time, at most ten questions per request, a low
   watermark of five, and a target of twenty. Small sources may run out of useful
   non-duplicate questions; generation then stops with an explanation.
-- Network/server/rate-limit failures get at most two retries. A timeout can still
-  incur provider charges. Interrupted jobs are cancelled on restart and a user
+- Only explicit server/rate-limit responses get at most two retries. Retry-After
+  seconds/dates are respected; waits longer than two minutes require a user restart.
+  Timeout/ambiguous transport errors require manual retry because they may have
+  incurred provider charges. Cancellation interrupts a scheduled wait immediately. Interrupted jobs are cancelled on restart and a user
   starts a new fill; paid requests are not replayed automatically.
 - Correct answers on the first attempt do not enter Review. Wrong answers are due
-  again in ten minutes, then after one, three, and seven days as correct reviews
-  accumulate. "Review early" explicitly allows practice before the due time.
-- Data stays on one device. Cloud sync, backups/exports, OCR, folder watching,
-  and ChatGPT subscription authorization are not included in this release.
+  again in ten minutes, then after one and three days. Three due-time correct
+  reviews graduate a question. Early correct practice records the attempt without
+  changing the review streak or due date; an incorrect answer resets the streak.
+- Data stays on one device. Cloud sync, OCR, folder watching,
+  are not included in this release. Direct ChatGPT authorization is experimental.
+
+## ZIP material import
+
+**Import ZIP** is available for each directory-backed library, including managed
+mobile libraries. It imports into the current library; it is not a database or
+progress backup format. TXT, Markdown and text PDFs retain their relative paths.
+Hidden files, macOS metadata, unsupported formats and nested archives are skipped.
+Unencrypted stored/deflate ZIPs are supported, up to 100 MB compressed, 100 MB
+expanded in total, 1,000 entries and 20 MB per supported material. ZIP64 and
+multi-volume archives are outside these bounds. Central-directory metadata is
+also bounded before decoding.
+
+`ZipDocumentAccess` stages and verifies all selected entries in temporary storage
+on a worker isolate before yielding materials one at a time. It rejects traversal,
+absolute paths, symlinks, ambiguous duplicate paths, invalid sizes and bad CRCs.
+Temporary files are removed on success, failure or stream cancellation. The
+library writer refuses existing links in parent directories and gives conflicting
+filenames a content hash suffix. Reimporting unchanged materials is idempotent.
+Existing sources are not reconciled/deleted during ZIP import. A valid archive
+can still contain an unreadable document; document parsing reports these per file,
+while other valid documents are imported normally.
+
+## Library storage and lifecycle
+
+`omniquiz.sqlite` remains the default library database. Existing documents,
+questions, attempts and reviews stay in place. Its `settings` table also stores
+the library catalog, active library, global AI profile and interface language.
+Other libraries use `libraries/<uuid>/quiz.sqlite` under application support;
+managed source folders use `libraries/<uuid>/materials`. External source folders
+contain only the user's materials. Library names never become file paths.
+Overlapping source directories are rejected to keep copied files in one library.
+
+Each session receives its own material, question, progress and job repositories.
+Only AI preferences and language use the global database; API secrets remain in
+system secure storage. Switching stops the old generator, replaces the router
+and all study view models, then disposes the old session after detaching widgets.
+Delayed model responses cannot publish into the next library. A global database
+handle is shared intentionally and is never closed by a study session.
+
+macOS uses the `omniquiz/folders` platform channel to retain security-scoped
+bookmarks in app preferences and restore access after restart. Both macOS builds
+require user-selected read/write and app-scope bookmark entitlements. Use
+**Grant folder access** to reselect the same directory if authorization expires.
+Native bookmark behavior must be checked in a sandboxed macOS build. Android and
+iOS do not request unrestricted directory access; users import into managed folders.
+This does not implement continuous filesystem watching or cross-device sync.
 
 ## Code map
 
@@ -203,3 +295,166 @@ Drift adapters currently use parameterized SQL and explicit schema migrations,
 with JSON snapshots for question content and source references. Do not import
 infrastructure classes from the domain/application layers. Add behavioral tests
 for new invariants and external boundaries; avoid a base-class hierarchy.
+
+## Android release identity
+
+Generate a new identity only for a new app signing lineage:
+
+```sh
+python scripts/android_signing.py create
+```
+
+This writes ignored private files under `.tooling/android-signing/`, installs local
+`android/key.properties`, and creates a private ZIP containing the key and its
+passwords. Keep that ZIP in secure storage outside this checkout. Never commit it.
+To reuse a key on another machine, restore `release.p12` and `key.properties` to
+those same locations. The default store type is PKCS12.
+
+For repository releases, configure `ANDROID_KEYSTORE_BASE64`,
+`ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD`, and `ANDROID_KEY_ALIAS` as
+GitHub Actions secrets. From an authenticated maintainer machine holding the
+private `github-secrets.json`, run:
+
+```sh
+python scripts/android_signing.py install-secrets
+```
+
+The reusable workflow inherits the secrets from main/tag workflows. Missing keys
+stop publication; release builds never fall back to a debug key. Signed APKs are
+split by ABI. CI uses seconds since 2024-01-01 as the base Android version code,
+so main and tag builds share a growing version-code sequence. Flutter adds ABI
+codes when splitting. Local release builds must likewise choose an increasing
+`--build-number` to cover an existing installed release. No signing secrets are
+provided to pull-request builds.
+
+## Backups and restore
+
+The Settings panel exports all library snapshots and supported original materials
+as a versioned OmniQuiz ZIP. It excludes AI configuration and secure-storage
+credentials. Missing legacy original files are reported; extracted text and
+learning records are still backed up. A disconnected library folder fails export
+instead of silently producing an incomplete backup. Limits: 100 MB compressed,
+512 MB expanded, 128 MB per database, 20 MB per material, 10,000 archive entries,
+and 100 libraries. Android exports the staged archive through SAF with a 64 KB
+copy buffer, and iOS exports its file URL through the document picker. Neither
+mobile path loads the whole ZIP into a Flutter method payload. Desktop saving
+still uses the file-picker bytes API under the 100 MB compressed limit. Archive
+CRC checks use a bounded buffer, including database snapshots.
+
+Restore stages and validates every archive entry and SQLite snapshot first, then
+creates app-managed copies with new library IDs and rebases source origins. A
+single catalog write publishes the result; failures remove only staged/new data.
+Existing libraries, active selection and AI settings remain unchanged. Running
+jobs are cancelled in snapshots; paid requests never replay after restore.
+
+Modules in `lib/infrastructure/backup/` separate the versioned manifest, archive
+I/O, source collection, database hygiene, restore staging, and orchestration. The
+presentation depends on backup ports; platform dialogs are separate adapters.
+During backup/restore, the host pauses generation and blocks app writes. Live
+filesystem edits outside OmniQuiz can still change original files while copying;
+normal revision checks reconcile them when a restored library is scanned.
+
+## Large libraries
+
+Generation reads a bounded three-chunk window directly from SQLite, rotating in
+source order and wrapping at the end. A schema-v2 index supports per-document
+selection. Only those chunks are decoded into Dart objects. Ready-question counts
+use COUNT independently of the 40-question display window. `generationChunks`
+and `readyCount` are repository operations rather than SQL in view models.
+
+## Local mobile authentication tests
+
+Run `scripts/flutter.ps1 test` on Windows for the unit/widget suite. The
+`mobile_settings_test.dart` cases exercise small Android/iOS layouts in both
+languages at 130% text size; an iOS theme is not an iOS runtime test.
+
+With an Android emulator running and Chrome's first-run setup completed:
+
+```powershell
+./scripts/flutter.ps1 test integration_test/mobile_auth_test.dart -d emulator-5554 --timeout 180s
+```
+
+This suite uses the real system browser, loopback sockets and native encrypted
+storage. OAuth/JWKS/Responses use synthetic fixtures and never consume account
+allowance. It also runs the protocol suite on the device. Credentials are written
+under a unique test key and deleted afterward. Run against a disposable emulator,
+since Flutter installs a test entry point under the normal application ID.
+On Android, close the Custom Tab after it displays the local callback message;
+the app deliberately waits until resumed before continuing authorization.
+For an interactive live-account test, use `--no-uninstall` to retain credentials
+and restore the normal app entry point afterward: the test runner otherwise
+stops/uninstalls the app when the test ends.
+
+For an iOS Simulator, use a Mac with Xcode and an installed iOS runtime. No real
+iPhone or distribution signing certificate is needed for simulator testing:
+
+```bash
+./scripts/flutter build ios --simulator
+./scripts/flutter devices
+./scripts/flutter test integration_test/mobile_auth_test.dart -d <simulator-id> --timeout 180s
+./scripts/flutter test integration_test/app_smoke_test.dart -d <simulator-id> --timeout 180s
+```
+
+The app smoke test runs the real entry point, opens Settings and switches between
+English and Chinese using native persistence. Use a disposable simulator.
+
+The Flutter wrapper selects `/Applications/Xcode.app` when the global developer
+directory still points at standalone Command Line Tools. An explicit
+`DEVELOPER_DIR` takes precedence. A generated, ignored `xcrun` wrapper preserves
+that selection inside Dart native-asset hooks, which filter `DEVELOPER_DIR` out
+of subprocess environments. This avoids requiring a global `sudo xcode-select`.
+
+Windows/WSL cannot run Xcode or Apple's Simulator. Local validation on Xcode 27.1
+and iOS 27.1 passed all nine authentication tests and the native app smoke test,
+including Safari loopback callbacks and Keychain storage.
+A separate, user-authorized live run on 2026-10-22 passed iOS simulator login,
+model listing, a JSON connection probe and one source-validated Chinese question
+using `gpt-6.1-sol`. Live tests require manual account authorization and consume
+plan usage; they are not part of automated tests or CI. An Android API 36 live run
+also passed after deferring token exchange until the app resumes from Chrome.
+Physical-device testing remains outstanding.
+
+## Subscription gateways
+
+OmniQuiz can use a user-operated CLIProxyAPI instance through its standard
+OpenAI-compatible client API. This connects to subscription accounts authenticated
+by the gateway. Standalone devices can instead use experimental direct ChatGPT sign-in in Settings. The
+[comparison](chatgpt-sign-in.md#current-implementation-standalone-devices) explains the tradeoff.
+
+1. Install [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) or its linked
+   desktop manager on a computer/server you control. Use the upstream version's
+   setup instructions and sign into the desired provider there. The CLI's
+   `--codex-login` option is its ChatGPT/Codex account flow.
+2. Configure a strong, unique **client** access key. In the current v8 configuration
+   this is `access.api-keys`; older configurations use a top-level `api-keys` list.
+   Do not put provider OAuth tokens or the management key into OmniQuiz.
+3. For same-computer use, bind the gateway to loopback and enter
+   `http://127.0.0.1:8317/v1` in OmniQuiz. For a phone, make the client API reachable
+   through HTTPS with a certificate trusted by that phone, for example through
+   your own TLS reverse proxy. Use that host's `/v1` URL, not `localhost`.
+   Keep management access local and expose only the client API paths needed by
+   OmniQuiz (`GET /v1/models`, `POST /v1/chat/completions`).
+4. In Settings enter the URL and client key, select **Load available models**,
+   search/select a model, and **Test connection**. Leave JSON mode off initially;
+   enable it only if the selected gateway/model supports it. Save, import the
+   sample material, and generate a batch to verify actual question generation.
+
+The model list is not a guarantee of inference access. A connection test uses
+inference and can consume the upstream account's allowance. The gateway sees
+selected study excerpts and must stay running while generating questions.
+OmniQuiz stores only its client key in OS secure storage; library backups omit it.
+Changing endpoints requires explicitly supplying that endpoint's key. Model-list
+requests reject redirects, have a 20-second timeout and a 1 MiB response limit,
+and do not reveal upstream error bodies.
+
+Phone networking uses the existing native HTTP client and Internet permissions;
+no CLI runtime or OAuth callback is needed on the phone for this route. Remote
+plain HTTP and invalid certificates are not accepted. If using a private LAN
+hostname/address on iOS, local-network permission must be granted. An HTTPS
+internet-reachable endpoint avoids that local-network dependency.
+
+Validation gates: automated transport and 390-pixel English/Chinese picker tests
+cover the client behavior. Complete a real signed Android/iOS device test against
+your authenticated gateway (model listing, question generation, network loss,
+app resume and expired upstream login) before treating that deployment as
+verified. Compiling an APK or receiving a model catalog alone is insufficient.

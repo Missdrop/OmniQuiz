@@ -22,7 +22,7 @@ class ConfigureProvider {
       );
     }
     // Do not silently reuse a secret after changing the recipient endpoint.
-    final sameEndpoint = old?.baseUrl == baseUrl.trim();
+    final sameEndpoint = old?.chatGpt != true && old?.baseUrl == baseUrl.trim();
     if (!replaceKey && key.isEmpty && old != null && !sameEndpoint) {
       throw const AppFailure(
         'Enter a key for the new endpoint, or explicitly select no key.',

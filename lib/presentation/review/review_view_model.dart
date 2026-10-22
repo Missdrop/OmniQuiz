@@ -9,6 +9,17 @@ class ReviewViewModel extends ChangeNotifier {
   List<ReviewEntry> _entries = [];
   List<ReviewEntry> get entries => List.unmodifiable(_entries);
   String? error;
+  bool _disposed = false;
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> refresh() async {
     try {
       _entries = await questions.reviews();
@@ -16,6 +27,6 @@ class ReviewViewModel extends ChangeNotifier {
     } catch (_) {
       error = 'Could not load your review queue.';
     }
-    notifyListeners();
+    _notify();
   }
 }

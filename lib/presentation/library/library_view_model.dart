@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import '../../application/generation/coordinator.dart';
+import '../../application/libraries/library_files.dart';
+import '../../application/libraries/library_scanner.dart';
 import '../../application/ports/repositories.dart';
 import '../../application/use_cases/import_materials.dart';
 import '../../domain/models.dart';
@@ -13,8 +15,27 @@ class LibraryViewModel extends ChangeNotifier {
     this.questions,
     this.access,
     this.importer,
-    this.coordinator,
-  );
+    this.coordinator, {
+    this.files,
+    this.archives,
+    this.scanner,
+  });
+  final LibraryFiles? files;
+  final LibraryScanner? scanner;
+  Future<void>? _scanFuture;
+  ScanCancellation? _scanCancellation;
+  ScanProgress? scanProgress;
+  Map<String, String> excluded = {};
+  Set<String> missingOrigins = {};
+  bool get scanning => _scanFuture != null;
+  void cancelScan() => _scanCancellation?.cancel();
+  Future<void> stopScan() async {
+    cancelScan();
+    await _scanFuture;
+  }
+
+  final ArchiveAccess? archives;
+  bool get canImportZip => files != null && archives != null;
   final MaterialRepository materials;
   final QuestionRepository questions;
   final DocumentAccess access;
@@ -26,14 +47,26 @@ class LibraryViewModel extends ChangeNotifier {
   bool busy = false;
   String? message;
   bool get supportsDirectories => access.supportsDirectories;
+  bool _disposed = false;
+  void _notify() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   Future<void> refresh() async {
     try {
       _documents = await materials.documents();
       stats = await questions.stats();
+      excluded = await scanner?.exclusions() ?? {};
     } catch (_) {
       message = 'Could not load your library.';
     }
-    notifyListeners();
+    _notify();
   }
 
   Future<void> import({
@@ -41,10 +74,10 @@ class LibraryViewModel extends ChangeNotifier {
     bool sample = false,
     bool chineseSample = false,
   }) async {
-    if (busy) return;
+    if (_disposed || busy) return;
     busy = true;
     message = null;
-    notifyListeners();
+    _notify();
     try {
       final inputs = sample
           ? [
@@ -57,7 +90,14 @@ class LibraryViewModel extends ChangeNotifier {
           : await (directory ? access.pickDirectory() : access.pickFiles());
       if (inputs.isEmpty) return;
       await coordinator.stop();
-      final result = await importer.execute(inputs);
+      final stored = <ImportInput>[];
+      for (final input in inputs) {
+        stored.add(files == null ? input : await files!.store(input));
+      }
+      final result = await importer.execute(stored);
+      for (final input in stored) {
+        await _allowImported(input);
+      }
       message =
           '${result.imported} imported · ${result.unchanged} unchanged'
           '${result.errors.isEmpty ? '' : '\n${result.errors.join('\n')}'}';
@@ -68,23 +108,146 @@ class LibraryViewModel extends ChangeNotifier {
           : 'Import failed. Check file permissions and try again.';
     } finally {
       busy = false;
-      notifyListeners();
+      _notify();
     }
   }
 
-  Future<void> remove(String id) async {
-    if (busy) return;
+  Future<void> importZip() async {
+    final archiveAccess = archives;
+    final destination = files;
+    if (_disposed || busy || archiveAccess == null || destination == null) {
+      return;
+    }
     busy = true;
-    notifyListeners();
+    message = null;
+    _notify();
+    var imported = 0, unchanged = 0;
+    final errors = <String>[];
     try {
       await coordinator.stop();
-      await materials.removeDocument(id);
+      var received = false;
+      await for (final input in archiveAccess.pickZip()) {
+        if (_disposed) return;
+        received = true;
+        final stored = await destination.store(
+          input,
+          preserveDirectories: true,
+        );
+        final result = await importer.execute([stored]);
+        if (result.errors.isEmpty) await _allowImported(stored);
+        imported += result.imported;
+        unchanged += result.unchanged;
+        errors.addAll(result.errors);
+      }
+      if (received) {
+        message =
+            '$imported imported · $unchanged unchanged'
+            '${errors.isEmpty ? '' : '\n${errors.join('\n')}'}';
+      }
+    } catch (error) {
+      message = error is AppFailure
+          ? error.message
+          : 'Could not import ZIP. Check storage space and file permissions.';
+    } finally {
+      await refresh();
+      busy = false;
+      _notify();
+    }
+  }
+
+  Future<void> _allowImported(ImportInput input) async {
+    if (scanner != null && await materials.byOrigin(input.origin) != null) {
+      await scanner!.include(input.origin);
+      missingOrigins.remove(input.origin);
+    }
+  }
+
+  Future<void> scan({bool full = false}) async {
+    if (_disposed || busy || scanner == null) return;
+    _scanCancellation = ScanCancellation();
+    final work = _runScan(full);
+    _scanFuture = work;
+    _notify();
+    try {
+      await work;
+    } finally {
+      _scanFuture = null;
+      _notify();
+    }
+  }
+
+  Future<void> _runScan(bool full) async {
+    busy = true;
+    message = null;
+    scanProgress = const ScanProgress(0, '');
+    _notify();
+    try {
+      await coordinator.stop();
+      final updates = Stopwatch()..start();
+      final result = await scanner!.scan(
+        full: full,
+        cancellation: _scanCancellation!,
+        onProgress: (progress) {
+          scanProgress = progress;
+          if (progress.checked == 1 || updates.elapsedMilliseconds >= 100) {
+            _notify();
+            updates.reset();
+          }
+        },
+      );
+      if (!result.cancelled && result.errors.isEmpty) {
+        missingOrigins = result.missing;
+      }
+      message =
+          '${result.imported} imported · ${result.unchanged} unchanged'
+          '\n${result.ignored} excluded · ${missingOrigins.length} missing sources'
+          '${result.cancelled ? '\nScan cancelled. Completed imports were kept.' : ''}'
+          '${result.errors.isEmpty ? '' : '\n${result.errors.join('\n')}'}';
+    } catch (_) {
+      message = 'Could not scan the library folder. Check that it is connected and grant folder access again.';
+    } finally {
+      await refresh();
+      busy = false;
+      scanProgress = null;
+      _notify();
+    }
+  }
+
+  Future<void> include(String origin) async {
+    if (_disposed || busy || scanner == null) return;
+    busy = true;
+    _notify();
+    try {
+      await scanner!.include(origin);
+    } catch (_) {
+      message = 'Could not restore this excluded file.';
+      return;
+    } finally {
+      busy = false;
+      _notify();
+    }
+    await scan();
+  }
+
+  Future<void> remove(String id) async {
+    if (_disposed || busy) return;
+    busy = true;
+    _notify();
+    try {
+      await coordinator.stop();
+      final document = _documents.firstWhere((doc) => doc.id == id);
+      if (scanner != null) {
+        await scanner!.exclude(document);
+      } else {
+        await materials.removeDocument(id);
+      }
+      missingOrigins.remove(document.origin);
       await refresh();
     } catch (_) {
       message = 'Could not remove this document.';
     } finally {
       busy = false;
-      notifyListeners();
+      _notify();
     }
   }
 

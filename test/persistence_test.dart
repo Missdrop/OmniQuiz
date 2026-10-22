@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:omniquiz/infrastructure/persistence/codec.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omniquiz/domain/models.dart';
@@ -104,6 +107,57 @@ void main() {
       final job = await prepare();
       await jobs.recover();
       expect(await jobs.complete(job, [sampleQuestion()]), false);
+    },
+  );
+  test('generation windows wrap in source order and ignore unrelated malformed payloads', () async {
+    for (var n = 0; n < 8; n++) {
+      await db.customStatement('INSERT INTO chunks VALUES (?,?,?)', [
+        'extra-$n',
+        'd',
+        n == 0
+            ? '{bad-json'
+            : jsonEncode(
+                chunkToJson(
+                  SourceChunk(
+                    id: 'extra-$n',
+                    documentId: 'd',
+                    documentName: 'Notes',
+                    revision: 'r',
+                    location: '$n',
+                    text: 'Text $n',
+                  ),
+                ),
+              ),
+      ]);
+    }
+    // The corrupted row outside this window must never be read or decoded.
+    final selected = await materials.generationChunks('d', 7, 3);
+    expect(selected.map((c) => c.id), ['extra-6', 'extra-7', 'c']);
+    expect(await materials.generationChunks('missing', 0, 3), isEmpty);
+  });
+  test(
+    'ready count is independent of the 40-question display window',
+    () async {
+      final job = await prepare();
+      final base = sampleQuestion();
+      await jobs.complete(
+        job,
+        List.generate(
+          55,
+          (n) => Question(
+            id: 'q-$n',
+            prompt: 'Question $n?',
+            options: base.options,
+            correctOptionId: base.correctOptionId,
+            explanation: base.explanation,
+            topic: base.topic,
+            source: base.source,
+            quote: base.quote,
+          ),
+        ),
+      );
+      expect(await questions.ready(null), hasLength(40));
+      expect(await questions.readyCount(null), 55);
     },
   );
 }

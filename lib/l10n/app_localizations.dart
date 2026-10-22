@@ -98,6 +98,54 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @gatewayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use ChatGPT or other accounts through CLIProxyAPI'**
+  String get gatewayTitle;
+
+  /// No description provided for @gatewayHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your provider in your own CLIProxyAPI gateway first. Enter its OpenAI-compatible base URL and client API key below, load the available models, then test and save. Use the gateway client key, not a ChatGPT password, OAuth token, or gateway management key. Model access and usage limits depend on the connected account. The gateway receives the study excerpts you send for generation.'**
+  String get gatewayHelp;
+
+  /// No description provided for @gatewayAddressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.'**
+  String get gatewayAddressHelp;
+
+  /// No description provided for @loadModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Load available models'**
+  String get loadModels;
+
+  /// No description provided for @chooseModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a model'**
+  String get chooseModel;
+
+  /// No description provided for @searchModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Search models'**
+  String get searchModels;
+
+  /// No description provided for @loadModelsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load models. Check the endpoint and key, or enter a model manually.'**
+  String get loadModelsError;
+
+  /// No description provided for @noModelsError.
+  ///
+  /// In en, this message translates to:
+  /// **'No models are available. Sign in to a provider on your gateway, or enter a model manually.'**
+  String get noModelsError;
+
   /// No description provided for @library.
   ///
   /// In en, this message translates to:
@@ -317,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @generateBody.
   ///
   /// In en, this message translates to:
-  /// **'Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.'**
+  /// **'Relevant excerpts will be sent to your selected AI connection and consume its plan allowance or API usage. Questions refill automatically up to 20 while practicing. You can pause at any time.'**
   String get generateBody;
 
   /// No description provided for @start.
@@ -515,7 +563,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.'**
+  /// **'Use your ChatGPT plan or an OpenAI-compatible API. No OmniQuiz account or server required.'**
   String get settingsSubtitle;
 
   /// No description provided for @aiProvider.
@@ -617,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyNotice.
   ///
   /// In en, this message translates to:
-  /// **'Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.'**
+  /// **'Generation sends selected excerpts to your AI connection. Connection tests use a small amount of plan allowance or API usage. Credentials stay in OS secure storage; materials and progress stay local.'**
   String get privacyNotice;
 
   /// No description provided for @licenses.
@@ -1057,6 +1105,492 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Import at most 100 files / 100 MB at once. Select a smaller folder.'**
   String get folderLimit;
+
+  /// No description provided for @currentLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Current library'**
+  String get currentLibrary;
+
+  /// No description provided for @createLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Create library'**
+  String get createLibrary;
+
+  /// No description provided for @libraryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Library name'**
+  String get libraryName;
+
+  /// No description provided for @useExistingFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an existing folder'**
+  String get useExistingFolder;
+
+  /// No description provided for @chooseFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose folder'**
+  String get chooseFolder;
+
+  /// No description provided for @folderIncludesSubfolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a folder, including its subfolders.'**
+  String get folderIncludesSubfolders;
+
+  /// No description provided for @managedFolderDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an app-managed folder. Imported files will be copied there.'**
+  String get managedFolderDescription;
+
+  /// No description provided for @mobileLibraryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'This device uses app-managed folders. Add materials with Import files.'**
+  String get mobileLibraryDescription;
+
+  /// No description provided for @libraryNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name and choose a folder.'**
+  String get libraryNameRequired;
+
+  /// No description provided for @createLibraryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create library. Check folder access and use non-overlapping folders.'**
+  String get createLibraryError;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @scanFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan folder'**
+  String get scanFolder;
+
+  /// No description provided for @libraryIsolationDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions, mistakes and progress belong to this library. Folders scan on launch, switch and resume; scan manually anytime.'**
+  String get libraryIsolationDescription;
+
+  /// No description provided for @openLibraryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open this library. Try again.'**
+  String get openLibraryError;
+
+  /// No description provided for @scanFolderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not scan the library folder. Check that it is connected and grant folder access again.'**
+  String get scanFolderError;
+
+  /// No description provided for @folderUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Library folder is unavailable. Reconnect it and scan again.'**
+  String get folderUnavailable;
+
+  /// No description provided for @copyLibraryFileError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot copy this file into the library folder.'**
+  String get copyLibraryFileError;
+
+  /// No description provided for @grantFolderAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant folder access'**
+  String get grantFolderAccess;
+
+  /// No description provided for @grantFolderError.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the same library folder to restore access.'**
+  String get grantFolderError;
+
+  /// No description provided for @removeIndexedDocumentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the imported document from practice and excludes its file from future scans. The original file is kept. Use Excluded files to import it again.'**
+  String get removeIndexedDocumentBody;
+
+  /// No description provided for @importZip.
+  ///
+  /// In en, this message translates to:
+  /// **'Import ZIP'**
+  String get importZip;
+
+  /// No description provided for @zipSupportedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries'**
+  String get zipSupportedFiles;
+
+  /// No description provided for @zipReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not read this ZIP. Use an unencrypted ZIP with standard compression.'**
+  String get zipReadError;
+
+  /// No description provided for @zipSelectedReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected ZIP could not be read.'**
+  String get zipSelectedReadError;
+
+  /// No description provided for @zipArchiveLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP exceeds the 100 MB archive limit.'**
+  String get zipArchiveLimit;
+
+  /// No description provided for @zipEntryLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains more than 1000 entries. Split the archive.'**
+  String get zipEntryLimit;
+
+  /// No description provided for @zipUnsafePaths.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains unsafe paths or links. Nothing was imported.'**
+  String get zipUnsafePaths;
+
+  /// No description provided for @zipInvalidSizes.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains invalid file sizes.'**
+  String get zipInvalidSizes;
+
+  /// No description provided for @zipExpandedLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP expands beyond the 100 MB limit.'**
+  String get zipExpandedLimit;
+
+  /// No description provided for @zipDuplicatePaths.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP contains unsafe or duplicate file paths.'**
+  String get zipDuplicatePaths;
+
+  /// No description provided for @zipMaterialLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'A material in the ZIP exceeds the 20 MB file limit.'**
+  String get zipMaterialLimit;
+
+  /// No description provided for @zipNoMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'No supported materials in ZIP. Include TXT, Markdown or text PDF.'**
+  String get zipNoMaterials;
+
+  /// No description provided for @zipDamaged.
+  ///
+  /// In en, this message translates to:
+  /// **'ZIP is damaged. Nothing was imported.'**
+  String get zipDamaged;
+
+  /// No description provided for @zipImportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import ZIP. Check storage space and file permissions.'**
+  String get zipImportError;
+
+  /// No description provided for @backupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your libraries'**
+  String get backupTitle;
+
+  /// No description provided for @backupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Save all libraries, materials, questions and progress. AI settings and API keys are excluded. Backups contain your private study data.'**
+  String get backupHelp;
+
+  /// No description provided for @exportBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Export backup'**
+  String get exportBackup;
+
+  /// No description provided for @restoreBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore backup'**
+  String get restoreBackup;
+
+  /// No description provided for @restoreBackupHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore a previously exported OmniQuiz backup as new libraries. Your existing libraries and AI settings will be kept.'**
+  String get restoreBackupHelp;
+
+  /// No description provided for @backupSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved.'**
+  String get backupSaved;
+
+  /// No description provided for @backupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup failed. Check storage space and folder access.'**
+  String get backupFailed;
+
+  /// No description provided for @backupRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored {count} libraries. Switch libraries to open them.'**
+  String backupRestored(int count);
+
+  /// No description provided for @backupMissingOriginals.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup saved. {count} original files were unavailable; their extracted text and learning records were preserved.'**
+  String backupMissingOriginals(int count);
+
+  /// No description provided for @backupTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is too large.'**
+  String get backupTooLarge;
+
+  /// No description provided for @backupSourceError.
+  ///
+  /// In en, this message translates to:
+  /// **'A source file could not be backed up.'**
+  String get backupSourceError;
+
+  /// No description provided for @backupReadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup could not be read.'**
+  String get backupReadError;
+
+  /// No description provided for @backupRestoreError.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup is invalid or could not be restored. Your existing libraries were kept.'**
+  String get backupRestoreError;
+
+  /// No description provided for @maintenanceBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish the current operation before backing up or restoring.'**
+  String get maintenanceBusy;
+
+  /// No description provided for @fullScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify all files'**
+  String get fullScan;
+
+  /// No description provided for @cancelScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop scanning'**
+  String get cancelScan;
+
+  /// No description provided for @scanCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan cancelled. Completed imports were kept.'**
+  String get scanCancelled;
+
+  /// No description provided for @sourceMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Source file unavailable; imported content and progress are retained.'**
+  String get sourceMissing;
+
+  /// No description provided for @restoreImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import again'**
+  String get restoreImport;
+
+  /// No description provided for @restoreExcludedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not restore this excluded file.'**
+  String get restoreExcludedError;
+
+  /// No description provided for @excludedFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Excluded files ({count})'**
+  String excludedFiles(int count);
+
+  /// No description provided for @scanProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {count} files · {name}'**
+  String scanProgress(int count, String name);
+
+  /// No description provided for @scanSourceSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{excluded} excluded · {missing} missing sources'**
+  String scanSourceSummary(int excluded, int missing);
+
+  /// No description provided for @chatGptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT subscription · experimental'**
+  String get chatGptTitle;
+
+  /// No description provided for @chatGptHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.'**
+  String get chatGptHelp;
+
+  /// No description provided for @chatGptActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected for generation'**
+  String get chatGptActive;
+
+  /// No description provided for @chatGptAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT account'**
+  String get chatGptAccount;
+
+  /// No description provided for @continueChatGpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with ChatGPT'**
+  String get continueChatGpt;
+
+  /// No description provided for @chatGptAddAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another account'**
+  String get chatGptAddAccount;
+
+  /// No description provided for @chatGptSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get chatGptSignOut;
+
+  /// No description provided for @chatGptUseModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Test and use this model'**
+  String get chatGptUseModel;
+
+  /// No description provided for @chatGptTestHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.'**
+  String get chatGptTestHelp;
+
+  /// No description provided for @chatGptUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage ChatGPT usage'**
+  String get chatGptUsage;
+
+  /// No description provided for @chatGptRequestError.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT request failed. Sign in again or check your plan access.'**
+  String get chatGptRequestError;
+
+  /// No description provided for @chatGptIdentityError.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT identity could not be verified. Please sign in again.'**
+  String get chatGptIdentityError;
+
+  /// No description provided for @chatGptLoginCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT sign-in was cancelled or expired. Please try again.'**
+  String get chatGptLoginCancelled;
+
+  /// No description provided for @chatGptLoginBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT sign-in is already running.'**
+  String get chatGptLoginBusy;
+
+  /// No description provided for @chatGptScopeError.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT plan access was not granted. Enable it when signing in.'**
+  String get chatGptScopeError;
+
+  /// No description provided for @chatGptSignInFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to ChatGPT in Settings first.'**
+  String get chatGptSignInFirst;
+
+  /// No description provided for @chatGptInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT request was interrupted. Please try again.'**
+  String get chatGptInterrupted;
+
+  /// No description provided for @chatGptIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT could not complete the response. Check your plan usage and try again.'**
+  String get chatGptIncomplete;
+
+  /// No description provided for @chatGptReady.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT is ready. New questions will use your selected account.'**
+  String get chatGptReady;
+
+  /// No description provided for @chatGptSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out of ChatGPT.'**
+  String get chatGptSignedOut;
+
+  /// No description provided for @chatGptRevocationUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.'**
+  String get chatGptRevocationUnconfirmed;
+
+  /// No description provided for @libraryStorageDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage and library details'**
+  String get libraryStorageDetails;
+
+  /// No description provided for @chatGptSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get chatGptSignInAgain;
+
+  /// No description provided for @chatGptDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'How subscription access works'**
+  String get chatGptDetails;
 }
 
 class _AppLocalizationsDelegate

@@ -9,7 +9,12 @@ export ANDROID_EMULATOR_HOME="$PROJECT_ROOT/.tooling/android-emulator"
 if [[ -d "$PROJECT_ROOT/.tooling/jdk/Contents/Home" ]]; then
   export JAVA_HOME="$PROJECT_ROOT/.tooling/jdk/Contents/Home"
   export PATH="$JAVA_HOME/bin:$PATH"
+elif [[ -d "$PROJECT_ROOT/.tooling/jdk/bin" ]]; then
+  export JAVA_HOME="$PROJECT_ROOT/.tooling/jdk"
+  export PATH="$JAVA_HOME/bin:$PATH"
 fi
+source "$PROJECT_ROOT/scripts/linux_environment.sh"
+source "$PROJECT_ROOT/scripts/apple_environment.sh"
 export XDG_CONFIG_HOME="$PROJECT_ROOT/.tooling/config"
 export XDG_CACHE_HOME="$PROJECT_ROOT/.tooling/cache"
 export CI=true

@@ -15,9 +15,12 @@ OmniQuiz keeps your library and progress on your device. No account needed.
 
 ## What you can do
 
-- **Study your own notes.** Import TXT, Markdown, or PDFs with selectable text.
+- **Keep subjects separate.** Create libraries with independent questions, mistakes, and progress.
+- **Import a ZIP.** Bring a folder of notes to your phone, keeping subfolders intact.
+- **Study a whole folder.** Connect an existing desktop folder or create an app-managed one. Scan TXT, Markdown, and PDFs with selectable text, including subfolders.
 - **Understand each answer.** Read explanations alongside excerpts from your materials.
-- **Review your mistakes.** Missed questions come back for spaced review.
+- **Review your mistakes.** Missed questions come back for spaced review; early practice does not fast-track mastery.
+- **Back up your progress.** Export all libraries and restore them as separate copies.
 - **Keep practicing offline.** Previously generated questions stay available.
 - **Choose your language.** English and Simplified Chinese interfaces, with a separate language setting for AI questions.
 
@@ -29,7 +32,7 @@ Get the available builds from [GitHub Releases](https://github.com/Missdrop/Omni
 | Platform | Release file |
 | --- | --- |
 | Windows | `OmniQuiz-windows-x64.msi` — run the installer; `.zip` is also available for use without installation |
-| Android | `OmniQuiz-android-debug.apk` — install on your device |
+| Android | `OmniQuiz-android-arm64-v8a.apk` — signed release for most phones; `armeabi-v7a` and `x86_64` builds are also available |
 | macOS | `OmniQuiz-macos.dmg` — open and drag OmniQuiz into Applications |
 | Linux | `OmniQuiz-linux-x64.tar.gz` |
 
@@ -39,12 +42,56 @@ See the [development guide](docs/development.md) for platform requirements.
 
 ## Get started
 
-1. **Connect your AI.** In **Settings**, enter your provider's API base URL, model, and API key. Select **Test connection**.
-2. **Add your notes.** Import a document in **Library**, or try the included sample notes.
+1. **Connect your AI.** In **Settings**, use experimental **Continue with ChatGPT**, or enter your provider's API base URL, model, and key, select **Test connection**, then **Save settings**.
+2. **Create a library.** In **Library**, choose **Create library**. Use an existing desktop folder or let OmniQuiz create one. Import files, or try the included sample notes.
 3. **Start practicing.** In **Practice**, choose your material and select **Generate questions**. Visit **Review** later to revisit mistakes.
 
-You need an API provider compatible with OpenAI Chat Completions. New questions require
-an internet connection and may incur charges from your provider. Saved questions work offline.
+API-key mode needs a provider compatible with OpenAI Chat Completions. Direct ChatGPT
+mode needs an eligible account and plan authorization. New questions require an internet
+connection and consume the selected connection's allowance or API usage. Saved questions work offline.
+
+### Use your ChatGPT plan directly (experimental)
+
+In **Settings → ChatGPT subscription**, choose **Continue with ChatGPT**.
+Complete browser authorization on this device, return to OmniQuiz, select an
+available model, then choose **Test and use this model**. This direct connection
+requires no API key, gateway, or always-on computer. It uses your authorized plan
+allowance; availability depends on your account.
+
+Android and iOS use native browser components with a local callback. This feature
+is experimental: automated tests do not establish successful real-device login.
+If the app is terminated during authorization, restart the sign-in. Account
+credentials remain in OS secure storage and are excluded from library backups.
+
+### Optional: use a subscription through CLIProxyAPI
+
+You can connect OmniQuiz to your own [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+gateway and use the provider accounts you have signed into there, including its
+ChatGPT/Codex route. In **Settings**, enter the gateway's `/v1` base URL and
+**client API key**, choose **Load available models**, then test and save.
+Available models and usage limits depend on your gateway and connected accounts.
+
+On the same computer, the usual address is `http://127.0.0.1:8317/v1`.
+On a phone, use a reachable **HTTPS** gateway address; `localhost` means the phone
+itself. Keep the gateway running. This optional route requires a gateway; use the direct sign-in above for standalone operation. See [setup and mobile requirements](docs/development.md#subscription-gateways).
+
+### Files and backups
+
+Folders scan on launch, library switch, and return to the app. Use **Scan folder**
+after editing files while OmniQuiz stays open. Scans import new and changed files.
+Missing source files are marked, but their imported text, questions, and progress
+remain available. Removing a document in OmniQuiz excludes it from future scans
+without deleting the original file; use **Excluded files** to include it again.
+Hidden files and symbolic links are skipped. Mobile devices use app-managed folders and
+file or ZIP import. ZIP imports preserve subfolders and skip hidden/unsupported
+files. Use an unencrypted ZIP (up to 100 MB compressed and expanded, 1,000 entries,
+20 MB per material). API settings and interface language are shared across libraries.
+
+In **Settings → Back up your libraries**, save an OmniQuiz backup before moving
+to another device or reinstalling. Restoring adds libraries without replacing
+existing data. Missing originals cannot be included, but their imported text and
+progress are preserved; the export reports how many originals are missing.
+AI settings and API keys are excluded. Keep backups private.
 
 ## Your data
 

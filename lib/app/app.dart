@@ -19,8 +19,17 @@ import 'theme.dart';
 import '../presentation/settings/language_view_model.dart';
 
 class OmniQuizApp extends StatefulWidget {
-  const OmniQuizApp({super.key, required this.dependencies});
+  const OmniQuizApp({
+    super.key,
+    required this.dependencies,
+    this.libraryControls,
+    this.settingsControls,
+    this.currentLibraryName,
+  });
   final AppDependencies dependencies;
+  final Widget? libraryControls;
+  final Widget? settingsControls;
+  final String? currentLibraryName;
   @override
   State<OmniQuizApp> createState() => _OmniQuizAppState();
 }
@@ -39,10 +48,17 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
           builder: (context, state, child) =>
               _shell(context, state.uri.path, child),
           routes: [
-            GoRoute(path: '/library', builder: (_, _) => const LibraryPage()),
+            GoRoute(
+              path: '/library',
+              builder: (_, _) => LibraryPage(controls: widget.libraryControls),
+            ),
             GoRoute(path: '/practice', builder: (_, _) => const PracticePage()),
             GoRoute(path: '/review', builder: (_, _) => const ReviewPage()),
-            GoRoute(path: '/settings', builder: (_, _) => const SettingsPage()),
+            GoRoute(
+              path: '/settings',
+              builder: (_, _) =>
+                  SettingsPage(controls: widget.settingsControls),
+            ),
           ],
         ),
       ],
@@ -119,8 +135,8 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                 width: 220,
                 child: Material(
                   color: const Color(0xFFEDF1E8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: ListView(
+                    padding: EdgeInsets.zero,
                     children: [
                       Padding(
                         padding: EdgeInsets.fromLTRB(24, 36, 24, 4),
@@ -169,7 +185,7 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                             onTap: () => _navigate(i),
                           ),
                         ),
-                      const Spacer(),
+                      const SizedBox(height: 24),
                       Padding(
                         padding: EdgeInsets.all(24),
                         child: Row(
@@ -189,7 +205,24 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                   ),
                 ),
               ),
-            Expanded(child: child),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (widget.currentLibraryName != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                      child: Text(
+                        widget.currentLibraryName!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  Expanded(child: child),
+                ],
+              ),
+            ),
           ],
         ),
       ),

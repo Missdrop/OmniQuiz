@@ -10,6 +10,35 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get gatewayTitle =>
+      'Use ChatGPT or other accounts through CLIProxyAPI';
+
+  @override
+  String get gatewayHelp =>
+      'Sign in to your provider in your own CLIProxyAPI gateway first. Enter its OpenAI-compatible base URL and client API key below, load the available models, then test and save. Use the gateway client key, not a ChatGPT password, OAuth token, or gateway management key. Model access and usage limits depend on the connected account. The gateway receives the study excerpts you send for generation.';
+
+  @override
+  String get gatewayAddressHelp =>
+      'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.';
+
+  @override
+  String get loadModels => 'Load available models';
+
+  @override
+  String get chooseModel => 'Choose a model';
+
+  @override
+  String get searchModels => 'Search models';
+
+  @override
+  String get loadModelsError =>
+      'Could not load models. Check the endpoint and key, or enter a model manually.';
+
+  @override
+  String get noModelsError =>
+      'No models are available. Sign in to a provider on your gateway, or enter a model manually.';
+
+  @override
   String get library => 'Library';
 
   @override
@@ -125,7 +154,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generateBody =>
-      'Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.';
+      'Relevant excerpts will be sent to your selected AI connection and consume its plan allowance or API usage. Questions refill automatically up to 20 while practicing. You can pause at any time.';
 
   @override
   String get start => 'Start';
@@ -231,7 +260,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSubtitle =>
-      'Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.';
+      'Use your ChatGPT plan or an OpenAI-compatible API. No OmniQuiz account or server required.';
 
   @override
   String get aiProvider => 'AI provider';
@@ -285,7 +314,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyNotice =>
-      'Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.';
+      'Generation sends selected excerpts to your AI connection. Connection tests use a small amount of plan allowance or API usage. Credentials stay in OS secure storage; materials and progress stay local.';
 
   @override
   String get licenses => 'Open-source licenses';
@@ -564,4 +593,291 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get folderLimit =>
       'Import at most 100 files / 100 MB at once. Select a smaller folder.';
+
+  @override
+  String get currentLibrary => 'Current library';
+
+  @override
+  String get createLibrary => 'Create library';
+
+  @override
+  String get libraryName => 'Library name';
+
+  @override
+  String get useExistingFolder => 'Use an existing folder';
+
+  @override
+  String get chooseFolder => 'Choose folder';
+
+  @override
+  String get folderIncludesSubfolders =>
+      'Choose a folder, including its subfolders.';
+
+  @override
+  String get managedFolderDescription =>
+      'Create an app-managed folder. Imported files will be copied there.';
+
+  @override
+  String get mobileLibraryDescription =>
+      'This device uses app-managed folders. Add materials with Import files.';
+
+  @override
+  String get libraryNameRequired => 'Enter a name and choose a folder.';
+
+  @override
+  String get createLibraryError =>
+      'Could not create library. Check folder access and use non-overlapping folders.';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get scanFolder => 'Scan folder';
+
+  @override
+  String get libraryIsolationDescription =>
+      'Questions, mistakes and progress belong to this library. Folders scan on launch, switch and resume; scan manually anytime.';
+
+  @override
+  String get openLibraryError => 'Could not open this library. Try again.';
+
+  @override
+  String get scanFolderError =>
+      'Could not scan the library folder. Check that it is connected and grant folder access again.';
+
+  @override
+  String get folderUnavailable =>
+      'Library folder is unavailable. Reconnect it and scan again.';
+
+  @override
+  String get copyLibraryFileError =>
+      'Cannot copy this file into the library folder.';
+
+  @override
+  String get grantFolderAccess => 'Grant folder access';
+
+  @override
+  String get grantFolderError =>
+      'Choose the same library folder to restore access.';
+
+  @override
+  String get removeIndexedDocumentBody =>
+      'This removes the imported document from practice and excludes its file from future scans. The original file is kept. Use Excluded files to import it again.';
+
+  @override
+  String get importZip => 'Import ZIP';
+
+  @override
+  String get zipSupportedFiles =>
+      'TXT, Markdown & text PDF · 20 MB per file · ZIP: 100 MB compressed / extracted, up to 1000 entries';
+
+  @override
+  String get zipReadError =>
+      'Could not read this ZIP. Use an unencrypted ZIP with standard compression.';
+
+  @override
+  String get zipSelectedReadError => 'The selected ZIP could not be read.';
+
+  @override
+  String get zipArchiveLimit => 'ZIP exceeds the 100 MB archive limit.';
+
+  @override
+  String get zipEntryLimit =>
+      'ZIP contains more than 1000 entries. Split the archive.';
+
+  @override
+  String get zipUnsafePaths =>
+      'ZIP contains unsafe paths or links. Nothing was imported.';
+
+  @override
+  String get zipInvalidSizes => 'ZIP contains invalid file sizes.';
+
+  @override
+  String get zipExpandedLimit => 'ZIP expands beyond the 100 MB limit.';
+
+  @override
+  String get zipDuplicatePaths =>
+      'ZIP contains unsafe or duplicate file paths.';
+
+  @override
+  String get zipMaterialLimit =>
+      'A material in the ZIP exceeds the 20 MB file limit.';
+
+  @override
+  String get zipNoMaterials =>
+      'No supported materials in ZIP. Include TXT, Markdown or text PDF.';
+
+  @override
+  String get zipDamaged => 'ZIP is damaged. Nothing was imported.';
+
+  @override
+  String get zipImportError =>
+      'Could not import ZIP. Check storage space and file permissions.';
+
+  @override
+  String get backupTitle => 'Back up your libraries';
+
+  @override
+  String get backupHelp =>
+      'Save all libraries, materials, questions and progress. AI settings and API keys are excluded. Backups contain your private study data.';
+
+  @override
+  String get exportBackup => 'Export backup';
+
+  @override
+  String get restoreBackup => 'Restore backup';
+
+  @override
+  String get restoreBackupHelp =>
+      'Restore a previously exported OmniQuiz backup as new libraries. Your existing libraries and AI settings will be kept.';
+
+  @override
+  String get backupSaved => 'Backup saved.';
+
+  @override
+  String get backupFailed =>
+      'Backup failed. Check storage space and folder access.';
+
+  @override
+  String backupRestored(int count) {
+    return 'Restored $count libraries. Switch libraries to open them.';
+  }
+
+  @override
+  String backupMissingOriginals(int count) {
+    return 'Backup saved. $count original files were unavailable; their extracted text and learning records were preserved.';
+  }
+
+  @override
+  String get backupTooLarge => 'Backup is too large.';
+
+  @override
+  String get backupSourceError => 'A source file could not be backed up.';
+
+  @override
+  String get backupReadError => 'Backup could not be read.';
+
+  @override
+  String get backupRestoreError =>
+      'Backup is invalid or could not be restored. Your existing libraries were kept.';
+
+  @override
+  String get maintenanceBusy =>
+      'Finish the current operation before backing up or restoring.';
+
+  @override
+  String get fullScan => 'Verify all files';
+
+  @override
+  String get cancelScan => 'Stop scanning';
+
+  @override
+  String get scanCancelled => 'Scan cancelled. Completed imports were kept.';
+
+  @override
+  String get sourceMissing =>
+      'Source file unavailable; imported content and progress are retained.';
+
+  @override
+  String get restoreImport => 'Import again';
+
+  @override
+  String get restoreExcludedError => 'Could not restore this excluded file.';
+
+  @override
+  String excludedFiles(int count) {
+    return 'Excluded files ($count)';
+  }
+
+  @override
+  String scanProgress(int count, String name) {
+    return 'Checked $count files · $name';
+  }
+
+  @override
+  String scanSourceSummary(int excluded, int missing) {
+    return '$excluded excluded · $missing missing sources';
+  }
+
+  @override
+  String get chatGptTitle => 'ChatGPT subscription · experimental';
+
+  @override
+  String get chatGptHelp =>
+      'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.';
+
+  @override
+  String get chatGptActive => 'Selected for generation';
+
+  @override
+  String get chatGptAccount => 'ChatGPT account';
+
+  @override
+  String get continueChatGpt => 'Continue with ChatGPT';
+
+  @override
+  String get chatGptAddAccount => 'Add another account';
+
+  @override
+  String get chatGptSignOut => 'Sign out';
+
+  @override
+  String get chatGptUseModel => 'Test and use this model';
+
+  @override
+  String get chatGptTestHelp =>
+      'Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.';
+
+  @override
+  String get chatGptUsage => 'Manage ChatGPT usage';
+
+  @override
+  String get chatGptRequestError =>
+      'ChatGPT request failed. Sign in again or check your plan access.';
+
+  @override
+  String get chatGptIdentityError =>
+      'ChatGPT identity could not be verified. Please sign in again.';
+
+  @override
+  String get chatGptLoginCancelled =>
+      'ChatGPT sign-in was cancelled or expired. Please try again.';
+
+  @override
+  String get chatGptLoginBusy => 'ChatGPT sign-in is already running.';
+
+  @override
+  String get chatGptScopeError =>
+      'ChatGPT plan access was not granted. Enable it when signing in.';
+
+  @override
+  String get chatGptSignInFirst => 'Sign in to ChatGPT in Settings first.';
+
+  @override
+  String get chatGptInterrupted =>
+      'ChatGPT request was interrupted. Please try again.';
+
+  @override
+  String get chatGptIncomplete =>
+      'ChatGPT could not complete the response. Check your plan usage and try again.';
+
+  @override
+  String get chatGptReady =>
+      'ChatGPT is ready. New questions will use your selected account.';
+
+  @override
+  String get chatGptSignedOut => 'Signed out of ChatGPT.';
+
+  @override
+  String get chatGptRevocationUnconfirmed =>
+      'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.';
+
+  @override
+  String get libraryStorageDetails => 'Storage and library details';
+
+  @override
+  String get chatGptSignInAgain => 'Sign in again';
+
+  @override
+  String get chatGptDetails => 'How subscription access works';
 }

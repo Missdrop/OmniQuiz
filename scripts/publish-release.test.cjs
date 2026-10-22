@@ -8,7 +8,7 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
   fs.mkdirSync('.tooling', { recursive: true });
   const directory = fs.mkdtempSync('.tooling/release-test-');
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
-  const names = ['OmniQuiz-android-debug.apk', 'OmniQuiz-linux-x64.tar.gz',
+  const names = ['OmniQuiz-android-arm64-v8a.apk', 'OmniQuiz-android-armeabi-v7a.apk', 'OmniQuiz-android-x86_64.apk', 'OmniQuiz-linux-x64.tar.gz',
     'OmniQuiz-windows-x64.zip', 'OmniQuiz-windows-x64.msi',
     'OmniQuiz-macos.tar.gz', 'OmniQuiz-macos.dmg', 'OmniQuiz-ios-unsigned.tar.gz'];
   for (const name of names) fs.writeFileSync(path.join(directory, name), name);
@@ -38,12 +38,12 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
   };
 }
 
-test('nightly replaces eight assets on the same release without creating another', async t => {
+test('nightly replaces ten assets on the same release without creating another', async t => {
   const { calls, options } = fixture(t);
   await publish(options);
   assert.equal(calls.filter(c => c.name === 'createRelease').length, 0);
-  assert.equal(calls.filter(c => c.name === 'deleteReleaseAsset').length, 8);
-  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 8);
+  assert.equal(calls.filter(c => c.name === 'deleteReleaseAsset').length, 10);
+  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 10);
   const update = calls.at(-1).args;
   assert.equal(update.release_id, 7);
   assert.equal(update.prerelease, true);

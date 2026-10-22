@@ -5,10 +5,13 @@ import 'package:provider/provider.dart';
 
 import 'settings_view_model.dart';
 import 'language_view_model.dart';
+import 'model_picker.dart';
+import 'chatgpt_panel.dart';
 import '../shared/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.controls});
+  final Widget? controls;
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
@@ -26,7 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
     void applyProfile() {
       if (!mounted) return;
       final profile = vm.profile;
-      if (profile == null) return;
+      if (profile == null || profile.chatGpt) return;
       setState(() {
         _url.text = profile.baseUrl;
         _model.text = profile.model;
@@ -61,7 +64,9 @@ class _SettingsPageState extends State<SettingsPage> {
       children: [
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(
+              MediaQuery.sizeOf(context).width < 600 ? 16 : 24,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -97,15 +102,29 @@ class _SettingsPageState extends State<SettingsPage> {
         const SizedBox(height: 20),
         if (!vm.loaded) const LinearProgressIndicator(),
         if (vm.message != null) Notice(vm.message!),
+        const ChatGptPanel(),
+        const SizedBox(height: 20),
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(
+              MediaQuery.sizeOf(context).width < 600 ? 16 : 24,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   context.l10n.aiProvider,
                   style: Theme.of(context).textTheme.titleLarge,
+                ),
+                ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Text(context.l10n.gatewayTitle),
+                  children: [
+                    Text(context.l10n.gatewayHelp),
+                    const SizedBox(height: 12),
+                    SelectableText(context.l10n.gatewayAddressHelp),
+                    const SizedBox(height: 12),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 TextField(
@@ -127,6 +146,29 @@ class _SettingsPageState extends State<SettingsPage> {
                     hintText: context.l10n.modelHint,
                   ),
                 ),
+                if (vm.catalog != null)
+                  TextButton.icon(
+                    key: const ValueKey('load-models'),
+                    onPressed: vm.busy || !vm.loaded
+                        ? null
+                        : () async {
+                            final models = await vm.loadModels(
+                              _url.text,
+                              _key.text,
+                              _noKey,
+                            );
+                            if (!context.mounted || models.isEmpty) return;
+                            final selected = await showDialog<String>(
+                              context: context,
+                              builder: (_) => ModelPicker(models: models),
+                            );
+                            if (mounted && selected != null) {
+                              setState(() => _model.text = selected);
+                            }
+                          },
+                    icon: const Icon(Icons.list_alt),
+                    label: Text(context.l10n.loadModels),
+                  ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _key,
@@ -136,7 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   autocorrect: false,
                   decoration: InputDecoration(
                     labelText: context.l10n.apiKey,
-                    hintText: vm.profile == null
+                    hintText: vm.profile == null || vm.profile!.chatGpt
                         ? context.l10n.pasteKey
                         : context.l10n.keepKey,
                     suffixIcon: IconButton(
@@ -229,6 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         const SizedBox(height: 20),
+        ?widget.controls,
         Notice(context.l10n.privacyNotice),
         Text(
           'OmniQuiz 0.1.0 · GPL-3.0-only',

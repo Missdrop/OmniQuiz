@@ -50,6 +50,7 @@ Map<String, dynamic> profileToJson(ProviderProfile p) => {
   'jsonMode': p.jsonMode,
   'credentialRef': p.credentialRef,
   'language': p.language,
+  'chatGpt': p.chatGpt,
 };
 ProviderProfile profileFromJson(Map<String, dynamic> j) => ProviderProfile(
   baseUrl: j['baseUrl'],
@@ -57,4 +58,5 @@ ProviderProfile profileFromJson(Map<String, dynamic> j) => ProviderProfile(
   jsonMode: j['jsonMode'] ?? false,
   credentialRef: j['credentialRef'] ?? '',
   language: j['language'] ?? '简体中文',
+  chatGpt: j['chatGpt'] ?? false,
 );
