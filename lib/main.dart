@@ -14,6 +14,8 @@ import 'app/dependencies.dart';
 import 'app/theme.dart';
 import 'infrastructure/persistence/database.dart';
 import 'l10n/localization.dart';
+import 'infrastructure/updates/update_preferences.dart';
+import 'presentation/updates/update_controller.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +48,13 @@ Future<void> main() async {
       ownsDatabase: !selected.legacy,
       libraryFiles: DirectoryLibraryFiles(selected.directory),
     );
-    runApp(LibraryHost(catalog: catalog, initial: dependencies));
+    runApp(
+      LibraryHost(
+        catalog: catalog,
+        initial: dependencies,
+        updates: UpdateController(SqlUpdatePreferences(database)),
+      ),
+    );
   } catch (_) {
     runApp(
       MaterialApp(

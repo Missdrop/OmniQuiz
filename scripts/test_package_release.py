@@ -1,15 +1,33 @@
 import contextlib
 import os
 import pathlib
+import subprocess
 import tempfile
 import unittest
 import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
-from package_release import app_version, windows_manifest, macos_dmg, wix_executable, package
+from package_release import app_version, windows_manifest, macos_dmg, verify_macos_bundle, wix_executable, package
 
 
 class PackagingTests(unittest.TestCase):
+    def test_macos_repairs_only_stale_ad_hoc_outer_seals(self):
+        with patch('package_release.subprocess.run', side_effect=[
+            subprocess.CompletedProcess([], 1),
+            subprocess.CompletedProcess([], 0, stderr='Signature=adhoc\nTeamIdentifier=not set'),
+            subprocess.CompletedProcess([], 0), subprocess.CompletedProcess([], 0),
+        ]) as run:
+            verify_macos_bundle('OmniQuiz.app')
+            self.assertIn('--preserve-metadata=entitlements,requirements,flags,runtime', run.call_args_list[2].args[0])
+            self.assertEqual(run.call_args_list[-1].args[0], ['codesign', '--verify', '--deep', '--strict', 'OmniQuiz.app'])
+        with patch('package_release.subprocess.run', side_effect=[
+            subprocess.CompletedProcess([], 1),
+            subprocess.CompletedProcess([], 0, stderr='Authority=Developer ID Application\nTeamIdentifier=ABC'),
+        ]) as run:
+            with self.assertRaisesRegex(RuntimeError, 'refusing'):
+                verify_macos_bundle('OmniQuiz.app')
+            self.assertEqual(run.call_count, 2)
+
     def test_android_releases_require_all_signed_abi_artifacts(self):
         with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
             build = pathlib.Path('build/app/outputs/flutter-apk')

@@ -34,7 +34,7 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
   };
   return {
     calls, options: { github, nightly, directory, core: { notice: () => {} },
-      context: { repo: { owner: 'owner', repo: 'repo' }, ref: 'refs/tags/v0.1.0', sha: 'abc', runId: 1 } },
+      context: { repo: { owner: 'owner', repo: 'repo' }, ref: 'refs/tags/v1.0.0', sha: 'abc', runId: 1 } },
   };
 }
 
@@ -61,8 +61,8 @@ test('first nightly creates one draft then publishes it', async t => {
 test('tag release uses the exact tag name and never moves its tag', async t => {
   const { calls, options } = fixture(t, { nightly: false, existing: false });
   await publish(options);
-  assert.equal(calls[0].args.name, 'v0.1.0');
-  assert.equal(calls.at(-1).args.name, 'v0.1.0');
+  assert.equal(calls[0].args.name, 'v1.0.0');
+  assert.equal(calls.at(-1).args.name, 'v1.0.0');
   assert.equal(calls.at(-1).args.prerelease, false);
   assert.equal(calls.some(c => c.name === 'updateRef'), false);
 });

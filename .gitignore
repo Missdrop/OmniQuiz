@@ -43,6 +43,7 @@ __pycache__/
 
 # Project-local toolchains and caches
 /.tooling/
+/.codex-remote-attachments/
 
 # Local planning and design exploration
 /AGENTS.md

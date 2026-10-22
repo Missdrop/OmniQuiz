@@ -49,7 +49,7 @@ module.exports = async function publish({ github, context, core, nightly, direct
     nightly ? 'Latest successful main build. Assets are replaced in place.' : `OmniQuiz ${tag}`,
     '', `Commit: ${context.sha}`,
     `Build: https://github.com/${repo.owner}/${repo.repo}/actions/runs/${context.runId}`,
-    '', 'Android is a debug-signed test APK (signing keys may change between builds).',
+    '', 'Android APKs use the fixed OmniQuiz release signing identity.',
     'Windows: MSI installer or portable ZIP. The installer is not code-signed.',
     'macOS: open the DMG and drag OmniQuiz to Applications. It is not notarized.',
     'The unsigned iOS app requires signing before installation.',

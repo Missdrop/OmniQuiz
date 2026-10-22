@@ -289,5 +289,53 @@
   "chatGptRevocationUnconfirmed": "已在本地退出。请在 ChatGPT 设置中断开 OmniQuiz，以确认撤销授权。",
   "libraryStorageDetails": "存储位置与资料库说明",
   "chatGptSignInAgain": "重新登录",
-  "chatGptDetails": "订阅接入说明"
+  "chatGptDetails": "订阅接入说明",
+  "updateTitle": "应用更新",
+  "updateAutoCheck": "启动时检查更新",
+  "updateHelp": "仅检查新版本，点击更新后才会下载安装包。",
+  "updateVersion": "当前版本：{version}",
+  "updateCheck": "检查更新",
+  "updateChecking": "正在检查更新…",
+  "updateCurrent": "当前已是最新正式版本。",
+  "updateNoRelease": "暂时还没有发布正式版本。",
+  "updateFound": "发现新版本 {version}",
+  "updateDownloading": "正在下载… {percent}%",
+  "updateReady": "下载已校验，可以继续安装。",
+  "updateInstalling": "正在准备安装…",
+  "updateFailed": "检查、下载或安装更新失败。请重试，或通过官方发布页下载。",
+  "updateCancelled": "已取消下载，可以继续使用当前版本。",
+  "updatePreferenceFailed": "更新偏好保存失败，请重试。",
+  "updateDetails": "查看更新",
+  "updateWebsite": "官方发布页",
+  "updateOptional": "更新完全自愿；稍后提醒或跳过均不影响使用。",
+  "updateNoNotes": "详细更新内容请查看官方发布页。",
+  "updateUnsupported": "当前平台没有可直接安装的更新包。请查看官方发布页中的可用版本和安装说明。",
+  "updateInstallHelp": "安装可能关闭并重启 OmniQuiz；资料和学习进度会保留。请按系统提示授权。",
+  "updateLater": "稍后提醒",
+  "updateSkip": "跳过此版本",
+  "updateCancelDownload": "取消下载",
+  "updateNow": "立即更新",
+  "updateInstall": "继续安装",
+  "@updateVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateFound": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "updateInstallPermission": "请在系统设置中允许 OmniQuiz 安装更新，然后返回并点击“继续安装”。"
 }

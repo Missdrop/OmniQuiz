@@ -880,4 +880,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatGptDetails => 'How subscription access works';
+
+  @override
+  String get updateTitle => 'App updates';
+
+  @override
+  String get updateAutoCheck => 'Check for updates at startup';
+
+  @override
+  String get updateHelp =>
+      'Only checks for new versions. Downloads start when you choose Update.';
+
+  @override
+  String updateVersion(String version) {
+    return 'Current version: $version';
+  }
+
+  @override
+  String get updateCheck => 'Check for updates';
+
+  @override
+  String get updateChecking => 'Checking for updates…';
+
+  @override
+  String get updateCurrent => 'You are using the latest stable version.';
+
+  @override
+  String get updateNoRelease => 'No stable release has been published yet.';
+
+  @override
+  String updateFound(String version) {
+    return 'New version $version';
+  }
+
+  @override
+  String updateDownloading(int percent) {
+    return 'Downloading… $percent%';
+  }
+
+  @override
+  String get updateReady =>
+      'Download verified. Continue installation when ready.';
+
+  @override
+  String get updateInstalling => 'Preparing installation…';
+
+  @override
+  String get updateFailed =>
+      'Could not check, download or install the update. Retry or use the official download page.';
+
+  @override
+  String get updateCancelled =>
+      'Download cancelled. You can keep using this version.';
+
+  @override
+  String get updatePreferenceFailed =>
+      'Could not save the update preference. Please try again.';
+
+  @override
+  String get updateDetails => 'View update';
+
+  @override
+  String get updateWebsite => 'Official download page';
+
+  @override
+  String get updateOptional =>
+      'Updates are optional. Remind me later or skip without affecting your use.';
+
+  @override
+  String get updateNoNotes => 'See the official release page for details.';
+
+  @override
+  String get updateUnsupported =>
+      'This platform has no compatible installer for this release. Use the official page for available builds and installation instructions.';
+
+  @override
+  String get updateInstallHelp =>
+      'Installation may close and restart OmniQuiz. Your libraries and progress are kept. Follow any system permission prompts.';
+
+  @override
+  String get updateLater => 'Remind me later';
+
+  @override
+  String get updateSkip => 'Skip this version';
+
+  @override
+  String get updateCancelDownload => 'Cancel download';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String get updateInstall => 'Continue installation';
+
+  @override
+  String get updateInstallPermission =>
+      'Allow OmniQuiz to install updates in system settings, then return and choose Continue installation.';
 }

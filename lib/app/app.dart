@@ -17,6 +17,8 @@ import '../presentation/settings/settings_view_model.dart';
 import 'dependencies.dart';
 import 'theme.dart';
 import '../presentation/settings/language_view_model.dart';
+import '../presentation/updates/update_controller.dart';
+import '../presentation/updates/update_panel.dart';
 
 class OmniQuizApp extends StatefulWidget {
   const OmniQuizApp({
@@ -25,11 +27,13 @@ class OmniQuizApp extends StatefulWidget {
     this.libraryControls,
     this.settingsControls,
     this.currentLibraryName,
+    this.updates,
   });
   final AppDependencies dependencies;
   final Widget? libraryControls;
   final Widget? settingsControls;
   final String? currentLibraryName;
+  final UpdateController? updates;
   @override
   State<OmniQuizApp> createState() => _OmniQuizAppState();
 }
@@ -56,8 +60,10 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
             GoRoute(path: '/review', builder: (_, _) => const ReviewPage()),
             GoRoute(
               path: '/settings',
-              builder: (_, _) =>
-                  SettingsPage(controls: widget.settingsControls),
+              builder: (_, _) => SettingsPage(
+                controls: widget.settingsControls,
+                updates: widget.updates,
+              ),
             ),
           ],
         ),
@@ -106,139 +112,145 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
       context.l10n.review,
       context.l10n.settings,
     ];
-    return Scaffold(
-      appBar: wide
-          ? null
-          : AppBar(
-              title: Row(
-                children: [
-                  Image.asset(
-                    'assets/branding/logo.png',
-                    width: 36,
-                    height: 36,
-                    excludeFromSemantics: true,
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'OmniQuiz',
-                    style: TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ],
+    return UpdateNoticeHost(
+      controller: widget.updates,
+      child: Scaffold(
+        appBar: wide
+            ? null
+            : AppBar(
+                title: Row(
+                  children: [
+                    Image.asset(
+                      'assets/branding/logo.png',
+                      width: 36,
+                      height: 36,
+                      excludeFromSemantics: true,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'OmniQuiz',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+                centerTitle: false,
               ),
-              centerTitle: false,
-            ),
-      body: SafeArea(
-        child: Row(
-          children: [
-            if (wide)
-              SizedBox(
-                width: 220,
-                child: Material(
-                  color: const Color(0xFFEDF1E8),
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(24, 36, 24, 4),
-                        child: Row(
-                          children: [
-                            Image.asset(
-                              'assets/branding/logo.png',
-                              width: 32,
-                              height: 32,
-                              excludeFromSemantics: true,
-                            ),
-                            SizedBox(width: 10),
-                            Flexible(
-                              child: Text(
-                                'OmniQuiz',
-                                style: TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.w800,
+        body: SafeArea(
+          child: Row(
+            children: [
+              if (wide)
+                SizedBox(
+                  width: 220,
+                  child: Material(
+                    color: const Color(0xFFEDF1E8),
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(24, 36, 24, 4),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                'assets/branding/logo.png',
+                                width: 32,
+                                height: 32,
+                                excludeFromSemantics: true,
+                              ),
+                              SizedBox(width: 10),
+                              Flexible(
+                                child: Text(
+                                  'OmniQuiz',
+                                  style: TextStyle(
+                                    fontSize: 23,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(24, 4, 24, 32),
-                        child: Text(
-                          context.l10n.tagline,
-                          style: TextStyle(fontSize: 12, color: Colors.black54),
-                        ),
-                      ),
-                      for (var i = 0; i < labels.length; i++)
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          child: ListTile(
-                            selected: selected == i,
-                            selectedTileColor: const Color(0xFFDDE8D7),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                          padding: EdgeInsets.fromLTRB(24, 4, 24, 32),
+                          child: Text(
+                            context.l10n.tagline,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black54,
                             ),
-                            leading: Icon(icons[i]),
-                            title: Text(labels[i]),
-                            onTap: () => _navigate(i),
                           ),
                         ),
-                      const SizedBox(height: 24),
-                      Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Row(
-                          children: [
-                            Icon(Icons.lock_outline, size: 16),
-                            SizedBox(width: 8),
-                            Flexible(
-                              child: Text(
-                                context.l10n.localByDesign,
-                                style: TextStyle(fontSize: 12),
-                              ),
+                        for (var i = 0; i < labels.length; i++)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
                             ),
-                          ],
+                            child: ListTile(
+                              selected: selected == i,
+                              selectedTileColor: const Color(0xFFDDE8D7),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              leading: Icon(icons[i]),
+                              title: Text(labels[i]),
+                              onTap: () => _navigate(i),
+                            ),
+                          ),
+                        const SizedBox(height: 24),
+                        Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Row(
+                            children: [
+                              Icon(Icons.lock_outline, size: 16),
+                              SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  context.l10n.localByDesign,
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (widget.currentLibraryName != null)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+                        child: Text(
+                          widget.currentLibraryName!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                    ],
+                    Expanded(child: child),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: wide
+            ? null
+            : NavigationBar(
+                selectedIndex: selected,
+                onDestinationSelected: _navigate,
+                destinations: List.generate(
+                  4,
+                  (i) => NavigationDestination(
+                    icon: Icon(icons[i]),
+                    label: labels[i],
                   ),
                 ),
               ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (widget.currentLibraryName != null)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-                      child: Text(
-                        widget.currentLibraryName!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  Expanded(child: child),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
-      bottomNavigationBar: wide
-          ? null
-          : NavigationBar(
-              selectedIndex: selected,
-              onDestinationSelected: _navigate,
-              destinations: List.generate(
-                4,
-                (i) => NavigationDestination(
-                  icon: Icon(icons[i]),
-                  label: labels[i],
-                ),
-              ),
-            ),
     );
   }
 

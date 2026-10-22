@@ -75,6 +75,25 @@ On the same computer, the usual address is `http://127.0.0.1:8317/v1`.
 On a phone, use a reachable **HTTPS** gateway address; `localhost` means the phone
 itself. Keep the gateway running. This optional route requires a gateway; use the direct sign-in above for standalone operation. See [setup and mobile requirements](docs/development.md#subscription-gateways).
 
+### App updates
+
+OmniQuiz checks for new **stable releases** at startup. In **Settings → App
+updates**, you can turn this off or check manually. A new version shows its
+release notes with **Remind me later**, **Skip this version**, and **Update now**.
+Skipping suppresses startup reminders for that version; manual checks still show it.
+Updates are always optional.
+
+Only **Update now** starts the download. OmniQuiz verifies its size and SHA-256
+before opening the Android/Windows system installer or replacing and restarting
+a writable macOS/Linux app bundle. System installation permission may be required.
+Closing the notice during download postpones installation; downloading can also be
+cancelled. Libraries and credentials stay in the app data directory.
+
+If checking, downloading, or installing fails, use **Official download page**.
+System-managed or read-only desktop installations may need manual installation.
+iOS currently offers update notices and the official page because its release
+archive is unsigned; it cannot install that archive as an app update.
+
 ### Files and backups
 
 Folders scan on launch, library switch, and return to the app. Use **Scan folder**
