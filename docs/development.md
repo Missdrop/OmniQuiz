@@ -387,10 +387,21 @@ iPhone or distribution signing certificate is needed for simulator testing:
 ./scripts/flutter build ios --simulator
 ./scripts/flutter devices
 ./scripts/flutter test integration_test/mobile_auth_test.dart -d <simulator-id> --timeout 180s
+./scripts/flutter test integration_test/app_smoke_test.dart -d <simulator-id> --timeout 180s
 ```
 
-Windows/WSL cannot run Xcode or Apple's Simulator. The same suite is prepared for
-iOS, but Android success does not verify Safari callbacks or Keychain behavior.
+The app smoke test runs the real entry point, opens Settings and switches between
+English and Chinese using native persistence. Use a disposable simulator.
+
+The Flutter wrapper selects `/Applications/Xcode.app` when the global developer
+directory still points at standalone Command Line Tools. An explicit
+`DEVELOPER_DIR` takes precedence. A generated, ignored `xcrun` wrapper preserves
+that selection inside Dart native-asset hooks, which filter `DEVELOPER_DIR` out
+of subprocess environments. This avoids requiring a global `sudo xcode-select`.
+
+Windows/WSL cannot run Xcode or Apple's Simulator. Local validation on Xcode 27.1
+and iOS 27.1 passed all nine authentication tests and the native app smoke test,
+including Safari loopback callbacks and Keychain storage.
 Actual OpenAI authorization, account eligibility and plan-funded generation still
 require separate account testing on both platforms.
 
