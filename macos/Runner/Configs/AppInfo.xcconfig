@@ -11,4 +11,4 @@ PRODUCT_NAME = OmniQuiz
 PRODUCT_BUNDLE_IDENTIFIER = io.github.missdrop.omniquiz
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 io.github.missdrop. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 Missdrop. Licensed under GPL-3.0-only.

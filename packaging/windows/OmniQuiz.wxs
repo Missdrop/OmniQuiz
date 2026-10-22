@@ -1,6 +1,6 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
-  <Package Name="OmniQuiz" Manufacturer="OmniQuiz contributors"
+  <Package Name="OmniQuiz" Manufacturer="Missdrop"
            Version="$(var.AppVersion)" Language="1033" Scope="perMachine"
            UpgradeCode="720EB22B-328C-48AA-8FCF-98884F61EAB8">
     <MajorUpgrade DowngradeErrorMessage="A newer version of OmniQuiz is already installed."

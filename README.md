@@ -142,4 +142,6 @@ Contributions are welcome: open an issue or a focused pull request against `dev`
 
 ## License
 
+Copyright © 2026 Missdrop.
+
 [GPL-3.0-only](LICENSE).
