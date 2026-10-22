@@ -32,9 +32,14 @@ available, but generation never silently falls back between billing modes.
   is accepted only after response.completed; failures and truncated streams fail.
 - macOS Release permits a local listener through its network-server entitlement.
 
-Android compilation and automated loopback/OIDC/refresh/SSE tests are validation
-steps, not evidence of real account eligibility or mobile sign-in. Android and
-iOS signed-device tests remain required. In particular, system termination during
+Local Android API 36 emulator tests exercise real Chrome Custom Tabs redirects
+to the app's loopback listener and native encrypted credential storage, alongside
+OIDC/refresh/SSE and validated question-generation tests. They use synthetic
+authorization codes and tokens, not an OpenAI account. Small-screen UI tests cover
+Android and iOS themes in English and Chinese with enlarged text.
+
+These checks do not prove real account eligibility or plan-funded inference.
+Android and iOS signed-device tests remain required. In particular, system termination during
 login discards the pending attempt; the user must start a new login. No remote
 credential relay or CLI subprocess is used. iOS browser/lifecycle behavior is
 still an engineering hypothesis to validate on a physical device.

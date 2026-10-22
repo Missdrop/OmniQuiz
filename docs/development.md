@@ -362,6 +362,38 @@ selection. Only those chunks are decoded into Dart objects. Ready-question count
 use COUNT independently of the 40-question display window. `generationChunks`
 and `readyCount` are repository operations rather than SQL in view models.
 
+## Local mobile authentication tests
+
+Run `scripts/flutter.ps1 test` on Windows for the unit/widget suite. The
+`mobile_settings_test.dart` cases exercise small Android/iOS layouts in both
+languages at 130% text size; an iOS theme is not an iOS runtime test.
+
+With an Android emulator running and Chrome's first-run setup completed:
+
+```powershell
+./scripts/flutter.ps1 test integration_test/mobile_auth_test.dart -d emulator-5554 --timeout 180s
+```
+
+This suite uses the real system browser, loopback sockets and native encrypted
+storage. OAuth/JWKS/Responses use synthetic fixtures and never consume account
+allowance. It also runs the protocol suite on the device. Credentials are written
+under a unique test key and deleted afterward. Run against a disposable emulator,
+since Flutter installs a test entry point under the normal application ID.
+
+For an iOS Simulator, use a Mac with Xcode and an installed iOS runtime. No real
+iPhone or distribution signing certificate is needed for simulator testing:
+
+```bash
+./scripts/flutter build ios --simulator
+./scripts/flutter devices
+./scripts/flutter test integration_test/mobile_auth_test.dart -d <simulator-id> --timeout 180s
+```
+
+Windows/WSL cannot run Xcode or Apple's Simulator. The same suite is prepared for
+iOS, but Android success does not verify Safari callbacks or Keychain behavior.
+Actual OpenAI authorization, account eligibility and plan-funded generation still
+require separate account testing on both platforms.
+
 ## Subscription gateways
 
 OmniQuiz can use a user-operated CLIProxyAPI instance through its standard

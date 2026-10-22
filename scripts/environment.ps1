@@ -5,7 +5,9 @@ $env:GRADLE_USER_HOME = Join-Path $projectRoot '.tooling/gradle'
 $env:ANDROID_HOME = Join-Path $projectRoot '.tooling/android-sdk'
 $env:ANDROID_SDK_ROOT = $env:ANDROID_HOME
 $env:ANDROID_USER_HOME = Join-Path $projectRoot '.tooling/android-user'
+$env:ANDROID_AVD_HOME = Join-Path $env:ANDROID_USER_HOME 'avd'
 $env:ANDROID_EMULATOR_HOME = Join-Path $projectRoot '.tooling/android-emulator'
+New-Item -ItemType Directory -Force $env:ANDROID_EMULATOR_HOME | Out-Null
 $env:XDG_CONFIG_HOME = Join-Path $projectRoot '.tooling/config'
 $env:XDG_CACHE_HOME = Join-Path $projectRoot '.tooling/cache'
 $env:CI = 'true'

@@ -54,6 +54,8 @@ dependencies:
   url_launcher: 6.3.3
   jose: 0.3.5+2
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   flutter_test:
     sdk: flutter
 
