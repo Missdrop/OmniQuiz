@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../application/generation/coordinator.dart';
 import '../../application/ports/repositories.dart';
+import '../../application/ports/model_catalog.dart';
 import '../../application/use_cases/configure_provider.dart';
 import '../../domain/models.dart';
 
@@ -11,13 +12,15 @@ class SettingsViewModel extends ChangeNotifier {
     this.credentials,
     this.configure,
     this.generator,
-    this.coordinator,
-  );
+    this.coordinator, {
+    this.catalog,
+  });
   final ProfileRepository profiles;
   final CredentialStore credentials;
   final ConfigureProvider configure;
   final AiQuestionGenerator generator;
   final GenerationCoordinator coordinator;
+  final ModelCatalog? catalog;
   ProviderProfile? profile;
   bool busy = false, loaded = false;
   String? message;
@@ -29,6 +32,7 @@ class SettingsViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    catalog?.cancel();
     super.dispose();
   }
 
@@ -40,6 +44,31 @@ class SettingsViewModel extends ChangeNotifier {
     }
     loaded = true;
     _notify();
+  }
+
+  Future<List<String>> loadModels(String url, String key, bool noKey) async {
+    if (busy || _disposed || catalog == null) return [];
+    busy = true;
+    message = null;
+    _notify();
+    try {
+      var secret = noKey ? '' : key.trim();
+      if (!noKey && secret.isEmpty) {
+        if (profile == null || url.trim() != profile!.baseUrl) {
+          throw const AppFailure(
+            'Enter the API key for this endpoint before testing.',
+          );
+        }
+        secret = await credentials.read(profile!.credentialRef) ?? '';
+      }
+      return await catalog!.list(url.trim(), secret);
+    } catch (e) {
+      message = e is AppFailure ? e.message : 'Could not load models. Check the endpoint and key, or enter a model manually.';
+      return [];
+    } finally {
+      busy = false;
+      _notify();
+    }
   }
 
   Future<bool> save(

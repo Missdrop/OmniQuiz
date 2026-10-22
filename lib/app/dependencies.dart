@@ -12,6 +12,8 @@ import '../application/use_cases/configure_provider.dart';
 import '../application/use_cases/import_materials.dart';
 import '../domain/policies.dart';
 import '../infrastructure/ai/chat_completions_generator.dart';
+import '../infrastructure/ai/compatible_model_catalog.dart';
+import '../application/ports/model_catalog.dart';
 import '../infrastructure/documents/parsers.dart';
 import '../infrastructure/persistence/database.dart';
 import '../infrastructure/persistence/repositories.dart';
@@ -54,6 +56,7 @@ class AppDependencies {
     ArchiveAccess? archiveAccess,
     CredentialStore? credentialStore,
     AiQuestionGenerator? ai,
+    ModelCatalog? modelCatalog,
   }) async {
     final materials = SqlMaterialRepository(database);
     final language = LanguageViewModel(
@@ -126,6 +129,7 @@ class AppDependencies {
         ConfigureProvider(profiles, credentials, ids),
         generator,
         coordinator,
+        catalog: modelCatalog ?? CompatibleModelCatalog(),
       ),
       language,
       ownsDatabase,

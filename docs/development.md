@@ -226,7 +226,7 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
   reviews graduate a question. Early correct practice records the attempt without
   changing the review streak or due date; an incorrect answer resets the streak.
 - Data stays on one device. Cloud sync, OCR, folder watching,
-  and ChatGPT subscription authorization are not included in this release.
+  and direct ChatGPT subscription authorization are not included in this release.
 
 ## ZIP material import
 
@@ -361,3 +361,48 @@ source order and wrapping at the end. A schema-v2 index supports per-document
 selection. Only those chunks are decoded into Dart objects. Ready-question counts
 use COUNT independently of the 40-question display window. `generationChunks`
 and `readyCount` are repository operations rather than SQL in view models.
+
+## Subscription gateways
+
+OmniQuiz can use a user-operated CLIProxyAPI instance through its standard
+OpenAI-compatible client API. This connects to subscription accounts authenticated
+by the gateway; OmniQuiz does not yet implement direct ChatGPT OAuth. The
+[comparison](chatgpt-sign-in.md#delivery-decision-2026-10-22) explains the tradeoff.
+
+1. Install [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) or its linked
+   desktop manager on a computer/server you control. Use the upstream version's
+   setup instructions and sign into the desired provider there. The CLI's
+   `--codex-login` option is its ChatGPT/Codex account flow.
+2. Configure a strong, unique **client** access key. In the current v8 configuration
+   this is `access.api-keys`; older configurations use a top-level `api-keys` list.
+   Do not put provider OAuth tokens or the management key into OmniQuiz.
+3. For same-computer use, bind the gateway to loopback and enter
+   `http://127.0.0.1:8317/v1` in OmniQuiz. For a phone, make the client API reachable
+   through HTTPS with a certificate trusted by that phone, for example through
+   your own TLS reverse proxy. Use that host's `/v1` URL, not `localhost`.
+   Keep management access local and expose only the client API paths needed by
+   OmniQuiz (`GET /v1/models`, `POST /v1/chat/completions`).
+4. In Settings enter the URL and client key, select **Load available models**,
+   search/select a model, and **Test connection**. Leave JSON mode off initially;
+   enable it only if the selected gateway/model supports it. Save, import the
+   sample material, and generate a batch to verify actual question generation.
+
+The model list is not a guarantee of inference access. A connection test uses
+inference and can consume the upstream account's allowance. The gateway sees
+selected study excerpts and must stay running while generating questions.
+OmniQuiz stores only its client key in OS secure storage; library backups omit it.
+Changing endpoints requires explicitly supplying that endpoint's key. Model-list
+requests reject redirects, have a 20-second timeout and a 1 MiB response limit,
+and do not reveal upstream error bodies.
+
+Phone networking uses the existing native HTTP client and Internet permissions;
+no CLI runtime or OAuth callback is needed on the phone for this route. Remote
+plain HTTP and invalid certificates are not accepted. If using a private LAN
+hostname/address on iOS, local-network permission must be granted. An HTTPS
+internet-reachable endpoint avoids that local-network dependency.
+
+Validation gates: automated transport and 390-pixel English/Chinese picker tests
+cover the client behavior. Complete a real signed Android/iOS device test against
+your authenticated gateway (model listing, question generation, network loss,
+app resume and expired upstream login) before treating that deployment as
+verified. Compiling an APK or receiving a model catalog alone is insufficient.

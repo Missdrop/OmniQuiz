@@ -10,6 +10,35 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get gatewayTitle =>
+      'Use ChatGPT or other accounts through CLIProxyAPI';
+
+  @override
+  String get gatewayHelp =>
+      'Sign in to your provider in your own CLIProxyAPI gateway first. Enter its OpenAI-compatible base URL and client API key below, load the available models, then test and save. Use the gateway client key, not a ChatGPT password, OAuth token, or gateway management key. Model access and usage limits depend on the connected account. The gateway receives the study excerpts you send for generation.';
+
+  @override
+  String get gatewayAddressHelp =>
+      'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. Direct ChatGPT sign-in is not implemented yet.';
+
+  @override
+  String get loadModels => 'Load available models';
+
+  @override
+  String get chooseModel => 'Choose a model';
+
+  @override
+  String get searchModels => 'Search models';
+
+  @override
+  String get loadModelsError =>
+      'Could not load models. Check the endpoint and key, or enter a model manually.';
+
+  @override
+  String get noModelsError =>
+      'No models are available. Sign in to a provider on your gateway, or enter a model manually.';
+
+  @override
   String get library => 'Library';
 
   @override

@@ -98,6 +98,54 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @gatewayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use ChatGPT or other accounts through CLIProxyAPI'**
+  String get gatewayTitle;
+
+  /// No description provided for @gatewayHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to your provider in your own CLIProxyAPI gateway first. Enter its OpenAI-compatible base URL and client API key below, load the available models, then test and save. Use the gateway client key, not a ChatGPT password, OAuth token, or gateway management key. Model access and usage limits depend on the connected account. The gateway receives the study excerpts you send for generation.'**
+  String get gatewayHelp;
+
+  /// No description provided for @gatewayAddressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. Direct ChatGPT sign-in is not implemented yet.'**
+  String get gatewayAddressHelp;
+
+  /// No description provided for @loadModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Load available models'**
+  String get loadModels;
+
+  /// No description provided for @chooseModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a model'**
+  String get chooseModel;
+
+  /// No description provided for @searchModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Search models'**
+  String get searchModels;
+
+  /// No description provided for @loadModelsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load models. Check the endpoint and key, or enter a model manually.'**
+  String get loadModelsError;
+
+  /// No description provided for @noModelsError.
+  ///
+  /// In en, this message translates to:
+  /// **'No models are available. Sign in to a provider on your gateway, or enter a model manually.'**
+  String get noModelsError;
+
   /// No description provided for @library.
   ///
   /// In en, this message translates to:

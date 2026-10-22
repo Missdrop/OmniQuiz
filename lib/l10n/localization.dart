@@ -16,6 +16,10 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Could not load models. Check the endpoint and key, or enter a model manually.':
+          loadModelsError,
+      'No models are available. Sign in to a provider on your gateway, or enter a model manually.':
+          noModelsError,
       'Scan cancelled. Completed imports were kept.': scanCancelled,
       'Could not restore this excluded file.': restoreExcludedError,
       'Finish the current operation before backing up or restoring.':

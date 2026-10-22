@@ -10,6 +10,32 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get gatewayTitle => '通过 CLIProxyAPI 使用 ChatGPT 等账号';
+
+  @override
+  String get gatewayHelp =>
+      '先在你自己的 CLIProxyAPI 网关中登录服务商账号。在下方填写网关兼容 OpenAI 的接口地址和客户端密钥，获取可用模型，再测试并保存。请使用网关客户端密钥，不是 ChatGPT 密码、OAuth 令牌或网关管理密钥。可用模型和用量限制取决于所连接的账号。生成题目时，所选资料片段会经过该网关。';
+
+  @override
+  String get gatewayAddressHelp =>
+      '本机电脑：http://127.0.0.1:8317/v1\n手机：填写手机可访问的 HTTPS 网关地址，以 /v1 结尾。手机上的 localhost 指手机自身，不是你的电脑。使用时需保持网关运行。目前尚未实现直接登录 ChatGPT。';
+
+  @override
+  String get loadModels => '获取可用模型';
+
+  @override
+  String get chooseModel => '选择模型';
+
+  @override
+  String get searchModels => '搜索模型';
+
+  @override
+  String get loadModelsError => '无法获取模型。请检查接口地址和密钥，或手动填写模型名称。';
+
+  @override
+  String get noModelsError => '没有可用模型。请先在网关中登录服务商账号，或手动填写模型名称。';
+
+  @override
   String get library => '资料库';
 
   @override

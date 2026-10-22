@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import 'settings_view_model.dart';
 import 'language_view_model.dart';
+import 'model_picker.dart';
 import '../shared/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -108,6 +109,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   context.l10n.aiProvider,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
+                ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Text(context.l10n.gatewayTitle),
+                  children: [
+                    Text(context.l10n.gatewayHelp),
+                    const SizedBox(height: 12),
+                    SelectableText(context.l10n.gatewayAddressHelp),
+                    const SizedBox(height: 12),
+                  ],
+                ),
                 const SizedBox(height: 24),
                 TextField(
                   controller: _url,
@@ -128,6 +139,29 @@ class _SettingsPageState extends State<SettingsPage> {
                     hintText: context.l10n.modelHint,
                   ),
                 ),
+                if (vm.catalog != null)
+                  TextButton.icon(
+                    key: const ValueKey('load-models'),
+                    onPressed: vm.busy || !vm.loaded
+                        ? null
+                        : () async {
+                            final models = await vm.loadModels(
+                              _url.text,
+                              _key.text,
+                              _noKey,
+                            );
+                            if (!context.mounted || models.isEmpty) return;
+                            final selected = await showDialog<String>(
+                              context: context,
+                              builder: (_) => ModelPicker(models: models),
+                            );
+                            if (mounted && selected != null) {
+                              setState(() => _model.text = selected);
+                            }
+                          },
+                    icon: const Icon(Icons.list_alt),
+                    label: Text(context.l10n.loadModels),
+                  ),
                 const SizedBox(height: 20),
                 TextField(
                   controller: _key,

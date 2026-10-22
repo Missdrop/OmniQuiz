@@ -1,5 +1,13 @@
 {
   "@@locale": "en",
+  "gatewayTitle": "Use ChatGPT or other accounts through CLIProxyAPI",
+  "gatewayHelp": "Sign in to your provider in your own CLIProxyAPI gateway first. Enter its OpenAI-compatible base URL and client API key below, load the available models, then test and save. Use the gateway client key, not a ChatGPT password, OAuth token, or gateway management key. Model access and usage limits depend on the connected account. The gateway receives the study excerpts you send for generation.",
+  "gatewayAddressHelp": "On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway's reachable HTTPS address ending in /v1. A phone's localhost refers to the phone, not your computer. Keep the gateway running. Direct ChatGPT sign-in is not implemented yet.",
+  "loadModels": "Load available models",
+  "chooseModel": "Choose a model",
+  "searchModels": "Search models",
+  "loadModelsError": "Could not load models. Check the endpoint and key, or enter a model manually.",
+  "noModelsError": "No models are available. Sign in to a provider on your gateway, or enter a model manually.",
   "library": "Library",
   "practice": "Practice",
   "review": "Review",

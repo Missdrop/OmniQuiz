@@ -9,7 +9,36 @@ sign-in, and no real account authorization or plan-funded inference was run.
 OmniQuiz already supports configurable OpenAI-compatible Chat Completions APIs.
 That protocol compatibility does not mean the provider must be OpenAI.
 
-## Recommended route
+## Delivery decision (2026-10-22)
+
+For a first version that can serve both desktop and phone clients, use an
+independently operated CLIProxyAPI gateway. OmniQuiz now discovers its models
+through `GET /v1/models`, offers a searchable picker, and continues using the
+existing Chat Completions generator and secure client-key storage. Provider login,
+refresh and protocol translation stay in the gateway. This is not official
+ChatGPT plan-sharing OAuth implemented by OmniQuiz, and compatibility does not
+guarantee any provider's account eligibility or continued subscription access.
+
+The phone connects over HTTPS to a running gateway; it does not run a CLI or
+receive the provider's refresh token. This sacrifices standalone phone operation.
+The common Dart transport and phone-sized English/Chinese UI have automated
+coverage; real account login and Android/iOS device inference still need live
+validation. See [gateway setup](development.md#subscription-gateways).
+
+| Route | Phone implications | Decision |
+| --- | --- | --- |
+| Official direct plan-sharing OAuth + Responses | No gateway in principle; documented loopback callback needs native lifecycle validation | Preferred long-term standalone route; not implemented yet |
+| CLIProxyAPI on a user-owned host | Phone uses HTTPS; host must stay online | First cross-platform integration; also exposes other configured providers |
+| Bundled CLIProxyAPI or Codex subprocess | Adds installation/process management; does not solve iOS background operation | Do not bundle in the phone app |
+| Hosted third-party relay | Phone-friendly HTTP interface, but another party holds account access or charges separately | Not required or selected |
+
+CLIProxyAPI sources: [project](https://github.com/router-for-me/CLIProxyAPI),
+[configuration](https://github.com/router-for-me/CLIProxyAPI/blob/main/config.example.yaml),
+[management/login API](https://help.router-for.me/management/api).
+The management API can access account auth files and administrative operations;
+OmniQuiz intentionally uses only the client inference API, never a management key.
+
+## Long-term direct route
 
 Implement direct **Sign in with ChatGPT** for the open-source, locally hosted app.
 The documented dynamic registration flow does not require an OmniQuiz backend,

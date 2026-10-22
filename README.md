@@ -49,6 +49,21 @@ See the [development guide](docs/development.md) for platform requirements.
 You need an API provider compatible with OpenAI Chat Completions. New questions require
 an internet connection and may incur charges from your provider. Saved questions work offline.
 
+### Use a subscription through CLIProxyAPI
+
+You can connect OmniQuiz to your own [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+gateway and use the provider accounts you have signed into there, including its
+ChatGPT/Codex route. In **Settings**, enter the gateway's `/v1` base URL and
+**client API key**, choose **Load available models**, then test and save.
+Available models and usage limits depend on your gateway and connected accounts.
+
+On the same computer, the usual address is `http://127.0.0.1:8317/v1`.
+On a phone, use a reachable **HTTPS** gateway address; `localhost` means the phone
+itself. Keep the gateway running. This is a gateway connection, not direct
+ChatGPT sign-in inside OmniQuiz. See [setup and mobile requirements](docs/development.md#subscription-gateways).
+
+### Files and backups
+
 Folders scan on launch, library switch, and return to the app. Use **Scan folder**
 after editing files while OmniQuiz stays open. Scans import new and changed files.
 Missing source files are marked, but their imported text, questions, and progress
