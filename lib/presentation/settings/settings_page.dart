@@ -290,7 +290,8 @@ class _SettingsPageState extends State<SettingsPage> {
             context: context,
             applicationName: 'OmniQuiz',
             applicationVersion: widget.updates?.version,
-            applicationLegalese: 'Copyright © 2026 OmniQuiz contributors\nLicensed under GPL-3.0-only',
+            applicationLegalese:
+                'Copyright © 2026 Missdrop\nLicensed under GPL-3.0-only',
           ),
           child: Text(context.l10n.licenses),
         ),
