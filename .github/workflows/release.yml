@@ -7,7 +7,6 @@ on:
       - '!nightly'
 permissions:
   contents: read
-  actions: read
 concurrency:
   group: release-${{ github.ref }}
   cancel-in-progress: false

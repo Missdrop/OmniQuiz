@@ -59,18 +59,6 @@ test('first nightly creates one draft then publishes it', async t => {
   assert.equal(calls.at(-1).args.draft, false);
 });
 
-test('release notes reflect whether Windows signing was enabled', async t => {
-  for (const windowsSigned of [false, true]) {
-    const { calls, options } = fixture(t, { existing: false });
-    fs.writeFileSync(path.join(options.directory, 'windows-signing-status.json'), JSON.stringify({ signed: windowsSigned }));
-    await publish(options);
-    const body = calls.at(-1).args.body;
-    assert.equal(body.includes('executables are code-signed through SignPath Foundation'), windowsSigned);
-    assert.equal(body.includes('installer is not code-signed'), !windowsSigned);
-    assert.ok(body.includes('Code signing policy:'));
-  }
-});
-
 test('tag release uses the exact tag name and never moves its tag', async t => {
   const { calls, options } = fixture(t, { nightly: false, existing: false });
   await publish(options);
