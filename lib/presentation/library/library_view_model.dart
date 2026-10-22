@@ -158,6 +158,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<void> _allowImported(ImportInput input) async {
     if (scanner != null && await materials.byOrigin(input.origin) != null) {
       await scanner!.include(input.origin);
+      missingOrigins.remove(input.origin);
     }
   }
 

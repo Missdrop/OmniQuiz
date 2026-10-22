@@ -35,14 +35,14 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       late Directory root;
-      late QuizDatabase global;
+      late _TrackedDatabase global;
       late LibraryCatalog catalog;
       late AppDependencies initial;
       final ai = FakeGenerator()..gate = Completer<void>();
       Future<void>? generating;
       await tester.runAsync(() async {
         root = await Directory.systemTemp.createTemp('omniquiz-host-');
-        global = QuizDatabase(
+        global = _TrackedDatabase(
           NativeDatabase(File(p.join(root.path, 'omniquiz.sqlite'))),
         );
         catalog = LibraryCatalog(global, root.path);
@@ -147,12 +147,34 @@ void main() {
       expect(find.text('Physics notes.md'), findsNothing);
       expect(tester.takeException(), isNull);
 
+      // Drive both Flutter microtasks and native I/O until shutdown completes.
+      // Fixed delays can delete files while Windows still has SQLite open.
       await tester.pumpWidget(const SizedBox.shrink());
-      // Allow the host to close its session and native worker on unmount.
+      for (var i = 0; i < 200 && !global.closed.isCompleted; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+      expect(
+        global.closed.isCompleted,
+        true,
+        reason: 'Host must close its database',
+      );
       await tester.runAsync(() async {
-        await Future<void>.delayed(const Duration(milliseconds: 200));
         await root.delete(recursive: true);
       });
     },
   );
+}
+
+class _TrackedDatabase extends QuizDatabase {
+  _TrackedDatabase(super.executor);
+  final closed = Completer<void>();
+
+  @override
+  Future<void> close() async {
+    await super.close();
+    closed.complete();
+  }
 }

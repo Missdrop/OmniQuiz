@@ -12,6 +12,7 @@ class BackupArchive {
   static const maxArchiveBytes = 100 * 1024 * 1024;
   static const maxExpandedBytes = 512 * 1024 * 1024;
   static const maxEntries = 10000;
+  static const maxManifestBytes = 1024 * 1024;
   static final _allowed = RegExp(
     r'^(manifest\.json|libraries/[0-9a-f-]{36}/(database\.sqlite|files/[0-9a-f-]{36}))$',
   );
@@ -68,7 +69,7 @@ class BackupArchive {
       final limit = name.endsWith('.sqlite')
           ? 128 * 1024 * 1024
           : name == 'manifest.json'
-          ? 1024 * 1024
+          ? maxManifestBytes
           : 20 * 1024 * 1024;
       if (!_allowed.hasMatch(name) ||
           !seen.add(name) ||

@@ -172,6 +172,45 @@ void main() {
       await db.close();
     }
   });
+  test('restoring a database with renamed required columns leaves the catalog unchanged', () async {
+    final service = LibraryBackup(catalog);
+    final archive = p.join(root.path, 'schema.zip');
+    await service.exportTo(archive);
+    final stage = await Directory(p.join(root.path, 'schema-stage')).create();
+    final manifest = BackupArchive.unpack(archive, stage.path);
+    final db = sqlite.sqlite3.open(
+      p.join(stage.path, manifest.libraries.single.database),
+    );
+    try {
+      db.execute(
+        'ALTER TABLE questions RENAME COLUMN payload TO broken_payload',
+      );
+    } finally {
+      db.close();
+    }
+    BackupArchive.pack(stage.path, archive);
+    await expectLater(service.restoreFrom(archive), throwsA(isA<AppFailure>()));
+    expect(catalog.libraries, hasLength(1));
+    expect((await SqlQuestionRepository(global).stats()).attempts, 1);
+  });
+
+  test(
+    'export rejects metadata larger than the restore manifest limit',
+    () async {
+      final source = await File(p.join(root.path, 'legacy.md'))
+          .writeAsString('Notes');
+      await global.customStatement('UPDATE documents SET name=?, origin=?', [
+        '${'a' * (1024 * 1024)}.md',
+        source.path,
+      ]);
+      final archive = p.join(root.path, 'oversized.zip');
+      await expectLater(
+        LibraryBackup(catalog).exportTo(archive),
+        throwsA(isA<AppFailure>()),
+      );
+      expect(await File(archive).exists(), false);
+    },
+  );
   test(
     'backup preserves exclusions and rebases them to the restored folder',
     () async {

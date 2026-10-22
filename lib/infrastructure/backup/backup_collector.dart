@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -38,7 +39,20 @@ class BackupCollector {
       libraries.add(await _library(library));
     }
     final manifest = BackupManifest(libraries, missingOriginals: _missing);
-    await File(p.join(stage, 'manifest.json')).writeAsString(manifest.encode());
+    final encoded = manifest.encode();
+    final bytes = utf8.encode(encoded);
+    // Export must obey the same limits and mappings as restore. The manifest
+    // already counts as one entry, but its bytes still count toward the budget.
+    if (bytes.length > BackupArchive.maxManifestBytes ||
+        _bytes + bytes.length > BackupArchive.maxExpandedBytes) {
+      throw const AppFailure('Backup is too large.');
+    }
+    try {
+      BackupManifest.decode(encoded);
+    } on FormatException {
+      throw const AppFailure('A source file could not be backed up.');
+    }
+    await File(p.join(stage, 'manifest.json')).writeAsBytes(bytes);
     return manifest;
   }
 

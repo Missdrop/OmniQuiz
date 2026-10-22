@@ -9,14 +9,16 @@ import '../../application/libraries/scan_state.dart';
 
 /// SQLite snapshot hygiene and validation are independent of ZIP/file picking.
 class BackupDatabase {
+  // Required columns are shared by schema versions 1 and 2 (v2 adds an index).
+  // Checking table names alone accepts snapshots that repositories cannot read.
   static const _tables = {
-    'settings',
-    'documents',
-    'chunks',
-    'questions',
-    'attempts',
-    'reviews',
-    'jobs',
+    'settings': 'key, value',
+    'documents': 'id, name, revision, origin, imported_at',
+    'chunks': 'id, document_id, payload',
+    'questions': 'id, document_id, revision, payload, fingerprint, created_at, flagged, stale',
+    'attempts': 'id, question_id, option_id, correct, at',
+    'reviews': 'question_id, streak, mistakes, due_at',
+    'jobs': 'id, epoch, scope, request, state, attempt, lease_until, retry_at, message',
   };
 
   static Future<void> snapshot(QuizDatabase database, String target) async {
@@ -76,15 +78,18 @@ class BackupDatabase {
       "SELECT name,type,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
     )) {
       if (row['type'] == 'table' &&
-          _tables.contains(row['name']) &&
+          _tables.containsKey(row['name']) &&
           !(row['sql'] as String).toUpperCase().contains('VIRTUAL TABLE')) {
         found.add(row['name'] as String);
       } else if (row['type'] != 'index') {
         throw const FormatException('Unexpected schema object');
       }
     }
-    if (!found.containsAll(_tables)) {
+    if (!found.containsAll(_tables.keys)) {
       throw const FormatException('Missing backup tables');
+    }
+    for (final table in _tables.entries) {
+      db.select('SELECT ${table.value} FROM ${table.key} LIMIT 0');
     }
   }
 

@@ -211,4 +211,29 @@ void main() {
       expect(await files.scan().toList(), hasLength(2));
     },
   );
+  test(
+    'reimporting a missing source clears its missing badge immediately',
+    () async {
+      final deps = await AppDependencies.create(
+        database: global,
+        ownsDatabase: false,
+        libraryFiles: DirectoryLibraryFiles(catalog.selected.directory),
+        credentialStore: MemoryCredentials(),
+        ai: FakeGenerator(),
+      );
+      try {
+        await deps.library.import(sample: true);
+        final origin = deps.library.documents.single.origin;
+        await File(origin).delete();
+        await deps.library.scan();
+        expect(deps.library.missingOrigins, contains(origin));
+        await deps.library.import(sample: true);
+        expect(await File(origin).exists(), true);
+        expect(deps.library.missingOrigins, isEmpty);
+        expect(deps.library.documents, hasLength(1));
+      } finally {
+        await deps.dispose();
+      }
+    },
+  );
 }

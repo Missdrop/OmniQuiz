@@ -50,16 +50,20 @@ You need an API provider compatible with OpenAI Chat Completions. New questions 
 an internet connection and may incur charges from your provider. Saved questions work offline.
 
 Folders scan on launch, library switch, and return to the app. Use **Scan folder**
-after editing files while OmniQuiz stays open. Each scan imports new and changed
-files; removed sources leave practice, while answer history is retained. Hidden
-files and symbolic links are skipped. Mobile devices use app-managed folders and
+after editing files while OmniQuiz stays open. Scans import new and changed files.
+Missing source files are marked, but their imported text, questions, and progress
+remain available. Removing a document in OmniQuiz excludes it from future scans
+without deleting the original file; use **Excluded files** to include it again.
+Hidden files and symbolic links are skipped. Mobile devices use app-managed folders and
 file or ZIP import. ZIP imports preserve subfolders and skip hidden/unsupported
 files. Use an unencrypted ZIP (up to 100 MB compressed and expanded, 1,000 entries,
 20 MB per material). API settings and interface language are shared across libraries.
 
 In **Settings → Back up your libraries**, save an OmniQuiz backup before moving
 to another device or reinstalling. Restoring adds libraries without replacing
-existing data. AI settings and API keys are excluded. Keep backups private.
+existing data. Missing originals cannot be included, but their imported text and
+progress are preserved; the export reports how many originals are missing.
+AI settings and API keys are excluded. Keep backups private.
 
 ## Your data
 
