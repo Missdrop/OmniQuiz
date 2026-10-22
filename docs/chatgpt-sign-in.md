@@ -3,42 +3,44 @@
 Rechecked against the current official sign-in, sessions, inference, limits,
 UI guidance and DevKit documentation. Public OIDC discovery was also fetched;
 its issuer, authorization/token endpoints, JWKS and revocation endpoint match
-these docs. This is a design proposal: OmniQuiz does not implement subscription
-sign-in, and no real account authorization or plan-funded inference was run.
+these docs. An experimental direct implementation is now present. No real account
+authorization or plan-funded inference has been verified.
 
 OmniQuiz already supports configurable OpenAI-compatible Chat Completions APIs.
 That protocol compatibility does not mean the provider must be OpenAI.
 
-## Delivery decision (2026-10-22)
+## Current implementation: standalone devices
 
-For a first version that can serve both desktop and phone clients, use an
-independently operated CLIProxyAPI gateway. OmniQuiz now discovers its models
-through `GET /v1/models`, offers a searchable picker, and continues using the
-existing Chat Completions generator and secure client-key storage. Provider login,
-refresh and protocol translation stay in the gateway. This is not official
-ChatGPT plan-sharing OAuth implemented by OmniQuiz, and compatibility does not
-guarantee any provider's account eligibility or continued subscription access.
+The required experience is independent phone login without a gateway, computer,
+or server. The primary implementation now uses the official dynamic-registration
+flow directly in Dart. CLIProxyAPI remains an optional compatible endpoint.
 
-The phone connects over HTTPS to a running gateway; it does not run a CLI or
-receive the provider's refresh token. This sacrifices standalone phone operation.
-The common Dart transport and phone-sized English/Chinese UI have automated
-coverage; real account login and Android/iOS device inference still need live
-validation. See [gateway setup](development.md#subscription-gateways).
+Settings exposes experimental sign-in, saved account registrations, account model
+selection, a small inference test before activation, sign-out and a usage link.
+The ChatGPT connection is an explicit profile mode. API-key connections remain
+available, but generation never silently falls back between billing modes.
 
-| Route | Phone implications | Decision |
-| --- | --- | --- |
-| Official direct plan-sharing OAuth + Responses | No gateway in principle; documented loopback callback needs native lifecycle validation | Preferred long-term standalone route; not implemented yet |
-| CLIProxyAPI on a user-owned host | Phone uses HTTPS; host must stay online | First cross-platform integration; also exposes other configured providers |
-| Bundled CLIProxyAPI or Codex subprocess | Adds installation/process management; does not solve iOS background operation | Do not bundle in the phone app |
-| Hosted third-party relay | Phone-friendly HTTP interface, but another party holds account access or charges separately | Not required or selected |
+- Android uses Custom Tabs and iOS uses SFSafariViewController through url_launcher.
+  The app starts a loopback-only listener before opening that browser component.
+  An unsupported browser mode fails instead of silently switching to a WebView.
+- State, nonce, PKCE, callback host/path, issued client ID, JWT RSA signature,
+  issuer, audience, expiry and returning subject are checked.
+- Registrations and tokens are stored together in OS secure storage, outside
+  SQLite and backups. Refreshes are serialized; rotated tokens are stored before
+  verifying a replacement identity token, and remain unusable until verified.
+- Only the fixed public Responses endpoint receives ChatGPT access tokens. Text
+  is accepted only after response.completed; failures and truncated streams fail.
+- macOS Release permits a local listener through its network-server entitlement.
 
-CLIProxyAPI sources: [project](https://github.com/router-for-me/CLIProxyAPI),
-[configuration](https://github.com/router-for-me/CLIProxyAPI/blob/main/config.example.yaml),
-[management/login API](https://help.router-for.me/management/api).
-The management API can access account auth files and administrative operations;
-OmniQuiz intentionally uses only the client inference API, never a management key.
+Android compilation and automated loopback/OIDC/refresh/SSE tests are validation
+steps, not evidence of real account eligibility or mobile sign-in. Android and
+iOS signed-device tests remain required. In particular, system termination during
+login discards the pending attempt; the user must start a new login. No remote
+credential relay or CLI subprocess is used. iOS browser/lifecycle behavior is
+still an engineering hypothesis to validate on a physical device.
 
-## Long-term direct route
+## Direct protocol
+
 
 Implement direct **Sign in with ChatGPT** for the open-source, locally hosted app.
 The documented dynamic registration flow does not require an OmniQuiz backend,
@@ -61,7 +63,7 @@ and hosted file search are not available on this route.
 
 ## Platform sequence
 
-Desktop first: Windows, macOS and Linux can host the documented HTTP loopback
+Desktop and mobile are implementation targets. Windows, macOS and Linux can host the documented HTTP loopback
 callback. Registration requires `127.0.0.1` and `/auth/callback`; an available port
 may vary between attempts, but the exact URI must match within an attempt.
 
@@ -104,7 +106,7 @@ an alternative integration, not a prerequisite and not an authentication bypass.
 | Platform | Assessment and work before claiming support |
 | --- | --- |
 | Windows/Linux | Best initial validation targets: browser authorization and a listener bound only to `127.0.0.1`, with a per-attempt ephemeral port. Test occupied ports, cancellation, wrong state and request timeouts. |
-| macOS | Same desktop flow, but the current Release sandbox entitlement has network client access only. Add network server access for the loopback listener and validate the signed Release app; Debug already has that entitlement. |
+| macOS | Same desktop flow, but Release now includes network-server access for the listener. Validate the signed Release app. |
 | Android | Experimental until tested: the loopback listener must remain available while the system browser is foregrounded. Test process/activity lifecycle, receiving the callback, explicit return to OmniQuiz and subsequent refresh. Existing Internet permission/local cleartext configuration does not prove the login works. |
 | iOS | Requires a feasibility spike: switching to the browser can suspend the app/listener. The reviewed OpenAI docs specify loopback, not a custom URL scheme or Universal Link recipe. Do not replace the callback with one of those without documented server support. |
 
@@ -189,20 +191,19 @@ pause prefill and offer Manage usage, while temporary usage-check outages may
 use bounded backoff. Do not replay an uncertain paid request or continue saving
 partial questions. Retain existing buffered questions while generation is paused.
 
-## Implementation sequence and acceptance gates
+## Remaining acceptance gates
 
 1. Build a small desktop OAuth/model-discovery/completed-inference spike using
    an explicitly authorized eligible account and a trivial non-private prompt.
    Login or model listing by itself is not a pass. Do not automatically launch
    account authorization as part of unit tests or CI.
-2. Add independent session/authentication and Responses adapters, then integrate
-   selection into settings and the existing quiz generator. Show the active
-   account, plan-use state and a Manage usage link; keep API-key access selectable.
+2. Exercise the implemented account/session and Responses adapters through the
+   real settings UI. Check account switching, model selection and usage links.
 3. Test callback state/nonce mismatch, duplicate callbacks, occupied ports,
    identity mismatch, missing scopes, token rotation races, revocation, split
    UTF-8/SSE events, quota failures after output, cancelled streams and backup
    exclusion of all account credentials. Run real signed desktop smoke tests.
-4. Run an Android-only mobile feasibility spike before presenting that platform
+4. Run Android mobile validation before presenting that platform
    as supported. Exercise browser round trips, activity/process recreation,
    cancellation, account switching, lock/unlock, refresh and completed inference.
 5. Validate iOS separately, especially background suspension and browser return.

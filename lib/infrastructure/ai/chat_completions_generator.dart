@@ -6,6 +6,7 @@ import '../../application/generation/question_validator.dart';
 import '../../application/ports/repositories.dart';
 import '../../domain/models.dart';
 import 'chat_completions_client.dart';
+import 'chatgpt_responses.dart';
 
 /// Prepares study prompts and validates untrusted output; transport is separate.
 class ChatCompletionsGenerator implements AiQuestionGenerator {
@@ -14,6 +15,7 @@ class ChatCompletionsGenerator implements AiQuestionGenerator {
     this.validator, {
     http.Client Function()? clientFactory,
     Duration requestTimeout = const Duration(seconds: 90),
+    this.chatGpt,
   }) : _client = ChatCompletionsClient(
          clientFactory: clientFactory,
          timeout: requestTimeout,
@@ -21,10 +23,24 @@ class ChatCompletionsGenerator implements AiQuestionGenerator {
   final CredentialStore credentials;
   final QuestionValidator validator;
   final ChatCompletionsClient _client;
+  final ChatGptResponses? chatGpt;
+  Future<String> _complete(
+    ProviderProfile profile,
+    String key,
+    List<Map<String, String>> messages,
+  ) {
+    if (profile.chatGpt) {
+      if (chatGpt == null) {
+        throw const AppFailure('Sign in to ChatGPT in Settings first.');
+      }
+      return chatGpt!.complete(profile, messages);
+    }
+    return _client.complete(profile, key, messages);
+  }
 
   @override
   Future<void> probe(ProviderProfile profile, String apiKey) async {
-    final content = await _client.complete(profile, apiKey, [
+    final content = await _complete(profile, apiKey, [
       {'role': 'user', 'content': 'Return only this JSON object: {"ok":true}'},
     ]);
     final result = _decode(content);
@@ -55,7 +71,9 @@ class ChatCompletionsGenerator implements AiQuestionGenerator {
   Future<List<Question>> generate(GenerationRequest request) async {
     String? key;
     try {
-      key = await credentials.read(request.profile.credentialRef);
+      key = request.profile.chatGpt
+          ? ''
+          : await credentials.read(request.profile.credentialRef);
     } catch (_) {
       throw const AppFailure(
         'Cannot access secure storage. Unlock your device and try again.',
@@ -66,7 +84,7 @@ class ChatCompletionsGenerator implements AiQuestionGenerator {
         'API credentials are missing. Save them in Settings.',
       );
     }
-    final content = await _client.complete(request.profile, key, [
+    final content = await _complete(request.profile, key, [
       {
         'role': 'system',
         'content': '''You create rigorous single-choice study questions strictly from supplied source excerpts.
@@ -95,5 +113,8 @@ Exactly one option must be correct. Use plausible distractors, vary answer posit
   }
 
   @override
-  void cancel() => _client.cancel();
+  void cancel() {
+    _client.cancel();
+    chatGpt?.cancel();
+  }
 }

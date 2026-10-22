@@ -18,7 +18,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gatewayAddressHelp =>
-      '本机电脑：http://127.0.0.1:8317/v1\n手机：填写手机可访问的 HTTPS 网关地址，以 /v1 结尾。手机上的 localhost 指手机自身，不是你的电脑。使用时需保持网关运行。目前尚未实现直接登录 ChatGPT。';
+      '本机电脑：http://127.0.0.1:8317/v1\n手机：填写手机可访问的 HTTPS 网关地址，以 /v1 结尾。手机上的 localhost 指手机自身，不是你的电脑。使用时需保持网关运行。独立使用请选上方实验性 ChatGPT 登录。';
 
   @override
   String get loadModels => '获取可用模型';
@@ -146,7 +146,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generateBody =>
-      '相关资料片段将发送给你配置的 AI 服务商，并消耗 API 额度。练习期间会自动补充题目，最多缓存 20 道，你可以随时暂停。';
+      '相关资料片段将发送至所选 AI 连接，并消耗订阅或 API 额度。练习期间会自动补充题目，最多缓存 20 道，你可以随时暂停。';
 
   @override
   String get start => '开始';
@@ -246,7 +246,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsSubtitle =>
-      '连接兼容 OpenAI Chat Completions 的 API，无需 OmniQuiz 账号或服务器。';
+      '使用 ChatGPT 订阅或兼容 OpenAI 的 API，无需 OmniQuiz 账号或服务器。';
 
   @override
   String get aiProvider => 'AI 服务商';
@@ -298,7 +298,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get privacyNotice =>
-      '生成题目会将选中的资料片段发送给你的 AI 服务商。连接测试会发起少量付费 API 请求。密钥存放在系统安全存储中，资料和学习进度保存在本地。';
+      '生成题目会将选中的资料片段发送至所选 AI 连接。连接测试会使用少量订阅或 API 额度。凭据存放在系统安全存储中，资料和学习进度保存在本地。';
 
   @override
   String get licenses => '开源许可证';
@@ -726,4 +726,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String scanSourceSummary(int excluded, int missing) {
     return '$excluded 个已排除 · $missing 个原文件暂不可用';
   }
+
+  @override
+  String get chatGptTitle => 'ChatGPT 订阅 · 实验性功能';
+
+  @override
+  String get chatGptHelp =>
+      '在本设备登录并授权使用符合条件的 ChatGPT 订阅，无需 API 密钥、电脑或网关。在浏览器完成授权后返回这里。手机登录属于实验性功能，仍需实机验证。';
+
+  @override
+  String get chatGptActive => '当前出题连接';
+
+  @override
+  String get chatGptAccount => 'ChatGPT 账号';
+
+  @override
+  String get continueChatGpt => '继续使用 ChatGPT';
+
+  @override
+  String get chatGptAddAccount => '添加其他账号';
+
+  @override
+  String get chatGptSignOut => '退出登录';
+
+  @override
+  String get chatGptUseModel => '测试并使用此模型';
+
+  @override
+  String get chatGptTestHelp => '测试会发送少量请求并使用订阅额度。仅登录不会切换当前的出题连接。';
+
+  @override
+  String get chatGptUsage => '管理 ChatGPT 用量';
+
+  @override
+  String get chatGptRequestError => 'ChatGPT 请求失败。请重新登录或检查订阅授权。';
+
+  @override
+  String get chatGptIdentityError => '无法验证 ChatGPT 身份。请重新登录。';
+
+  @override
+  String get chatGptLoginCancelled => 'ChatGPT 登录已取消或超时。请重试。';
+
+  @override
+  String get chatGptLoginBusy => 'ChatGPT 登录正在进行中。';
+
+  @override
+  String get chatGptScopeError => '尚未授权使用 ChatGPT 订阅。请在登录时启用此权限。';
+
+  @override
+  String get chatGptSignInFirst => '请先在设置中登录 ChatGPT。';
+
+  @override
+  String get chatGptInterrupted => 'ChatGPT 请求被中断。请重试。';
+
+  @override
+  String get chatGptIncomplete => 'ChatGPT 未能完成回复。请检查订阅用量后重试。';
+
+  @override
+  String get chatGptReady => 'ChatGPT 已就绪。新题目将使用所选账号生成。';
+
+  @override
+  String get chatGptSignedOut => '已退出 ChatGPT。';
+
+  @override
+  String get chatGptRevocationUnconfirmed =>
+      '已在本地退出。请在 ChatGPT 设置中断开 OmniQuiz，以确认撤销授权。';
 }

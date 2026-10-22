@@ -113,7 +113,7 @@ abstract class AppLocalizations {
   /// No description provided for @gatewayAddressHelp.
   ///
   /// In en, this message translates to:
-  /// **'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. Direct ChatGPT sign-in is not implemented yet.'**
+  /// **'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.'**
   String get gatewayAddressHelp;
 
   /// No description provided for @loadModels.
@@ -365,7 +365,7 @@ abstract class AppLocalizations {
   /// No description provided for @generateBody.
   ///
   /// In en, this message translates to:
-  /// **'Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.'**
+  /// **'Relevant excerpts will be sent to your selected AI connection and consume its plan allowance or API usage. Questions refill automatically up to 20 while practicing. You can pause at any time.'**
   String get generateBody;
 
   /// No description provided for @start.
@@ -563,7 +563,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.'**
+  /// **'Use your ChatGPT plan or an OpenAI-compatible API. No OmniQuiz account or server required.'**
   String get settingsSubtitle;
 
   /// No description provided for @aiProvider.
@@ -665,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacyNotice.
   ///
   /// In en, this message translates to:
-  /// **'Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.'**
+  /// **'Generation sends selected excerpts to your AI connection. Connection tests use a small amount of plan allowance or API usage. Credentials stay in OS secure storage; materials and progress stay local.'**
   String get privacyNotice;
 
   /// No description provided for @licenses.
@@ -1447,6 +1447,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{excluded} excluded · {missing} missing sources'**
   String scanSourceSummary(int excluded, int missing);
+
+  /// No description provided for @chatGptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT subscription · experimental'**
+  String get chatGptTitle;
+
+  /// No description provided for @chatGptHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.'**
+  String get chatGptHelp;
+
+  /// No description provided for @chatGptActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected for generation'**
+  String get chatGptActive;
+
+  /// No description provided for @chatGptAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT account'**
+  String get chatGptAccount;
+
+  /// No description provided for @continueChatGpt.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with ChatGPT'**
+  String get continueChatGpt;
+
+  /// No description provided for @chatGptAddAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add another account'**
+  String get chatGptAddAccount;
+
+  /// No description provided for @chatGptSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get chatGptSignOut;
+
+  /// No description provided for @chatGptUseModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Test and use this model'**
+  String get chatGptUseModel;
+
+  /// No description provided for @chatGptTestHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.'**
+  String get chatGptTestHelp;
+
+  /// No description provided for @chatGptUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage ChatGPT usage'**
+  String get chatGptUsage;
+
+  /// No description provided for @chatGptRequestError.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT request failed. Sign in again or check your plan access.'**
+  String get chatGptRequestError;
+
+  /// No description provided for @chatGptIdentityError.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT identity could not be verified. Please sign in again.'**
+  String get chatGptIdentityError;
+
+  /// No description provided for @chatGptLoginCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT sign-in was cancelled or expired. Please try again.'**
+  String get chatGptLoginCancelled;
+
+  /// No description provided for @chatGptLoginBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT sign-in is already running.'**
+  String get chatGptLoginBusy;
+
+  /// No description provided for @chatGptScopeError.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT plan access was not granted. Enable it when signing in.'**
+  String get chatGptScopeError;
+
+  /// No description provided for @chatGptSignInFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to ChatGPT in Settings first.'**
+  String get chatGptSignInFirst;
+
+  /// No description provided for @chatGptInterrupted.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT request was interrupted. Please try again.'**
+  String get chatGptInterrupted;
+
+  /// No description provided for @chatGptIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT could not complete the response. Check your plan usage and try again.'**
+  String get chatGptIncomplete;
+
+  /// No description provided for @chatGptReady.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT is ready. New questions will use your selected account.'**
+  String get chatGptReady;
+
+  /// No description provided for @chatGptSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out of ChatGPT.'**
+  String get chatGptSignedOut;
+
+  /// No description provided for @chatGptRevocationUnconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.'**
+  String get chatGptRevocationUnconfirmed;
 }
 
 class _AppLocalizationsDelegate

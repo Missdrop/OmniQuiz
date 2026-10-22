@@ -80,7 +80,13 @@ class ProviderProfile {
     this.jsonMode = false,
     this.credentialRef = '',
     this.language = '简体中文',
+    this.chatGpt = false,
   }) {
+    if (chatGpt &&
+        (baseUrl != 'https://api.openai.com/v1' ||
+            !credentialRef.startsWith('oaiapp_'))) {
+      throw const AppFailure('Sign in to ChatGPT in Settings first.');
+    }
     final uri = Uri.tryParse(baseUrl);
     if (uri == null ||
         !uri.hasAuthority ||
@@ -98,6 +104,7 @@ class ProviderProfile {
   }
   final String baseUrl, model, credentialRef, language;
   final bool jsonMode;
+  final bool chatGpt;
   Uri get completionsUri =>
       Uri.parse('${baseUrl.replaceAll(RegExp(r'/+$'), '')}/chat/completions');
 }

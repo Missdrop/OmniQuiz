@@ -16,6 +16,24 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      "ChatGPT request failed. Sign in again or check your plan access.":
+          chatGptRequestError,
+      "ChatGPT identity could not be verified. Please sign in again.":
+          chatGptIdentityError,
+      "ChatGPT sign-in was cancelled or expired. Please try again.":
+          chatGptLoginCancelled,
+      "ChatGPT sign-in is already running.": chatGptLoginBusy,
+      "ChatGPT plan access was not granted. Enable it when signing in.":
+          chatGptScopeError,
+      "Sign in to ChatGPT in Settings first.": chatGptSignInFirst,
+      "ChatGPT request was interrupted. Please try again.": chatGptInterrupted,
+      "ChatGPT could not complete the response. Check your plan usage and try again.":
+          chatGptIncomplete,
+      "ChatGPT is ready. New questions will use your selected account.":
+          chatGptReady,
+      "Signed out of ChatGPT.": chatGptSignedOut,
+      "Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.":
+          chatGptRevocationUnconfirmed,
       'Could not load models. Check the endpoint and key, or enter a model manually.':
           loadModelsError,
       'No models are available. Sign in to a provider on your gateway, or enter a model manually.':

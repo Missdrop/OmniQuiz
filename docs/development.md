@@ -226,7 +226,7 @@ requires an available Secret Service at runtime. There is no plaintext fallback.
   reviews graduate a question. Early correct practice records the attempt without
   changing the review streak or due date; an incorrect answer resets the streak.
 - Data stays on one device. Cloud sync, OCR, folder watching,
-  and direct ChatGPT subscription authorization are not included in this release.
+  are not included in this release. Direct ChatGPT authorization is experimental.
 
 ## ZIP material import
 
@@ -366,8 +366,8 @@ and `readyCount` are repository operations rather than SQL in view models.
 
 OmniQuiz can use a user-operated CLIProxyAPI instance through its standard
 OpenAI-compatible client API. This connects to subscription accounts authenticated
-by the gateway; OmniQuiz does not yet implement direct ChatGPT OAuth. The
-[comparison](chatgpt-sign-in.md#delivery-decision-2026-10-22) explains the tradeoff.
+by the gateway. Standalone devices can instead use experimental direct ChatGPT sign-in in Settings. The
+[comparison](chatgpt-sign-in.md#current-implementation-standalone-devices) explains the tradeoff.
 
 1. Install [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) or its linked
    desktop manager on a computer/server you control. Use the upstream version's

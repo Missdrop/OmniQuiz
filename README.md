@@ -42,14 +42,28 @@ See the [development guide](docs/development.md) for platform requirements.
 
 ## Get started
 
-1. **Connect your AI.** In **Settings**, enter your provider's API base URL, model, and API key. Select **Test connection**.
+1. **Connect your AI.** In **Settings**, use experimental **Continue with ChatGPT**, or enter your provider's API base URL, model, and key and select **Test connection**.
 2. **Create a library.** In **Library**, choose **Create library**. Use an existing desktop folder or let OmniQuiz create one. Import files, or try the included sample notes.
 3. **Start practicing.** In **Practice**, choose your material and select **Generate questions**. Visit **Review** later to revisit mistakes.
 
-You need an API provider compatible with OpenAI Chat Completions. New questions require
-an internet connection and may incur charges from your provider. Saved questions work offline.
+API-key mode needs a provider compatible with OpenAI Chat Completions. Direct ChatGPT
+mode needs an eligible account and plan authorization. New questions require an internet
+connection and consume the selected connection's allowance or API usage. Saved questions work offline.
 
-### Use a subscription through CLIProxyAPI
+### Use your ChatGPT plan directly (experimental)
+
+In **Settings → ChatGPT subscription**, choose **Continue with ChatGPT**.
+Complete browser authorization on this device, return to OmniQuiz, select an
+available model, then choose **Test and use this model**. This direct connection
+requires no API key, gateway, or always-on computer. It uses your authorized plan
+allowance; availability depends on your account.
+
+Android and iOS use native browser components with a local callback. This feature
+is experimental: automated tests do not establish successful real-device login.
+If the app is terminated during authorization, restart the sign-in. Account
+credentials remain in OS secure storage and are excluded from library backups.
+
+### Optional: use a subscription through CLIProxyAPI
 
 You can connect OmniQuiz to your own [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
 gateway and use the provider accounts you have signed into there, including its
@@ -59,8 +73,7 @@ Available models and usage limits depend on your gateway and connected accounts.
 
 On the same computer, the usual address is `http://127.0.0.1:8317/v1`.
 On a phone, use a reachable **HTTPS** gateway address; `localhost` means the phone
-itself. Keep the gateway running. This is a gateway connection, not direct
-ChatGPT sign-in inside OmniQuiz. See [setup and mobile requirements](docs/development.md#subscription-gateways).
+itself. Keep the gateway running. This optional route requires a gateway; use the direct sign-in above for standalone operation. See [setup and mobile requirements](docs/development.md#subscription-gateways).
 
 ### Files and backups
 

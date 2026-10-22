@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'settings_view_model.dart';
 import 'language_view_model.dart';
 import 'model_picker.dart';
+import 'chatgpt_panel.dart';
 import '../shared/widgets.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _SettingsPageState extends State<SettingsPage> {
     void applyProfile() {
       if (!mounted) return;
       final profile = vm.profile;
-      if (profile == null) return;
+      if (profile == null || profile.chatGpt) return;
       setState(() {
         _url.text = profile.baseUrl;
         _model.text = profile.model;
@@ -99,6 +100,8 @@ class _SettingsPageState extends State<SettingsPage> {
         const SizedBox(height: 20),
         if (!vm.loaded) const LinearProgressIndicator(),
         if (vm.message != null) Notice(vm.message!),
+        const ChatGptPanel(),
+        const SizedBox(height: 20),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -171,7 +174,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   autocorrect: false,
                   decoration: InputDecoration(
                     labelText: context.l10n.apiKey,
-                    hintText: vm.profile == null
+                    hintText: vm.profile == null || vm.profile!.chatGpt
                         ? context.l10n.pasteKey
                         : context.l10n.keepKey,
                     suffixIcon: IconButton(

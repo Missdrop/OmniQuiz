@@ -19,7 +19,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gatewayAddressHelp =>
-      'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. Direct ChatGPT sign-in is not implemented yet.';
+      'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.';
 
   @override
   String get loadModels => 'Load available models';
@@ -154,7 +154,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generateBody =>
-      'Relevant excerpts will be sent to your configured AI provider. Generation uses your API balance and automatically replenishes a buffer of up to 20 questions while practice is active. You can pause at any time.';
+      'Relevant excerpts will be sent to your selected AI connection and consume its plan allowance or API usage. Questions refill automatically up to 20 while practicing. You can pause at any time.';
 
   @override
   String get start => 'Start';
@@ -260,7 +260,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsSubtitle =>
-      'Connect an OpenAI-compatible Chat Completions API. No OmniQuiz account or server.';
+      'Use your ChatGPT plan or an OpenAI-compatible API. No OmniQuiz account or server required.';
 
   @override
   String get aiProvider => 'AI provider';
@@ -314,7 +314,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyNotice =>
-      'Generation sends selected source excerpts to your chosen provider. Connection tests make a small paid API request. Keys are kept in system secure storage; documents and study progress stay local.';
+      'Generation sends selected excerpts to your AI connection. Connection tests use a small amount of plan allowance or API usage. Credentials stay in OS secure storage; materials and progress stay local.';
 
   @override
   String get licenses => 'Open-source licenses';
@@ -798,4 +798,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String scanSourceSummary(int excluded, int missing) {
     return '$excluded excluded · $missing missing sources';
   }
+
+  @override
+  String get chatGptTitle => 'ChatGPT subscription · experimental';
+
+  @override
+  String get chatGptHelp =>
+      'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.';
+
+  @override
+  String get chatGptActive => 'Selected for generation';
+
+  @override
+  String get chatGptAccount => 'ChatGPT account';
+
+  @override
+  String get continueChatGpt => 'Continue with ChatGPT';
+
+  @override
+  String get chatGptAddAccount => 'Add another account';
+
+  @override
+  String get chatGptSignOut => 'Sign out';
+
+  @override
+  String get chatGptUseModel => 'Test and use this model';
+
+  @override
+  String get chatGptTestHelp =>
+      'Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.';
+
+  @override
+  String get chatGptUsage => 'Manage ChatGPT usage';
+
+  @override
+  String get chatGptRequestError =>
+      'ChatGPT request failed. Sign in again or check your plan access.';
+
+  @override
+  String get chatGptIdentityError =>
+      'ChatGPT identity could not be verified. Please sign in again.';
+
+  @override
+  String get chatGptLoginCancelled =>
+      'ChatGPT sign-in was cancelled or expired. Please try again.';
+
+  @override
+  String get chatGptLoginBusy => 'ChatGPT sign-in is already running.';
+
+  @override
+  String get chatGptScopeError =>
+      'ChatGPT plan access was not granted. Enable it when signing in.';
+
+  @override
+  String get chatGptSignInFirst => 'Sign in to ChatGPT in Settings first.';
+
+  @override
+  String get chatGptInterrupted =>
+      'ChatGPT request was interrupted. Please try again.';
+
+  @override
+  String get chatGptIncomplete =>
+      'ChatGPT could not complete the response. Check your plan usage and try again.';
+
+  @override
+  String get chatGptReady =>
+      'ChatGPT is ready. New questions will use your selected account.';
+
+  @override
+  String get chatGptSignedOut => 'Signed out of ChatGPT.';
+
+  @override
+  String get chatGptRevocationUnconfirmed =>
+      'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.';
 }

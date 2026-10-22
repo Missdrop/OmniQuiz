@@ -164,6 +164,7 @@ void main() {
         find.widgetWithText(TextField, 'Model ID'),
         'unsaved-model',
       );
+      await tester.ensureVisible(find.byKey(const ValueKey('interface-en')));
       await tester.tap(find.byKey(const ValueKey('interface-en')));
       await settle();
       await tester.tap(find.text('简体中文').last);

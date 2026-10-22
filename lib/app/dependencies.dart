@@ -13,6 +13,8 @@ import '../application/use_cases/import_materials.dart';
 import '../domain/policies.dart';
 import '../infrastructure/ai/chat_completions_generator.dart';
 import '../infrastructure/ai/compatible_model_catalog.dart';
+import '../infrastructure/ai/chatgpt_sessions.dart';
+import '../infrastructure/ai/chatgpt_responses.dart';
 import '../application/ports/model_catalog.dart';
 import '../infrastructure/documents/parsers.dart';
 import '../infrastructure/persistence/database.dart';
@@ -78,8 +80,14 @@ class AppDependencies {
     final clock = SystemClock();
     final jobs = SqlJobRepository(database, clock);
     await jobs.recover();
+    final chatGpt = ChatGptSessions(credentials);
     final generator =
-        ai ?? ChatCompletionsGenerator(credentials, QuestionValidator(ids));
+        ai ??
+        ChatCompletionsGenerator(
+          credentials,
+          QuestionValidator(ids),
+          chatGpt: ChatGptResponses(chatGpt),
+        );
     final coordinator = GenerationCoordinator(
       materials: materials,
       questions: questions,
@@ -130,6 +138,7 @@ class AppDependencies {
         generator,
         coordinator,
         catalog: modelCatalog ?? CompatibleModelCatalog(),
+        chatGpt: chatGpt,
       ),
       language,
       ownsDatabase,
