@@ -18,8 +18,10 @@ import 'package:sqlite3/sqlite3.dart' as sqlite;
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
+import 'support/folder_permissions.dart';
 
 void main() {
+  mockFolderPermissions();
   late Directory root;
   late QuizDatabase global;
   late LibraryCatalog catalog;

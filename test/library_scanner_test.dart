@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p;
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
+import 'support/folder_permissions.dart';
 
 class CountingFiles extends DirectoryLibraryFiles {
   CountingFiles(super.directory);
@@ -29,6 +30,7 @@ class CountingFiles extends DirectoryLibraryFiles {
 }
 
 void main() {
+  mockFolderPermissions();
   late Directory folder;
   late QuizDatabase db;
   late CountingFiles files;

@@ -15,6 +15,7 @@ import 'package:path/path.dart' as p;
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
+import 'support/folder_permissions.dart';
 
 class ChosenZip implements ArchiveAccess {
   ChosenZip(this.path);
@@ -24,6 +25,7 @@ class ChosenZip implements ArchiveAccess {
 }
 
 void main() {
+  mockFolderPermissions();
   late Directory temporary, materials;
   setUp(() async {
     temporary = await Directory.systemTemp.createTemp('omniquiz-zip-test-');

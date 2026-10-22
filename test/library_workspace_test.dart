@@ -14,8 +14,10 @@ import 'package:path/path.dart' as p;
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
+import 'support/folder_permissions.dart';
 
 void main() {
+  mockFolderPermissions();
   // Each library deliberately has its own file and executor.
   final previousWarning = driftRuntimeOptions.dontWarnAboutMultipleDatabases;
   setUpAll(() => driftRuntimeOptions.dontWarnAboutMultipleDatabases = true);

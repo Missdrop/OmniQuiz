@@ -17,8 +17,10 @@ import 'package:omniquiz/presentation/library/library_view_model.dart';
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
+import 'support/folder_permissions.dart';
 
 void main() {
+  mockFolderPermissions();
   testWidgets(
     'switching cancels generation, shows only the selected library and creates libraries on mobile',
     (tester) async {
@@ -93,9 +95,10 @@ void main() {
       await settleWork();
       await tester.runAsync(() async {
         generating = initial.coordinator.start(null);
-        while (ai.calls == 0) {
+        for (var i = 0; i < 200 && ai.calls == 0; i++) {
           await Future<void>.delayed(const Duration(milliseconds: 5));
         }
+        expect(ai.calls, greaterThan(0), reason: 'Generation must start.');
       });
       await tester.tap(find.byType(DropdownButtonFormField<String>));
       await tester.pumpAndSettle();
