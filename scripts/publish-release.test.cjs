@@ -38,12 +38,13 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
   };
 }
 
-test('nightly replaces ten assets on the same release without creating another', async t => {
+test('nightly replaces nine packages and removes the legacy checksum file', async t => {
   const { calls, options } = fixture(t);
   await publish(options);
   assert.equal(calls.filter(c => c.name === 'createRelease').length, 0);
   assert.equal(calls.filter(c => c.name === 'deleteReleaseAsset').length, 10);
-  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 10);
+  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 9);
+  assert.equal(calls.some(c => c.name === 'uploadReleaseAsset' && c.args.name === 'SHA256SUMS'), false);
   const update = calls.at(-1).args;
   assert.equal(update.release_id, 7);
   assert.equal(update.prerelease, true);
@@ -65,6 +66,8 @@ test('tag release uses the exact tag name and never moves its tag', async t => {
   assert.equal(calls.at(-1).args.name, 'v1.0.0');
   assert.equal(calls.at(-1).args.prerelease, false);
   assert.equal(calls.some(c => c.name === 'updateRef'), false);
+  assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 9);
+  assert.equal(calls.some(c => c.name === 'uploadReleaseAsset' && c.args.name === 'SHA256SUMS'), false);
 });
 
 test('old main builds and already-published stable tags cause no mutations', async t => {

@@ -127,7 +127,8 @@ keys are stored in this repository.
   do not publish. You can also run **Rolling prerelease** manually on `main`.
 - Both workflows require tests and all five native builds to pass. Each release
   includes Android APK, Windows MSI and portable ZIP, macOS DMG and TAR.GZ,
-  Linux TAR.GZ, and unsigned iOS TAR.GZ, plus SHA-256 checksums.
+  Linux TAR.GZ, and unsigned iOS TAR.GZ. GitHub exposes SHA-256 digests in the
+  Releases API; no separate checksum file is uploaded.
   Unix archives preserve permissions and symbolic links.
 - Nightly reuses the same release ID and asset names, and moves the `nightly`
   tag to the built commit. It does not delete and recreate the release. Existing
@@ -194,8 +195,9 @@ The global database stores startup-check and skipped-version preferences under
 
 Checks never download installers. An explicit update action selects the matching
 asset (including native Android ABI order), streams it into the private update
-cache, and verifies length and SHA-256 from the release asset digest or
-`SHA256SUMS`. Only HTTPS GitHub release download redirects are accepted. Failed or
+cache, and verifies length and SHA-256 from the GitHub release asset digest
+(with `SHA256SUMS` fallback for older releases). Only HTTPS GitHub release
+download redirects are accepted. Failed or
 cancelled downloads discard partial files and retain the official page fallback.
 
 Android checks the APK package name, signing certificate and increasing version

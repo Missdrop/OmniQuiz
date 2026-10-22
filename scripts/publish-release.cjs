@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const crypto = require('node:crypto');
 
 const assets = [
   'OmniQuiz-android-arm64-v8a.apk', 'OmniQuiz-android-armeabi-v7a.apk', 'OmniQuiz-android-x86_64.apk',
@@ -26,9 +25,6 @@ module.exports = async function publish({ github, context, core, nightly, direct
   // Validate the complete set before modifying any existing release.
   const files = assets.map(name => ({ name, data: fs.readFileSync(path.join(directory, name)) }));
   if (files.some(file => !file.data.length)) throw new Error('Empty release asset.');
-  const checksums = files.map(file =>
-    `${crypto.createHash('sha256').update(file.data).digest('hex')}  ${file.name}\n`).join('');
-  files.push({ name: 'SHA256SUMS', data: Buffer.from(checksums) });
 
   if (nightly) {
     const head = await github.rest.git.getRef({ ...repo, ref: 'heads/main' });
@@ -65,6 +61,10 @@ module.exports = async function publish({ github, context, core, nightly, direct
   const existing = await github.paginate(github.rest.repos.listReleaseAssets, {
     ...repo, release_id: release.id, per_page: 100,
   });
+  // GitHub provides each asset's SHA-256 digest through the Releases API.
+  for (const old of existing.filter(asset => asset.name === 'SHA256SUMS')) {
+    await github.rest.repos.deleteReleaseAsset({ ...repo, asset_id: old.id });
+  }
   for (const file of files) {
     const old = existing.find(asset => asset.name === file.name);
     if (old) await github.rest.repos.deleteReleaseAsset({ ...repo, asset_id: old.id });
