@@ -128,7 +128,7 @@ void main() {
     );
     deps.settings.chatGptAccount = 'oaiapp_fixture';
     deps.settings.chatGptAccounts = {
-      'oaiapp_fixture': 'long-account-name-for-layout@example.test · fixture',
+      'oaiapp_fixture': 'long-account-name-for-layout@example.test',
     };
     deps.settings.chatGptModels = ['other-model', 'test-model'];
     runApp(OmniQuizApp(dependencies: deps));
@@ -136,7 +136,7 @@ void main() {
     await tap(tester, find.byIcon(Icons.tune_rounded));
     await tester.ensureVisible(find.text('Sign in again'));
     await capture(tester, '08-account');
-    await tester.ensureVisible(find.text('Test and use this model'));
+    await tester.ensureVisible(find.text('Test connection'));
     await capture(tester, '09-model-language');
     final model = find.byWidgetPredicate(
       (widget) =>

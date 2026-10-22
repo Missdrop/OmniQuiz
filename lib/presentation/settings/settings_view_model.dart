@@ -91,30 +91,58 @@ class SettingsViewModel extends ChangeNotifier {
           chatGptAccount = chatGpt!.lastRegistration ?? chatGptAccount;
         }
         chatGptAccount = id;
-        chatGptModels = [];
-        chatGptModels = await chatGpt!.models(id);
+        await _loadAndUseChatGpt(id, firstModel: true);
       });
   Future<void> selectChatGpt(String id) => _chatGptAction(() async {
     chatGptAccount = id;
     chatGptModels = [];
-    chatGptModels = await chatGpt!.models(id);
+    await _loadAndUseChatGpt(id);
   });
-  Future<void> useChatGpt(String model, String language) =>
+  Future<void> _loadAndUseChatGpt(String id, {bool firstModel = false}) async {
+    try {
+      chatGptModels = (await chatGpt!.models(id))
+          .where((model) => model.trim().isNotEmpty)
+          .toSet()
+          .toList();
+      if (chatGptModels.isEmpty) throw const FormatException();
+    } catch (_) {
+      throw const AppFailure(
+        'Account saved. Could not load available models. Load models again to finish setup.',
+      );
+    }
+    final saved = profile;
+    final model =
+        !firstModel &&
+            saved?.credentialRef == id &&
+            chatGptModels.contains(saved?.model)
+        ? saved!.model
+        : chatGptModels.first;
+    await _saveChatGpt(model, saved?.language ?? '简体中文');
+  }
+
+  Future<void> _saveChatGpt(
+    String model,
+    String language, {
+    bool test = false,
+  }) async {
+    final id = chatGptAccount!;
+    if (!chatGptModels.contains(model)) throw const FormatException();
+    final candidate = ProviderProfile(
+      baseUrl: 'https://api.openai.com/v1',
+      model: model,
+      credentialRef: id,
+      chatGpt: true,
+      language: language,
+    );
+    if (test) await generator.probe(candidate, '');
+    await profiles.save(candidate);
+    profile = candidate;
+    message = 'ChatGPT is ready. New questions will use your selected account.';
+  }
+
+  Future<void> useChatGpt(String model, String language, {bool test = true}) =>
       _chatGptAction(() async {
-        final id = chatGptAccount!;
-        if (!chatGptModels.contains(model)) throw const FormatException();
-        final candidate = ProviderProfile(
-          baseUrl: 'https://api.openai.com/v1',
-          model: model,
-          credentialRef: id,
-          chatGpt: true,
-          language: language,
-        );
-        await generator.probe(candidate, '');
-        await profiles.save(candidate);
-        profile = candidate;
-        message =
-            'ChatGPT is ready. New questions will use your selected account.';
+        await _saveChatGpt(model, language, test: test);
       });
   Future<void> signOutChatGpt() => _chatGptAction(() async {
     final revoked = await chatGpt!.signOut(chatGptAccount!);

@@ -57,6 +57,7 @@ class GenerationCoordinator {
     _enabled = true;
     _scope = scope;
     _cursor = Random().nextInt(10000);
+    _emit('Preparing your next questions…', running: true);
     await replenish();
   }
 

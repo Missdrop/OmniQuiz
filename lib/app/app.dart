@@ -196,22 +196,6 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                               onTap: () => _navigate(i),
                             ),
                           ),
-                        const SizedBox(height: 24),
-                        Padding(
-                          padding: EdgeInsets.all(24),
-                          child: Row(
-                            children: [
-                              Icon(Icons.lock_outline, size: 16),
-                              SizedBox(width: 8),
-                              Flexible(
-                                child: Text(
-                                  context.l10n.localByDesign,
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                       ],
                     ),
                   ),

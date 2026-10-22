@@ -1499,8 +1499,26 @@ abstract class AppLocalizations {
   /// No description provided for @chatGptTestHelp.
   ///
   /// In en, this message translates to:
-  /// **'Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.'**
+  /// **'Signing in saves your account and selects the first available model automatically. Model and question-language changes are saved immediately. Testing is optional and uses a small amount of plan allowance.'**
   String get chatGptTestHelp;
+
+  /// No description provided for @chatGptModelsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account is saved on this device, but available models could not be loaded. Load models again to finish setup.'**
+  String get chatGptModelsPending;
+
+  /// No description provided for @chatGptAccountUnnamed.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT account'**
+  String get chatGptAccountUnnamed;
+
+  /// No description provided for @chatGptRegistrationPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization is incomplete. Sign in again.'**
+  String get chatGptRegistrationPending;
 
   /// No description provided for @chatGptUsage.
   ///

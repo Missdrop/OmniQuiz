@@ -90,7 +90,7 @@ void main() {
                 .initialValue,
             'English',
           );
-          await tester.ensureVisible(find.text(l.chatGptUseModel));
+          await tester.ensureVisible(find.text(l.testConnection));
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox());
         },

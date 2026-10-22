@@ -53,8 +53,11 @@ connection and consume the selected connection's allowance or API usage. Saved q
 ### Use your ChatGPT plan directly (experimental)
 
 In **Settings → ChatGPT subscription**, choose **Continue with ChatGPT**.
-Complete browser authorization on this device, return to OmniQuiz, select an
-available model, then choose **Test and use this model**. This direct connection
+Complete browser authorization on this device and return to OmniQuiz. Your account
+is saved and the first available model is selected automatically. Changing the
+model or question language also saves immediately; **Test connection** is optional.
+If model loading fails, your account stays saved; choose **Load available models**
+to finish setup. This direct connection
 requires no API key, gateway, or always-on computer. It uses your authorized plan
 allowance; availability depends on your account.
 
