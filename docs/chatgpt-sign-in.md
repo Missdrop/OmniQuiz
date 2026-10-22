@@ -3,8 +3,9 @@
 Rechecked against the current official sign-in, sessions, inference, limits,
 UI guidance and DevKit documentation. Public OIDC discovery was also fetched;
 its issuer, authorization/token endpoints, JWKS and revocation endpoint match
-these docs. An experimental direct implementation is now present. No real account
-authorization or plan-funded inference has been verified.
+these docs. An experimental direct implementation is now present. On 2026-10-22,
+an explicitly authorized real account completed sign-in and plan-funded inference
+on the iOS 27.1 simulator; physical phones remain untested.
 
 OmniQuiz already supports configurable OpenAI-compatible Chat Completions APIs.
 That protocol compatibility does not mean the provider must be OpenAI.
@@ -39,7 +40,12 @@ OIDC/refresh/SSE and validated question-generation tests. They use synthetic
 authorization codes and tokens, not an OpenAI account. Small-screen UI tests cover
 Android and iOS themes in English and Chinese with enlarged text.
 
-These checks do not prove real account eligibility or plan-funded inference.
+Separately, a manual live-account run on iOS 27.1 completed Safari authorization,
+returned seven available models, passed the JSON connection probe with
+`gpt-6.1-sol`, and generated one Chinese question with a validated source quote
+from a public water-freezing/boiling-point excerpt. No API key or gateway was used.
+This establishes the flow for that account and simulator, not universal eligibility.
+
 Android and iOS signed-device tests remain required. In particular, system termination during
 login discards the pending attempt; the user must start a new login. No remote
 credential relay or CLI subprocess is used. Simulator success does not establish
@@ -73,7 +79,8 @@ Desktop and mobile are implementation targets. Windows, macOS and Linux can host
 callback. Registration requires `127.0.0.1` and `/auth/callback`; an available port
 may vary between attempts, but the exact URI must match within an attempt.
 
-Android/iOS feasibility remains unverified. The reviewed protocol does not provide
+Android synthetic browser tests and iOS live-account inference have passed on
+simulators. The reviewed protocol does not provide
 an explicit mobile deep-link callback recipe. Test system-browser authorization,
 loopback listener lifetime across app suspension, app return, token refresh and
 signed-build networking before calling it supported. Mobile uncertainty is an
@@ -216,8 +223,9 @@ partial questions. Retain existing buffered questions while generation is paused
    Do not claim a supported callback or introduce a remote credential relay just
    to mask an unresolved native lifecycle problem.
 
-Research has confirmed the public protocol and identified repository changes.
-End-to-end authorization, account eligibility and phone support remain unverified.
+The iOS simulator live run has passed end-to-end authorization and one completed
+question-generation request. Desktop live-account testing, Android live-account
+testing and the physical-device/lifecycle gates above remain outstanding.
 
 ## Official sources
 

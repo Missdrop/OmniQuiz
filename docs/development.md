@@ -402,8 +402,11 @@ of subprocess environments. This avoids requiring a global `sudo xcode-select`.
 Windows/WSL cannot run Xcode or Apple's Simulator. Local validation on Xcode 27.1
 and iOS 27.1 passed all nine authentication tests and the native app smoke test,
 including Safari loopback callbacks and Keychain storage.
-Actual OpenAI authorization, account eligibility and plan-funded generation still
-require separate account testing on both platforms.
+A separate, user-authorized live run on 2026-10-22 passed iOS simulator login,
+model listing, a JSON connection probe and one source-validated Chinese question
+using `gpt-6.1-sol`. Live tests require manual account authorization and consume
+plan usage; they are not part of automated tests or CI. Android live-account and
+physical-device testing remain outstanding.
 
 ## Subscription gateways
 
