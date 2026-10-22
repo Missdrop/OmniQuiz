@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 ThemeData buildTheme() {
@@ -9,6 +10,18 @@ ThemeData buildTheme() {
   );
   return ThemeData(
     useMaterial3: true,
+    fontFamily: switch (defaultTargetPlatform) {
+      TargetPlatform.windows => 'Microsoft YaHei UI',
+      TargetPlatform.macOS || TargetPlatform.iOS => 'PingFang SC',
+      _ => null,
+    },
+    fontFamilyFallback: const [
+      'Microsoft YaHei',
+      'PingFang SC',
+      'Noto Sans CJK SC',
+      'Noto Sans SC',
+      'sans-serif',
+    ],
     colorScheme: scheme,
     scaffoldBackgroundColor: scheme.surface,
     inputDecorationTheme: InputDecorationTheme(

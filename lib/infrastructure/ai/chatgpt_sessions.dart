@@ -41,7 +41,11 @@ class ChatGptSessions {
   Future<Map<String, String>> accounts() async => (await _load()).map(
     (id, record) => MapEntry(
       id,
-      '${record['email'] ?? record['sub']} · ${id.substring(id.length > 6 ? id.length - 6 : 0)}',
+      (record['email'] as String?)?.trim().isNotEmpty == true
+          ? record['email'] as String
+          : record['verified'] == true
+          ? 'ChatGPT account'
+          : 'Registration pending',
     ),
   );
 

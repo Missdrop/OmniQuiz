@@ -16,6 +16,10 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Account saved. Could not load available models. Load models again to finish setup.':
+          chatGptModelsPending,
+      'ChatGPT account': chatGptAccountUnnamed,
+      'Registration pending': chatGptRegistrationPending,
       "ChatGPT request failed. Sign in again or check your plan access.":
           chatGptRequestError,
       "ChatGPT identity could not be verified. Please sign in again.":

@@ -5,29 +5,18 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../l10n/localization.dart';
 import 'settings_view_model.dart';
 
-class ChatGptPanel extends StatefulWidget {
+class ChatGptPanel extends StatelessWidget {
   const ChatGptPanel({super.key});
-  @override
-  State<ChatGptPanel> createState() => _ChatGptPanelState();
-}
-
-class _ChatGptPanelState extends State<ChatGptPanel> {
-  String? _model;
-  String? _language;
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SettingsViewModel>();
     final l = context.l10n;
     if (vm.chatGpt == null) return const SizedBox.shrink();
-    final language =
-        _language ??
-        (vm.profile?.chatGpt == true ? vm.profile!.language : '简体中文');
+    final language = vm.profile?.language ?? '简体中文';
     final savedModel = vm.profile?.credentialRef == vm.chatGptAccount
         ? vm.profile?.model
         : null;
-    final model = vm.chatGptModels.contains(_model)
-        ? _model
-        : vm.chatGptModels.contains(savedModel)
+    final model = vm.chatGptModels.contains(savedModel)
         ? savedModel
         : vm.chatGptModels.firstOrNull;
     return Card(
@@ -50,7 +39,7 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
               Padding(
                 padding: const EdgeInsets.only(top: 12),
                 child: Text(
-                  '${l.chatGptActive}: ${vm.chatGptAccounts[vm.profile!.credentialRef] ?? vm.profile!.credentialRef} / ${vm.profile!.model}',
+                  '${l.chatGptActive}: ${l.diagnostic(vm.chatGptAccounts[vm.profile!.credentialRef] ?? 'ChatGPT account')} / ${vm.profile!.model}',
                 ),
               ),
             const SizedBox(height: 24),
@@ -67,7 +56,7 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                       (entry) => DropdownMenuItem(
                         value: entry.key,
                         child: Text(
-                          entry.value,
+                          l.diagnostic(entry.value),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -137,7 +126,13 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                       ),
                     )
                     .toList(),
-                onChanged: vm.busy ? null : (id) => setState(() => _model = id),
+                onChanged: vm.busy
+                    ? null
+                    : (id) {
+                        if (id != null) {
+                          vm.useChatGpt(id, language, test: false);
+                        }
+                      },
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
@@ -150,14 +145,16 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                     .toList(),
                 onChanged: vm.busy
                     ? null
-                    : (id) => setState(() => _language = id!),
+                    : (id) {
+                        if (id != null) vm.useChatGpt(model, id, test: false);
+                      },
               ),
               const SizedBox(height: 20),
               FilledButton(
                 onPressed: vm.busy
                     ? null
                     : () => vm.useChatGpt(model, language),
-                child: Text(l.chatGptUseModel),
+                child: Text(l.testConnection),
               ),
             ],
             const SizedBox(height: 16),

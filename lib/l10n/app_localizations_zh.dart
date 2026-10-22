@@ -753,7 +753,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatGptUseModel => '测试并使用此模型';
 
   @override
-  String get chatGptTestHelp => '测试会发送少量请求并使用订阅额度。仅登录不会切换当前的出题连接。';
+  String get chatGptTestHelp =>
+      '登录后自动保存账号，并选用列表中的第一个模型。更改模型或出题语言也会自动保存。测试连接为可选操作，会使用少量订阅额度。';
+
+  @override
+  String get chatGptModelsPending => '账号已保存在本机，但未能获取可用模型。请重新获取模型以完成设置。';
+
+  @override
+  String get chatGptAccountUnnamed => 'ChatGPT 账号';
+
+  @override
+  String get chatGptRegistrationPending => '授权尚未完成，请重新登录';
 
   @override
   String get chatGptUsage => '管理 ChatGPT 用量';

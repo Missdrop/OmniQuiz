@@ -826,7 +826,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatGptTestHelp =>
-      'Testing sends a small request and consumes plan usage. Signing in alone does not change your active generation connection.';
+      'Signing in saves your account and selects the first available model automatically. Model and question-language changes are saved immediately. Testing is optional and uses a small amount of plan allowance.';
+
+  @override
+  String get chatGptModelsPending =>
+      'Your account is saved on this device, but available models could not be loaded. Load models again to finish setup.';
+
+  @override
+  String get chatGptAccountUnnamed => 'ChatGPT account';
+
+  @override
+  String get chatGptRegistrationPending =>
+      'Authorization is incomplete. Sign in again.';
 
   @override
   String get chatGptUsage => 'Manage ChatGPT usage';
