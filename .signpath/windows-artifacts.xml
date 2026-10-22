@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
+  <!-- actions/upload-artifact wraps these two packages in an outer ZIP. -->
+  <zip-file>
+    <zip-file path="OmniQuiz-windows-x64.zip">
+      <pe-file path="omniquiz.exe" product-name="OmniQuiz"
+               product-version="${version}" file-version="${version}"
+               original-filename="omniquiz.exe">
+        <authenticode-sign />
+      </pe-file>
+    </zip-file>
+    <msi-file path="OmniQuiz-windows-x64.msi">
+      <pe-file path="**/omniquiz.exe" product-name="OmniQuiz"
+               product-version="${version}" file-version="${version}"
+               original-filename="omniquiz.exe">
+        <authenticode-sign />
+      </pe-file>
+      <authenticode-sign />
+    </msi-file>
+  </zip-file>
+</artifact-configuration>

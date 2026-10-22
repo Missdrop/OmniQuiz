@@ -2,6 +2,8 @@ name: Build and test
 on:
   workflow_call:
     secrets:
+      SIGNPATH_API_TOKEN:
+        required: false
       ANDROID_KEYSTORE_BASE64:
         required: true
       ANDROID_STORE_PASSWORD:
@@ -14,6 +16,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,6 +39,7 @@ jobs:
       - run: flutter analyze
       - run: flutter test --timeout 90s
   build:
+    needs: test
     strategy:
       fail-fast: false
       matrix:
@@ -112,6 +116,57 @@ jobs:
       - name: Verify MSI payload with Windows Installer
         if: matrix.target == 'windows'
         run: python scripts/verify_windows_package.py
+      - name: Validate SignPath configuration
+        id: signpath
+        if: matrix.target == 'windows' && github.event_name != 'pull_request' && vars.SIGNPATH_ENABLED == 'true'
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+        run: |
+          if ($env:GITHUB_REF -ne 'refs/heads/main' -and $env:GITHUB_REF -notmatch '^refs/tags/v\d+\.\d+\.\d+$') {
+            throw 'Production signing is restricted to main and stable version tags.'
+          }
+          foreach ($name in @('SIGNPATH_API_TOKEN', 'SIGNPATH_ORGANIZATION_ID', 'SIGNPATH_PROJECT_SLUG', 'SIGNPATH_SIGNING_POLICY_SLUG', 'SIGNPATH_ARTIFACT_CONFIGURATION_SLUG')) {
+            if (-not [Environment]::GetEnvironmentVariable($name)) { throw "Missing configuration: $name" }
+          }
+          $version = (Get-Item build/windows/x64/runner/Release/omniquiz.exe).VersionInfo.ProductVersion
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Upload Windows packages for origin-verified signing
+        id: unsigned-windows
+        if: matrix.target == 'windows' && github.event_name != 'pull_request' && vars.SIGNPATH_ENABLED == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: signpath-windows-unsigned
+          path: |
+            dist/OmniQuiz-windows-x64.msi
+            dist/OmniQuiz-windows-x64.zip
+          if-no-files-found: error
+      - name: Request Windows signing and wait for maintainer approval
+        if: matrix.target == 'windows' && github.event_name != 'pull_request' && vars.SIGNPATH_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.unsigned-windows.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: .tooling/signpath-signed
+          parameters: |
+            version: ${{ toJSON(steps.signpath.outputs.version) }}
+      - name: Verify signed packages and select them for publication
+        if: matrix.target == 'windows' && github.event_name != 'pull_request' && vars.SIGNPATH_ENABLED == 'true'
+        run: python scripts/verify_signed_windows.py
+      - name: Record verified Windows signing status for release notes
+        if: matrix.target == 'windows'
+        run: |
+          python -c "import json, os, pathlib; pathlib.Path('dist/windows-signing-status.json').write_text(json.dumps({'signed': os.environ.get('OMNIQUIZ_WINDOWS_SIGNED') == 'true'}), encoding='utf-8')"
       - uses: actions/upload-artifact@v4
         with:
           name: omniquiz-${{ matrix.target }}

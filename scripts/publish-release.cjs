@@ -25,6 +25,9 @@ module.exports = async function publish({ github, context, core, nightly, direct
   // Validate the complete set before modifying any existing release.
   const files = assets.map(name => ({ name, data: fs.readFileSync(path.join(directory, name)) }));
   if (files.some(file => !file.data.length)) throw new Error('Empty release asset.');
+  const signingStatus = path.join(directory, 'windows-signing-status.json');
+  const windowsSigned = fs.existsSync(signingStatus)
+    && JSON.parse(fs.readFileSync(signingStatus, 'utf8')).signed === true;
 
   if (nightly) {
     const head = await github.rest.git.getRef({ ...repo, ref: 'heads/main' });
@@ -46,7 +49,10 @@ module.exports = async function publish({ github, context, core, nightly, direct
     '', `Commit: ${context.sha}`,
     `Build: https://github.com/${repo.owner}/${repo.repo}/actions/runs/${context.runId}`,
     '', 'Android APKs use the fixed OmniQuiz release signing identity.',
-    'Windows: MSI installer or portable ZIP. The installer is not code-signed.',
+    windowsSigned
+      ? 'Windows: MSI installer and application executables are code-signed through SignPath Foundation.'
+      : 'Windows: MSI installer or portable ZIP. The installer is not code-signed.',
+    `Code signing policy: https://github.com/${repo.owner}/${repo.repo}/blob/main/docs/code-signing-policy.md`,
     'macOS: open the DMG and drag OmniQuiz to Applications. It is not notarized.',
     'The unsigned iOS app requires signing before installation.',
     'Application version comes from pubspec.yaml; update it before tagging a version.',
