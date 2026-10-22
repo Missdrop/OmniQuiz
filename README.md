@@ -38,9 +38,6 @@ Get the available builds from [GitHub Releases](https://github.com/Missdrop/Omni
 
 For iOS, the release archive is unsigned; building and signing requires macOS and Xcode.
 Windows installers are not code-signed, and macOS builds are not notarized.
-We are applying for SignPath Foundation's free Windows signing service; approval
-is pending. See the [Code signing policy](docs/code-signing-policy.md) and
-[Privacy policy](docs/privacy.md).
 See the [development guide](docs/development.md) for platform requirements.
 
 ## Get started
