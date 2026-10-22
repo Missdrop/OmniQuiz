@@ -5,7 +5,7 @@ UI guidance and DevKit documentation. Public OIDC discovery was also fetched;
 its issuer, authorization/token endpoints, JWKS and revocation endpoint match
 these docs. An experimental direct implementation is now present. On 2026-10-22,
 an explicitly authorized real account completed sign-in and plan-funded inference
-on the iOS 27.1 simulator; physical phones remain untested.
+on both the iOS 27.1 simulator and Android API 36 emulator; physical phones remain untested.
 
 OmniQuiz already supports configurable OpenAI-compatible Chat Completions APIs.
 That protocol compatibility does not mean the provider must be OpenAI.
@@ -24,6 +24,9 @@ available, but generation never silently falls back between billing modes.
 - Android uses Custom Tabs and iOS uses SFSafariViewController through url_launcher.
   The app starts a loopback-only listener before opening that browser component.
   An unsupported browser mode fails instead of silently switching to a WebView.
+- Android waits for the app to resume after the callback before exchanging the
+  single-use code. In live testing, requests while Chrome was foreground failed
+  with connection-aborted socket errors; returning to OmniQuiz resolved this.
 - State, nonce, PKCE, callback host/path, issued client ID, JWT RSA signature,
   issuer, audience, expiry and returning subject are checked.
 - Registrations and tokens are stored together in OS secure storage, outside
@@ -44,7 +47,9 @@ Separately, a manual live-account run on iOS 27.1 completed Safari authorization
 returned seven available models, passed the JSON connection probe with
 `gpt-6.1-sol`, and generated one Chinese question with a validated source quote
 from a public water-freezing/boiling-point excerpt. No API key or gateway was used.
-This establishes the flow for that account and simulator, not universal eligibility.
+The Android API 36 live run subsequently passed the same flow, including seven
+models and a source-validated Chinese question, after the foreground fix.
+This establishes the flow for the tested accounts and simulators, not universal eligibility.
 
 Android and iOS signed-device tests remain required. In particular, system termination during
 login discards the pending attempt; the user must start a new login. No remote
@@ -224,8 +229,8 @@ partial questions. Retain existing buffered questions while generation is paused
    to mask an unresolved native lifecycle problem.
 
 The iOS simulator live run has passed end-to-end authorization and one completed
-question-generation request. Desktop live-account testing, Android live-account
-testing and the physical-device/lifecycle gates above remain outstanding.
+question-generation request, as has the Android emulator live run. Desktop
+live-account testing and the physical-device/lifecycle gates above remain outstanding.
 
 ## Official sources
 

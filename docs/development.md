@@ -379,6 +379,11 @@ storage. OAuth/JWKS/Responses use synthetic fixtures and never consume account
 allowance. It also runs the protocol suite on the device. Credentials are written
 under a unique test key and deleted afterward. Run against a disposable emulator,
 since Flutter installs a test entry point under the normal application ID.
+On Android, close the Custom Tab after it displays the local callback message;
+the app deliberately waits until resumed before continuing authorization.
+For an interactive live-account test, use `--no-uninstall` to retain credentials
+and restore the normal app entry point afterward: the test runner otherwise
+stops/uninstalls the app when the test ends.
 
 For an iOS Simulator, use a Mac with Xcode and an installed iOS runtime. No real
 iPhone or distribution signing certificate is needed for simulator testing:
@@ -405,8 +410,9 @@ including Safari loopback callbacks and Keychain storage.
 A separate, user-authorized live run on 2026-10-22 passed iOS simulator login,
 model listing, a JSON connection probe and one source-validated Chinese question
 using `gpt-6.1-sol`. Live tests require manual account authorization and consume
-plan usage; they are not part of automated tests or CI. Android live-account and
-physical-device testing remain outstanding.
+plan usage; they are not part of automated tests or CI. An Android API 36 live run
+also passed after deferring token exchange until the app resumes from Chrome.
+Physical-device testing remains outstanding.
 
 ## Subscription gateways
 

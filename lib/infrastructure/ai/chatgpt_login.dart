@@ -7,6 +7,7 @@ import 'package:crypto/crypto.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/models.dart';
+import '../platform/auth_foreground.dart';
 
 class ChatGptLogin {
   ChatGptLogin({
@@ -16,6 +17,7 @@ class ChatGptLogin {
   final Future<bool> Function(Uri) launch;
   final Duration timeout;
   Completer<Map<String, String>>? _pending;
+  Completer<void>? _cancelSignal;
   static Future<bool> _launch(Uri uri) async {
     final mobile = Platform.isAndroid || Platform.isIOS;
     if (mobile && !await supportsLaunchMode(LaunchMode.inAppBrowserView)) {
@@ -33,6 +35,9 @@ class ChatGptLogin {
       .encode(List.generate(32, (_) => Random.secure().nextInt(256)))
       .replaceAll('=', '');
   void cancel() {
+    if (_cancelSignal != null && !_cancelSignal!.isCompleted) {
+      _cancelSignal!.complete();
+    }
     if (_pending != null && !_pending!.isCompleted) {
       _pending!.complete({'error': 'cancelled'});
     }
@@ -44,6 +49,7 @@ class ChatGptLogin {
     }
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final pending = _pending = Completer<Map<String, String>>();
+    final cancelSignal = _cancelSignal = Completer<void>();
     final state = random(), nonce = random(), verifier = random();
     final redirect = 'http://127.0.0.1:${server.port}/auth/callback';
     final uri = Uri.https('auth.openai.com', '/api/accounts/authorize', {
@@ -94,6 +100,12 @@ class ChatGptLogin {
           (clientId != null && issued != clientId)) {
         throw const FormatException();
       }
+      if (Platform.isAndroid) {
+        await waitForAuthForeground(
+          cancelled: cancelSignal.future,
+          timeout: timeout,
+        );
+      }
       return {
         'client_id': issued,
         'code': result['code']!,
@@ -107,6 +119,7 @@ class ChatGptLogin {
       );
     } finally {
       _pending = null;
+      _cancelSignal = null;
       await server.close(force: true);
       if (Platform.isIOS) {
         try {
