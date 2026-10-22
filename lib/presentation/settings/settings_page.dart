@@ -8,10 +8,13 @@ import 'language_view_model.dart';
 import 'model_picker.dart';
 import 'chatgpt_panel.dart';
 import '../shared/widgets.dart';
+import '../updates/update_controller.dart';
+import '../updates/update_panel.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, this.controls});
+  const SettingsPage({super.key, this.controls, this.updates});
   final Widget? controls;
+  final UpdateController? updates;
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
@@ -272,16 +275,21 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
         const SizedBox(height: 20),
         ?widget.controls,
+        if (widget.updates != null) ...[
+          const SizedBox(height: 20),
+          UpdatePanel(controller: widget.updates!),
+          const SizedBox(height: 20),
+        ],
         Notice(context.l10n.privacyNotice),
         Text(
-          'OmniQuiz 0.1.0 · GPL-3.0-only',
+          'OmniQuiz · GPL-3.0-only',
           style: TextStyle(color: Colors.black54),
         ),
         TextButton(
           onPressed: () => showLicensePage(
             context: context,
             applicationName: 'OmniQuiz',
-            applicationVersion: '0.1.0',
+            applicationVersion: widget.updates?.version,
             applicationLegalese: 'Copyright © 2026 OmniQuiz contributors\nLicensed under GPL-3.0-only',
           ),
           child: Text(context.l10n.licenses),

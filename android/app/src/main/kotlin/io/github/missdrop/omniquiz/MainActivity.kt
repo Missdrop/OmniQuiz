@@ -10,6 +10,8 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger,
+            "io.github.missdrop.omniquiz/updates").setMethodCallHandler(UpdateInstaller(this))
         backupExporter = BackupExporter(this)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger,
             "io.github.missdrop.omniquiz/backup").setMethodCallHandler(backupExporter)
@@ -22,6 +24,8 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger,
+            "io.github.missdrop.omniquiz/updates").setMethodCallHandler(null)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger,
             "io.github.missdrop.omniquiz/backup").setMethodCallHandler(null)
         backupExporter?.dispose()

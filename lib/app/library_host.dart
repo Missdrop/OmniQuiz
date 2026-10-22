@@ -20,12 +20,19 @@ import 'dependencies.dart';
 import '../infrastructure/backup/library_backup.dart';
 import '../infrastructure/platform/backup_actions.dart';
 import '../presentation/backup/backup_panel.dart';
+import '../presentation/updates/update_controller.dart';
 
 /// Replaces the complete study session on a switch, including its view models.
 class LibraryHost extends StatefulWidget {
-  const LibraryHost({super.key, required this.catalog, required this.initial});
+  const LibraryHost({
+    super.key,
+    required this.catalog,
+    required this.initial,
+    this.updates,
+  });
   final LibraryCatalog catalog;
   final AppDependencies initial;
+  final UpdateController? updates;
   @override
   State<LibraryHost> createState() => _LibraryHostState();
 }
@@ -39,6 +46,20 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    widget.updates?.prepareToExit = () async {
+      if (_switching ||
+          _dialogOpen ||
+          _dependencies.library.busy ||
+          _dependencies.practice.busy ||
+          _dependencies.settings.busy ||
+          _dependencies.language.saving) {
+        throw const AppFailure(
+          'Finish the current operation before installing an update.',
+        );
+      }
+      await _dependencies.coordinator.quiesce();
+      await _dependencies.library.stopScan();
+    };
     unawaited(_dependencies.library.scan());
   }
 
@@ -274,6 +295,7 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
         OmniQuizApp(
           key: ObjectKey(_dependencies),
           dependencies: _dependencies,
+          updates: widget.updates,
           libraryControls: ListenableBuilder(
             listenable: Listenable.merge([
               _dependencies.library,
@@ -311,6 +333,7 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    widget.updates?.dispose();
     unawaited(
       _dependencies.dispose().whenComplete(widget.catalog.database.close),
     );

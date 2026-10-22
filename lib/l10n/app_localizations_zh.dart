@@ -800,4 +800,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatGptDetails => '订阅接入说明';
+
+  @override
+  String get updateTitle => '应用更新';
+
+  @override
+  String get updateAutoCheck => '启动时检查更新';
+
+  @override
+  String get updateHelp => '仅检查新版本，点击更新后才会下载安装包。';
+
+  @override
+  String updateVersion(String version) {
+    return '当前版本：$version';
+  }
+
+  @override
+  String get updateCheck => '检查更新';
+
+  @override
+  String get updateChecking => '正在检查更新…';
+
+  @override
+  String get updateCurrent => '当前已是最新正式版本。';
+
+  @override
+  String get updateNoRelease => '暂时还没有发布正式版本。';
+
+  @override
+  String updateFound(String version) {
+    return '发现新版本 $version';
+  }
+
+  @override
+  String updateDownloading(int percent) {
+    return '正在下载… $percent%';
+  }
+
+  @override
+  String get updateReady => '下载已校验，可以继续安装。';
+
+  @override
+  String get updateInstalling => '正在准备安装…';
+
+  @override
+  String get updateFailed => '检查、下载或安装更新失败。请重试，或通过官方发布页下载。';
+
+  @override
+  String get updateCancelled => '已取消下载，可以继续使用当前版本。';
+
+  @override
+  String get updatePreferenceFailed => '更新偏好保存失败，请重试。';
+
+  @override
+  String get updateDetails => '查看更新';
+
+  @override
+  String get updateWebsite => '官方发布页';
+
+  @override
+  String get updateOptional => '更新完全自愿；稍后提醒或跳过均不影响使用。';
+
+  @override
+  String get updateNoNotes => '详细更新内容请查看官方发布页。';
+
+  @override
+  String get updateUnsupported => '当前平台没有可直接安装的更新包。请查看官方发布页中的可用版本和安装说明。';
+
+  @override
+  String get updateInstallHelp => '安装可能关闭并重启 OmniQuiz；资料和学习进度会保留。请按系统提示授权。';
+
+  @override
+  String get updateLater => '稍后提醒';
+
+  @override
+  String get updateSkip => '跳过此版本';
+
+  @override
+  String get updateCancelDownload => '取消下载';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get updateInstall => '继续安装';
+
+  @override
+  String get updateInstallPermission =>
+      '请在系统设置中允许 OmniQuiz 安装更新，然后返回并点击“继续安装”。';
 }

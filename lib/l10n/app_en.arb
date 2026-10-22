@@ -391,5 +391,53 @@
   "chatGptRevocationUnconfirmed": "Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.",
   "libraryStorageDetails": "Storage and library details",
   "chatGptSignInAgain": "Sign in again",
-  "chatGptDetails": "How subscription access works"
+  "chatGptDetails": "How subscription access works",
+  "updateTitle": "App updates",
+  "updateAutoCheck": "Check for updates at startup",
+  "updateHelp": "Only checks for new versions. Downloads start when you choose Update.",
+  "updateVersion": "Current version: {version}",
+  "updateCheck": "Check for updates",
+  "updateChecking": "Checking for updates…",
+  "updateCurrent": "You are using the latest stable version.",
+  "updateNoRelease": "No stable release has been published yet.",
+  "updateFound": "New version {version}",
+  "updateDownloading": "Downloading… {percent}%",
+  "updateReady": "Download verified. Continue installation when ready.",
+  "updateInstalling": "Preparing installation…",
+  "updateFailed": "Could not check, download or install the update. Retry or use the official download page.",
+  "updateCancelled": "Download cancelled. You can keep using this version.",
+  "updatePreferenceFailed": "Could not save the update preference. Please try again.",
+  "updateDetails": "View update",
+  "updateWebsite": "Official download page",
+  "updateOptional": "Updates are optional. Remind me later or skip without affecting your use.",
+  "updateNoNotes": "See the official release page for details.",
+  "updateUnsupported": "This platform has no compatible installer for this release. Use the official page for available builds and installation instructions.",
+  "updateInstallHelp": "Installation may close and restart OmniQuiz. Your libraries and progress are kept. Follow any system permission prompts.",
+  "updateLater": "Remind me later",
+  "updateSkip": "Skip this version",
+  "updateCancelDownload": "Cancel download",
+  "updateNow": "Update now",
+  "updateInstall": "Continue installation",
+  "@updateVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateFound": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@updateDownloading": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "updateInstallPermission": "Allow OmniQuiz to install updates in system settings, then return and choose Continue installation."
 }

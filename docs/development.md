@@ -184,6 +184,49 @@ cross-app Keychain Sharing. Test secure storage on your signed/distributed build
 iOS signing and Keychain access must likewise be checked on a device. Linux
 requires an available Secret Service at runtime. There is no plaintext fallback.
 
+## Update delivery
+
+The updater uses the public GitHub `releases/latest` endpoint for this repository,
+ignores drafts/prereleases and compares the installed package version. Current
+version information comes from `package_info_plus`, not hard-coded UI text.
+The global database stores startup-check and skipped-version preferences under
+`app_updates`; these device preferences are excluded from portable backups.
+
+Checks never download installers. An explicit update action selects the matching
+asset (including native Android ABI order), streams it into the private update
+cache, and verifies length and SHA-256 from the release asset digest or
+`SHA256SUMS`. Only HTTPS GitHub release download redirects are accepted. Failed or
+cancelled downloads discard partial files and retain the official page fallback.
+
+Android checks the APK package name, signing certificate and increasing version
+code before granting a narrowly scoped FileProvider URI to the system installer.
+It requests the user's unknown-source installation approval when necessary.
+Windows hands the MSI to Windows Installer. macOS verifies/stages a DMG app using
+native tools; Linux stages the portable tar bundle. Writable desktop bundles use
+a detached helper to wait for the old process, rename bundles on the same volume,
+and restart; failed swaps restore and restart the previous bundle. The prior
+bundle remains in the sibling staging directory for recovery. Application data
+is outside those bundles. Read-only/system-managed installations and unsigned iOS
+builds fall back to the release page.
+
+macOS packaging verifies the complete app seal before archiving. Incremental
+ad-hoc builds with a stale outer seal are re-signed preserving metadata, then
+verified again. An invalid distribution identity is never replaced with ad-hoc
+signing. This does not add Developer ID signing or notarization.
+
+Update regression coverage is in `test/update_test.dart`,
+`test/desktop_update_test.dart`, and `integration_test/update_interaction_test.dart`.
+To validate real DMG staging after building/packaging on macOS:
+
+```sh
+OMNIQUIZ_TEST_DMG="$PWD/dist/OmniQuiz-macos.dmg" ./scripts/flutter test test/desktop_update_test.dart
+```
+
+Only use `RUN_NATIVE_UPDATE_INSTALL=true` in a disposable Android test instance
+with a newer matching-signature APK staged in `cache/updates/test/next.apk`.
+The real system installer requires user interaction; ordinary UI fixtures avoid
+replacing the running test application.
+
 ## Initial scope
 
 - Multiple local libraries, each with all-materials or per-document practice scope.

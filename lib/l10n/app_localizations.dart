@@ -1591,6 +1591,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How subscription access works'**
   String get chatGptDetails;
+
+  /// No description provided for @updateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App updates'**
+  String get updateTitle;
+
+  /// No description provided for @updateAutoCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates at startup'**
+  String get updateAutoCheck;
+
+  /// No description provided for @updateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only checks for new versions. Downloads start when you choose Update.'**
+  String get updateHelp;
+
+  /// No description provided for @updateVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Current version: {version}'**
+  String updateVersion(String version);
+
+  /// No description provided for @updateCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get updateCheck;
+
+  /// No description provided for @updateChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates…'**
+  String get updateChecking;
+
+  /// No description provided for @updateCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'You are using the latest stable version.'**
+  String get updateCurrent;
+
+  /// No description provided for @updateNoRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'No stable release has been published yet.'**
+  String get updateNoRelease;
+
+  /// No description provided for @updateFound.
+  ///
+  /// In en, this message translates to:
+  /// **'New version {version}'**
+  String updateFound(String version);
+
+  /// No description provided for @updateDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading… {percent}%'**
+  String updateDownloading(int percent);
+
+  /// No description provided for @updateReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Download verified. Continue installation when ready.'**
+  String get updateReady;
+
+  /// No description provided for @updateInstalling.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing installation…'**
+  String get updateInstalling;
+
+  /// No description provided for @updateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check, download or install the update. Retry or use the official download page.'**
+  String get updateFailed;
+
+  /// No description provided for @updateCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Download cancelled. You can keep using this version.'**
+  String get updateCancelled;
+
+  /// No description provided for @updatePreferenceFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the update preference. Please try again.'**
+  String get updatePreferenceFailed;
+
+  /// No description provided for @updateDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'View update'**
+  String get updateDetails;
+
+  /// No description provided for @updateWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Official download page'**
+  String get updateWebsite;
+
+  /// No description provided for @updateOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates are optional. Remind me later or skip without affecting your use.'**
+  String get updateOptional;
+
+  /// No description provided for @updateNoNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'See the official release page for details.'**
+  String get updateNoNotes;
+
+  /// No description provided for @updateUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This platform has no compatible installer for this release. Use the official page for available builds and installation instructions.'**
+  String get updateUnsupported;
+
+  /// No description provided for @updateInstallHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Installation may close and restart OmniQuiz. Your libraries and progress are kept. Follow any system permission prompts.'**
+  String get updateInstallHelp;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Remind me later'**
+  String get updateLater;
+
+  /// No description provided for @updateSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip this version'**
+  String get updateSkip;
+
+  /// No description provided for @updateCancelDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel download'**
+  String get updateCancelDownload;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get updateNow;
+
+  /// No description provided for @updateInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue installation'**
+  String get updateInstall;
+
+  /// No description provided for @updateInstallPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow OmniQuiz to install updates in system settings, then return and choose Continue installation.'**
+  String get updateInstallPermission;
 }
 
 class _AppLocalizationsDelegate

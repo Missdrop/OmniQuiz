@@ -94,6 +94,21 @@ def windows_package(destination):
                     '-pdbtype', 'none', '-o', str(destination / 'OmniQuiz-windows-x64.msi')], check=True)
 
 
+def verify_macos_bundle(source):
+    """Repair stale outer ad-hoc seals from incremental Flutter builds only."""
+    command = ['codesign', '--verify', '--deep', '--strict', str(source)]
+    verified = subprocess.run(command, capture_output=True, text=True)
+    if verified.returncode == 0:
+        return
+    identity = subprocess.run(['codesign', '--display', '--verbose=2', str(source)],
+                              capture_output=True, text=True)
+    if identity.returncode != 0 or 'Signature=adhoc' not in identity.stderr:
+        raise RuntimeError('macOS signature verification failed; refusing to replace a distribution identity')
+    subprocess.run(['codesign', '--force', '--sign', '-',
+                    '--preserve-metadata=entitlements,requirements,flags,runtime', str(source)], check=True)
+    subprocess.run(command, check=True)
+
+
 def macos_dmg(source, destination):
     with tempfile.TemporaryDirectory(prefix='omniquiz-dmg-') as temporary:
         staging = pathlib.Path(temporary)
@@ -127,6 +142,8 @@ def package(target):
             'ios': ('build/ios/iphoneos/Runner.app', 'Runner.app', 'ios-unsigned'),
         }
         source, name, suffix = sources[target]
+        if target == 'macos':
+            verify_macos_bundle(source)
         with tarfile.open(destination / f'OmniQuiz-{suffix}.tar.gz', 'w:gz') as archive:
             archive.add(source, arcname=name)
         if target == 'macos':
