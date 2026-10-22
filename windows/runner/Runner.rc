@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "io.github.missdrop" "\0"
-            VALUE "FileDescription", "omniquiz" "\0"
+            VALUE "FileDescription", "OmniQuiz" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "omniquiz" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 io.github.missdrop. All rights reserved." "\0"
             VALUE "OriginalFilename", "omniquiz.exe" "\0"
-            VALUE "ProductName", "omniquiz" "\0"
+            VALUE "ProductName", "OmniQuiz" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

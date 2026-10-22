@@ -503,3 +503,55 @@ cover the client behavior. Complete a real signed Android/iOS device test agains
 your authenticated gateway (model listing, question generation, network loss,
 app resume and expired upstream login) before treating that deployment as
 verified. Compiling an APK or receiving a model catalog alone is insufficient.
+
+## Windows code signing (SignPath application pending)
+
+See the [Code signing policy](code-signing-policy.md), [Privacy policy](privacy.md),
+and [.signpath/windows-artifacts.xml](../.signpath/windows-artifacts.xml).
+The CI integration is prepared but cannot sign until SignPath accepts the project,
+issues access, and a maintainer enables the following configuration.
+
+In SignPath, create the OmniQuiz project linked to this public repository and its
+GitHub.com trusted build system. Import `windows-artifacts.xml` as the artifact
+configuration. It expects the GitHub artifact's outer ZIP to contain the MSI and
+portable ZIP, constraining our executable's product name and exact build version.
+Use a production signing policy with origin verification, GitHub-hosted runners,
+`main`/stable version tag restrictions, and manual approval for every request.
+Confirm the MSI's generated internal path against an uploaded sample before enabling
+production signing. Reviewers/approvers and GitHub/SignPath accounts must use MFA.
+
+Add these repository settings after approval:
+
+| Setting | Type | Value |
+| --- | --- | --- |
+| `SIGNPATH_API_TOKEN` | Actions secret | Submitter token supplied by SignPath; never commit or paste into issues |
+| `SIGNPATH_ORGANIZATION_ID` | Actions variable | Granted organization ID |
+| `SIGNPATH_PROJECT_SLUG` | Actions variable | Configured project slug |
+| `SIGNPATH_SIGNING_POLICY_SLUG` | Actions variable | Production policy with manual approval |
+| `SIGNPATH_ARTIFACT_CONFIGURATION_SLUG` | Actions variable | Imported Windows artifact configuration slug |
+| `SIGNPATH_ENABLED` | Actions variable | Set to `true` **last**, after the above settings and policy are validated |
+
+If SignPath requires its GitHub App, the repository owner installs it with access
+limited to OmniQuiz. Do not grant organization-wide access unnecessarily.
+The token may submit requests; a separate human approval is still required.
+The build waits up to one hour for approval, then fails rather than publishing
+unsigned packages. A timed-out run can be retried after reviewing the request.
+PRs do not receive a signing request. Manual CI runs from arbitrary branches are
+rejected for production signing; use `main` for the first end-to-end verification.
+
+Before enabling, unsigned builds continue to work and release notes identify them
+as unsigned. Once enabled, all tests must pass before the build, signatures and
+timestamps must verify, and both packages' payloads must match the compiled build
+except for our executable's Authenticode fields. Only the final verified packages
+are named `omniquiz-windows` for the publisher; unsigned inputs use a distinct
+`signpath-windows-unsigned` workflow artifact and never enter the published asset set.
+An internal `windows-signing-status.json` accompanies the workflow artifact so
+release notes reflect the actual verification result; it is not uploaded to Releases.
+Upstream DLLs are not re-signed under this project's certificate.
+
+An approved subscription and a successful first signed CI build are required before
+claiming signing works. Check the certificate's Windows publisher name; the verifier
+expects `SignPath Foundation`. If the granted certificate differs, review the
+certificate and deliberately update this check. After acceptance, update the
+pending status/attribution in the README and signing policy. Do not replace or move
+the existing v1.0.0 tag; publish signed artifacts through a new release version.

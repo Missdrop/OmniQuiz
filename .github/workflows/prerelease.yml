@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 # Never interrupt asset replacement. GitHub retains the newest pending run.
 concurrency:
   group: rolling-prerelease
