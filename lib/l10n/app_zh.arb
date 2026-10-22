@@ -286,5 +286,8 @@
   "chatGptIncomplete": "ChatGPT 未能完成回复。请检查订阅用量后重试。",
   "chatGptReady": "ChatGPT 已就绪。新题目将使用所选账号生成。",
   "chatGptSignedOut": "已退出 ChatGPT。",
-  "chatGptRevocationUnconfirmed": "已在本地退出。请在 ChatGPT 设置中断开 OmniQuiz，以确认撤销授权。"
+  "chatGptRevocationUnconfirmed": "已在本地退出。请在 ChatGPT 设置中断开 OmniQuiz，以确认撤销授权。",
+  "libraryStorageDetails": "存储位置与资料库说明",
+  "chatGptSignInAgain": "重新登录",
+  "chatGptDetails": "订阅接入说明"
 }

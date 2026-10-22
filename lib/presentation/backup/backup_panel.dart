@@ -60,6 +60,7 @@ class _BackupPanelState extends State<BackupPanel> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.restoreBackup),
         content: Text(context.l10n.restoreBackupHelp),
         actions: [
@@ -80,7 +81,7 @@ class _BackupPanelState extends State<BackupPanel> {
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 16 : 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

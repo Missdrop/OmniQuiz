@@ -73,6 +73,7 @@ class PracticePage extends StatelessWidget {
                     final proceed = await showDialog<bool>(
                       context: context,
                       builder: (context) => AlertDialog(
+                        scrollable: true,
                         title: Text(context.l10n.generateTitle),
                         content: Text(context.l10n.generateBody),
                         actions: [
@@ -249,6 +250,7 @@ class PracticePage extends StatelessWidget {
                                 final flag = await showDialog<bool>(
                                   context: context,
                                   builder: (context) => AlertDialog(
+                                    scrollable: true,
                                     title: Text(context.l10n.hideQuestionTitle),
                                     content: Text(
                                       context.l10n.hideQuestionBody,

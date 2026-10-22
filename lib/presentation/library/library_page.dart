@@ -157,6 +157,7 @@ class LibraryPage extends StatelessWidget {
                 showDialog<void>(
                   context: context,
                   builder: (context) => AlertDialog(
+                    scrollable: true,
                     title: Text(doc.name),
                     content: SizedBox(
                       width: 640,
@@ -196,6 +197,7 @@ class LibraryPage extends StatelessWidget {
                         final remove = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
+                            scrollable: true,
                             title: Text(context.l10n.removeDocumentTitle),
                             content: Text(
                               vm.files == null
@@ -228,6 +230,7 @@ class LibraryPage extends StatelessWidget {
     final selected = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(context.l10n.excludedFiles(vm.excluded.length)),
         content: SizedBox(
           width: 520,

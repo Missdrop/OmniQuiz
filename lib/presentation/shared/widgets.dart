@@ -14,6 +14,7 @@ class PageFrame extends StatelessWidget {
   final List<Widget> children;
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
+    keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
     padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 20 : 40),
     child: Center(
       child: ConstrainedBox(
@@ -33,8 +34,11 @@ class PageFrame extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              style: Theme.of(context).textTheme.headlineLarge
-                  ?.copyWith(fontWeight: FontWeight.w700),
+              style:
+                  (MediaQuery.sizeOf(context).width < 600
+                          ? Theme.of(context).textTheme.headlineSmall
+                          : Theme.of(context).textTheme.headlineLarge)
+                      ?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 10),
             Text(
@@ -84,7 +88,7 @@ class EmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     child: Padding(
-      padding: const EdgeInsets.all(32),
+      padding: EdgeInsets.all(MediaQuery.sizeOf(context).width < 600 ? 20 : 32),
       child: SizedBox(
         width: double.infinity,
         child: Column(

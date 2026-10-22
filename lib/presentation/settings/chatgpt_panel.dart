@@ -13,24 +13,39 @@ class ChatGptPanel extends StatefulWidget {
 
 class _ChatGptPanelState extends State<ChatGptPanel> {
   String? _model;
-  String _language = '简体中文';
+  String? _language;
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SettingsViewModel>();
     final l = context.l10n;
     if (vm.chatGpt == null) return const SizedBox.shrink();
+    final language =
+        _language ??
+        (vm.profile?.chatGpt == true ? vm.profile!.language : '简体中文');
+    final savedModel = vm.profile?.credentialRef == vm.chatGptAccount
+        ? vm.profile?.model
+        : null;
     final model = vm.chatGptModels.contains(_model)
         ? _model
+        : vm.chatGptModels.contains(savedModel)
+        ? savedModel
         : vm.chatGptModels.firstOrNull;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(
+          MediaQuery.sizeOf(context).width < 600 ? 16 : 24,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(l.chatGptTitle, style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 12),
-            Text(l.chatGptHelp),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              title: Text(l.chatGptDetails),
+              childrenPadding: const EdgeInsets.only(bottom: 12),
+              children: [Text(l.chatGptHelp)],
+            ),
             if (vm.profile?.chatGpt == true)
               Padding(
                 padding: const EdgeInsets.only(top: 12),
@@ -38,6 +53,7 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                   '${l.chatGptActive}: ${vm.chatGptAccounts[vm.profile!.credentialRef] ?? vm.profile!.credentialRef} / ${vm.profile!.model}',
                 ),
               ),
+            const SizedBox(height: 24),
             if (vm.chatGptAccounts.isNotEmpty)
               DropdownButtonFormField<String>(
                 key: ValueKey(vm.chatGptAccount),
@@ -68,11 +84,15 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                FilledButton(
+                OutlinedButton(
                   onPressed: vm.busy || !vm.loaded
                       ? null
                       : () => vm.signInChatGpt(),
-                  child: Text(l.continueChatGpt),
+                  child: Text(
+                    vm.chatGptAccount == null
+                        ? l.continueChatGpt
+                        : l.chatGptSignInAgain,
+                  ),
                 ),
                 if (vm.chatGptAccounts.isNotEmpty)
                   TextButton(
@@ -97,7 +117,12 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                   TextButton(onPressed: vm.cancelSignIn, child: Text(l.cancel)),
               ],
             ),
+            if (vm.busy) ...[
+              const SizedBox(height: 12),
+              const LinearProgressIndicator(),
+            ],
             if (model != null) ...[
+              const Divider(height: 32),
               DropdownButtonFormField<String>(
                 key: ValueKey('${vm.chatGptAccount}/$model'),
                 initialValue: model,
@@ -114,8 +139,11 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                     .toList(),
                 onChanged: vm.busy ? null : (id) => setState(() => _model = id),
               ),
+              const SizedBox(height: 24),
               DropdownButtonFormField<String>(
-                initialValue: _language,
+                initialValue: language,
+                key: ValueKey(language),
+                isExpanded: true,
                 decoration: InputDecoration(labelText: l.questionLanguage),
                 items: ['简体中文', 'English']
                     .map((id) => DropdownMenuItem(value: id, child: Text(id)))
@@ -124,15 +152,19 @@ class _ChatGptPanelState extends State<ChatGptPanel> {
                     ? null
                     : (id) => setState(() => _language = id!),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               FilledButton(
                 onPressed: vm.busy
                     ? null
-                    : () => vm.useChatGpt(model, _language),
+                    : () => vm.useChatGpt(model, language),
                 child: Text(l.chatGptUseModel),
               ),
             ],
-            Text(l.chatGptTestHelp),
+            const SizedBox(height: 16),
+            Text(
+              l.chatGptTestHelp,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             TextButton(
               onPressed: () => launchUrl(
                 Uri.parse('https://chatgpt.com/settings/usage'),

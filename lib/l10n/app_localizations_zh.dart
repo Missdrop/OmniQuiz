@@ -791,4 +791,13 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get chatGptRevocationUnconfirmed =>
       '已在本地退出。请在 ChatGPT 设置中断开 OmniQuiz，以确认撤销授权。';
+
+  @override
+  String get libraryStorageDetails => '存储位置与资料库说明';
+
+  @override
+  String get chatGptSignInAgain => '重新登录';
+
+  @override
+  String get chatGptDetails => '订阅接入说明';
 }

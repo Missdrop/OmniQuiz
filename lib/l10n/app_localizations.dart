@@ -1573,6 +1573,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.'**
   String get chatGptRevocationUnconfirmed;
+
+  /// No description provided for @libraryStorageDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage and library details'**
+  String get libraryStorageDetails;
+
+  /// No description provided for @chatGptSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in again'**
+  String get chatGptSignInAgain;
+
+  /// No description provided for @chatGptDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'How subscription access works'**
+  String get chatGptDetails;
 }
 
 class _AppLocalizationsDelegate

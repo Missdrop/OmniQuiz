@@ -388,5 +388,8 @@
   "chatGptIncomplete": "ChatGPT could not complete the response. Check your plan usage and try again.",
   "chatGptReady": "ChatGPT is ready. New questions will use your selected account.",
   "chatGptSignedOut": "Signed out of ChatGPT.",
-  "chatGptRevocationUnconfirmed": "Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation."
+  "chatGptRevocationUnconfirmed": "Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.",
+  "libraryStorageDetails": "Storage and library details",
+  "chatGptSignInAgain": "Sign in again",
+  "chatGptDetails": "How subscription access works"
 }

@@ -871,4 +871,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get chatGptRevocationUnconfirmed =>
       'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.';
+
+  @override
+  String get libraryStorageDetails => 'Storage and library details';
+
+  @override
+  String get chatGptSignInAgain => 'Sign in again';
+
+  @override
+  String get chatGptDetails => 'How subscription access works';
 }

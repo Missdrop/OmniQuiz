@@ -244,13 +244,16 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
           ],
         ),
         const SizedBox(height: 8),
-        SelectableText(
-          widget.catalog.selected.directory,
-          style: const TextStyle(fontSize: 12),
-        ),
-        Text(
-          context.l10n.libraryIsolationDescription,
-          style: const TextStyle(fontSize: 12),
+        ExpansionTile(
+          tilePadding: EdgeInsets.zero,
+          title: Text(context.l10n.libraryStorageDetails),
+          childrenPadding: const EdgeInsets.only(bottom: 16),
+          expandedCrossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SelectableText(widget.catalog.selected.directory),
+            const SizedBox(height: 8),
+            Text(context.l10n.libraryIsolationDescription),
+          ],
         ),
         if (_error != null)
           Text(
