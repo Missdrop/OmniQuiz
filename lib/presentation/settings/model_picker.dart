@@ -30,8 +30,11 @@ class _ModelPickerState extends State<ModelPicker> {
               decoration: InputDecoration(labelText: context.l10n.searchModels),
               onChanged: (value) => setState(() => _query = value),
             ),
+            const SizedBox(height: 12),
             SizedBox(
-              height: 240,
+              height:
+                  (matches.length * MediaQuery.textScalerOf(context).scale(64))
+                      .clamp(0.0, 240.0),
               child: ListView.builder(
                 itemCount: matches.length,
                 itemBuilder: (context, index) => ListTile(

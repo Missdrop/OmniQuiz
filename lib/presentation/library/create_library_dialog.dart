@@ -88,18 +88,18 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
                   labelText: context.l10n.libraryName,
                 ),
               ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _external,
-                onChanged:
-                    !_busy && PlatformDocumentAccess().supportsDirectories
-                    ? (value) => setState(() {
-                        _external = value;
-                        _error = null;
-                      })
-                    : null,
-                title: Text(context.l10n.useExistingFolder),
-              ),
+              if (PlatformDocumentAccess().supportsDirectories)
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _external,
+                  onChanged: !_busy
+                      ? (value) => setState(() {
+                          _external = value;
+                          _error = null;
+                        })
+                      : null,
+                  title: Text(context.l10n.useExistingFolder),
+                ),
               if (_external)
                 OutlinedButton.icon(
                   onPressed: _busy ? null : _choose,
@@ -109,10 +109,10 @@ class _CreateLibraryDialogState extends State<CreateLibraryDialog> {
               Text(
                 _external
                     ? (_folder ?? context.l10n.folderIncludesSubfolders)
-                    : context.l10n.managedFolderDescription,
+                    : PlatformDocumentAccess().supportsDirectories
+                    ? context.l10n.managedFolderDescription
+                    : context.l10n.mobileLibraryDescription,
               ),
-              if (!PlatformDocumentAccess().supportsDirectories)
-                Text(context.l10n.mobileLibraryDescription),
               if (_busy) const LinearProgressIndicator(),
               if (_error != null)
                 Text(
