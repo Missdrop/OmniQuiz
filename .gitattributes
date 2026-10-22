@@ -1,0 +1,5 @@
+# Bash entry points must also run from Windows checkouts and source archives.
+*.sh text eol=lf
+scripts/bootstrap text eol=lf
+scripts/flutter text eol=lf
+scripts/dart text eol=lf
