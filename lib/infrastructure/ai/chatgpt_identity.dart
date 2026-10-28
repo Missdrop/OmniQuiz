@@ -1,3 +1,5 @@
+// Verifies signed identity tokens and binds claims to the expected client and login attempt.
+
 import 'dart:convert';
 
 import 'package:jose/jose.dart';
@@ -5,9 +7,12 @@ import 'package:jose/jose.dart';
 import '../../domain/models.dart';
 import 'chatgpt_http.dart';
 
+/// Validates RSA signatures, issuer, audience, lifetime and login-bound identity claims.
 class ChatGptIdentity {
   ChatGptIdentity(this.http);
   final ChatGptHttp http;
+
+  /// Verifies signatures before exposing claims; decoding a JWT alone proves nothing.
   Future<Map<String, dynamic>> verify(
     String token,
     String clientId, {

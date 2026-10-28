@@ -1,7 +1,10 @@
+// Filters discovered model identifiers while allowing settings to retain a stable selection.
+
 import 'package:flutter/material.dart';
 
 import '../../l10n/localization.dart';
 
+/// A searchable view over model IDs; it does not fetch or activate provider connections.
 class ModelPicker extends StatefulWidget {
   const ModelPicker({super.key, required this.models});
   final List<String> models;

@@ -1,3 +1,5 @@
+// Coordinates user import/scan actions and refreshes library statistics without parsing in widgets.
+
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -9,6 +11,7 @@ import '../../application/ports/repositories.dart';
 import '../../application/use_cases/import_materials.dart';
 import '../../domain/models.dart';
 
+/// Coordinates material actions while retaining partial import results and scan progress.
 class LibraryViewModel extends ChangeNotifier {
   LibraryViewModel(
     this.materials,

@@ -1,3 +1,5 @@
+// Maps known application diagnostics at the UI boundary while preserving user-provided filenames.
+
 import 'package:flutter/widgets.dart';
 
 import 'app_localizations.dart';
@@ -16,6 +18,28 @@ extension LocalizedDiagnostics on AppLocalizations {
       return message.split('\n').map(diagnostic).join('\n');
     }
     final known = <String, String>{
+      'Invalid saved AI connections.': invalidConnections,
+      'Enter a connection name (1–80 characters).': connectionNameError,
+      'Could not save AI connections. Please try again.': connectionSaveError,
+      'Connection saved and selected for new questions.': connectionSavedActive,
+      'Connection saved. The current AI connection is unchanged.':
+          connectionSavedInactive,
+      'Connection removed. Other saved connections were kept.':
+          connectionRemoved,
+      'Reading study material excerpts…': stageReading,
+      'Reading sample papers and question requirements…': stageGuidance,
+      'Waiting for the model to write questions…': stageRequesting,
+      'Checking answers, citations and duplicates…': stageValidating,
+      'Saving verified questions to this library…': stageSaving,
+      'The provider is busy. Waiting before a limited retry…': stageRetrying,
+      'Library metadata contains an unsafe path.': unsafeMetadata,
+      'Could not save question feedback. Please try again.': feedbackSaveError,
+      'Question guidance exceeds its size limits.': guidanceLimitError,
+      'Invalid or duplicate reference examples.': guidanceInvalidExamples,
+      'Could not load question guidance. Save it again to repair it.':
+          guidanceLoadError,
+      'Could not import reference examples.': guidanceImportError,
+      'Could not save question guidance. Please try again.': guidanceSaveError,
       'Account saved. Could not load available models. Load models again to finish setup.':
           chatGptModelsPending,
       'ChatGPT account': chatGptAccountUnnamed,

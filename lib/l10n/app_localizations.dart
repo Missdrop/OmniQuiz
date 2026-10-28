@@ -98,6 +98,150 @@ abstract class AppLocalizations {
     Locale('zh'),
   ];
 
+  /// No description provided for @appName.
+  ///
+  /// In en, this message translates to:
+  /// **'OmniQuiz'**
+  String get appName;
+
+  /// No description provided for @guidanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Examples and question requirements'**
+  String get guidanceTitle;
+
+  /// No description provided for @guidanceHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample questions and papers guide style and difficulty, not factual answers. Answers must remain grounded in study materials. Currently supports four-option single-choice questions. Settings belong to this library; requirements and sample excerpts are sent to your selected AI when generating. Files are stored in .omniquiz/guidance inside this library; external edits are read for subsequent batches.'**
+  String get guidanceHelp;
+
+  /// No description provided for @extraRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional question requirements'**
+  String get extraRequirements;
+
+  /// No description provided for @extraRequirementsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'For example: medium difficulty; focus on applying concepts, use plausible distractors, and explain why other options are incorrect.'**
+  String get extraRequirementsHint;
+
+  /// No description provided for @pasteExamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste sample questions or paper text (optional)'**
+  String get pasteExamples;
+
+  /// No description provided for @importExamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Import sample questions / papers'**
+  String get importExamples;
+
+  /// No description provided for @guidanceFormats.
+  ///
+  /// In en, this message translates to:
+  /// **'TXT, Markdown and text-based PDF. Up to 8 files, 20 MB each, with 120,000 characters of reference text in total; pasted text is limited to 20,000. Long papers rotate through excerpts (about 12,000 characters per batch). Originals stay unchanged. Scanned files need OCR first.'**
+  String get guidanceFormats;
+
+  /// No description provided for @exampleCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} characters · Expand to preview'**
+  String exampleCharacters(int count);
+
+  /// No description provided for @removeExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove example'**
+  String get removeExample;
+
+  /// No description provided for @replaceGuidanceBuffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate unanswered questions'**
+  String get replaceGuidanceBuffer;
+
+  /// No description provided for @replaceGuidanceBufferHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps answer history and reviews. Active practice continues with the new requirements and uses service allowance. When unchecked, existing cached questions stay unchanged and guidance applies only to future generation.'**
+  String get replaceGuidanceBufferHelp;
+
+  /// No description provided for @saveGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Save question settings'**
+  String get saveGuidance;
+
+  /// No description provided for @guidanceEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This library\'s examples / question requirements are enabled'**
+  String get guidanceEnabled;
+
+  /// No description provided for @guidanceLimitError.
+  ///
+  /// In en, this message translates to:
+  /// **'Size or count limit exceeded. Shorten requirements, split papers or remove examples.'**
+  String get guidanceLimitError;
+
+  /// No description provided for @guidanceLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load question settings. Save them again to repair them.'**
+  String get guidanceLoadError;
+
+  /// No description provided for @guidanceImportError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import samples. Check their format and readable text.'**
+  String get guidanceImportError;
+
+  /// No description provided for @guidanceSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Question settings were not saved. Please try again.'**
+  String get guidanceSaveError;
+
+  /// No description provided for @guidanceInvalidExamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid or duplicate examples. Please import them again.'**
+  String get guidanceInvalidExamples;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @privacyLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the privacy policy. Please reopen this page.'**
+  String get privacyLoadFailed;
+
+  /// No description provided for @reportToDeveloper.
+  ///
+  /// In en, this message translates to:
+  /// **'Report AI content to developer'**
+  String get reportToDeveloper;
+
+  /// No description provided for @storeUpdatesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'This edition is distributed and updated by Microsoft Store. Use the Store to check for and install updates.'**
+  String get storeUpdatesHelp;
+
+  /// No description provided for @openMicrosoftStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Microsoft Store'**
+  String get openMicrosoftStore;
+
   /// No description provided for @gatewayTitle.
   ///
   /// In en, this message translates to:
@@ -113,7 +257,7 @@ abstract class AppLocalizations {
   /// No description provided for @gatewayAddressHelp.
   ///
   /// In en, this message translates to:
-  /// **'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.'**
+  /// **'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose ChatGPT sign-in above.'**
   String get gatewayAddressHelp;
 
   /// No description provided for @loadModels.
@@ -181,6 +325,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Local by design'**
   String get localByDesign;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @systemTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get systemTheme;
+
+  /// No description provided for @lightTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Light mode'**
+  String get lightTheme;
+
+  /// No description provided for @darkTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get darkTheme;
+
+  /// No description provided for @switchToLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to light mode'**
+  String get switchToLight;
+
+  /// No description provided for @switchToDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to dark mode'**
+  String get switchToDark;
+
+  /// No description provided for @themeSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save appearance settings. Please retry.'**
+  String get themeSaveError;
+
+  /// No description provided for @startPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Start practice'**
+  String get startPractice;
+
+  /// No description provided for @endPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'End practice'**
+  String get endPractice;
+
+  /// No description provided for @retryPractice.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry refill'**
+  String get retryPractice;
+
+  /// No description provided for @practiceSessionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting practice automatically refills questions as you run low. Leaving this page or ending practice stops requests. New questions require an internet connection and use your selected service allowance.'**
+  String get practiceSessionHelp;
+
+  /// No description provided for @practiceAutoReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Practice is active. More questions will be prepared as you run low.'**
+  String get practiceAutoReady;
+
+  /// No description provided for @waitingForQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing your next question…'**
+  String get waitingForQuestion;
+
+  /// No description provided for @waitingForQuestionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next question will appear automatically. You do not need to start again. If the connection fails, check the message above.'**
+  String get waitingForQuestionBody;
 
   /// No description provided for @libraryEyebrow.
   ///
@@ -335,7 +563,7 @@ abstract class AppLocalizations {
   /// No description provided for @practiceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Fresh questions from your materials, ready before you need them.'**
+  /// **'Start once and keep practicing. Questions refill automatically from your materials.'**
   String get practiceSubtitle;
 
   /// No description provided for @practiceScope.
@@ -407,7 +635,7 @@ abstract class AppLocalizations {
   /// No description provided for @firstQuestionBody.
   ///
   /// In en, this message translates to:
-  /// **'Import your notes, connect an AI provider, then start generating.\nOnce saved, questions work offline too.'**
+  /// **'Import your notes, connect an AI provider, then select Start practice.\nQuestions refill while you practice. Saved questions also work offline.'**
   String get firstQuestionBody;
 
   /// No description provided for @openLibrary.
@@ -461,7 +689,7 @@ abstract class AppLocalizations {
   /// No description provided for @hideQuestionBody.
   ///
   /// In en, this message translates to:
-  /// **'If the question is incorrect or ambiguous, remove it from practice and review. This report stays on your device.'**
+  /// **'Hide an incorrect or inappropriate question locally. To ask the developer to address it, choose Report AI content to developer and fill out and submit the GitHub form. Reports are public: do not include private materials or credentials. Question content is not attached automatically.'**
   String get hideQuestionBody;
 
   /// No description provided for @hideQuestion.
@@ -491,7 +719,7 @@ abstract class AppLocalizations {
   /// No description provided for @fullSource.
   ///
   /// In en, this message translates to:
-  /// **'Read the full source excerpt'**
+  /// **'View original source'**
   String get fullSource;
 
   /// No description provided for @aiDisclaimer.
@@ -689,14 +917,26 @@ abstract class AppLocalizations {
   /// No description provided for @appLanguageHelp.
   ///
   /// In en, this message translates to:
-  /// **'Applies immediately and is saved on this device. Question language is configured separately below.'**
+  /// **'Applies immediately and is saved on this device.'**
   String get appLanguageHelp;
 
   /// No description provided for @questionLanguageHelp.
   ///
   /// In en, this message translates to:
-  /// **'Applies to newly generated questions and explanations. Existing questions keep their original language.'**
+  /// **'Shared by all AI connections. New questions and explanations follow the system language by default; existing questions stay unchanged.'**
   String get questionLanguageHelp;
+
+  /// No description provided for @noLibrariesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first library'**
+  String get noLibrariesTitle;
+
+  /// No description provided for @noLibrariesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No libraries yet. Create one before importing your learning materials.'**
+  String get noLibrariesBody;
 
   /// No description provided for @languageSaveError.
   ///
@@ -1187,8 +1427,26 @@ abstract class AppLocalizations {
   /// No description provided for @openLibraryError.
   ///
   /// In en, this message translates to:
-  /// **'Could not open this library. Try again.'**
+  /// **'Could not open this library. Reconnect its folder or grant folder access, then reopen it.'**
   String get openLibraryError;
+
+  /// No description provided for @reopenLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Reopen library'**
+  String get reopenLibrary;
+
+  /// No description provided for @zoomIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom in'**
+  String get zoomIn;
+
+  /// No description provided for @zoomOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom out'**
+  String get zoomOut;
 
   /// No description provided for @scanFolderError.
   ///
@@ -1451,13 +1709,13 @@ abstract class AppLocalizations {
   /// No description provided for @chatGptTitle.
   ///
   /// In en, this message translates to:
-  /// **'ChatGPT subscription · experimental'**
+  /// **'ChatGPT subscription'**
   String get chatGptTitle;
 
   /// No description provided for @chatGptHelp.
   ///
   /// In en, this message translates to:
-  /// **'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.'**
+  /// **'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here.'**
   String get chatGptHelp;
 
   /// No description provided for @chatGptActive.
@@ -1771,6 +2029,288 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Allow OmniQuiz to install updates in system settings, then return and choose Continue installation.'**
   String get updateInstallPermission;
+
+  /// No description provided for @pdfSourceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The original PDF is missing, changed or unavailable. Showing the saved text excerpt instead; reconnect or reimport the source to view the page.'**
+  String get pdfSourceUnavailable;
+
+  /// No description provided for @questionGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get questionGood;
+
+  /// No description provided for @feedbackNextGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Your feedback will guide subsequent generation.'**
+  String get feedbackNextGeneration;
+
+  /// No description provided for @questionBad.
+  ///
+  /// In en, this message translates to:
+  /// **'Not good'**
+  String get questionBad;
+
+  /// No description provided for @questionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Something wrong?'**
+  String get questionError;
+
+  /// No description provided for @questionFeedbackHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Your rating and optional note will accompany the next generation request to improve subsequent questions. Marking an error hides this question but keeps answer history. Nothing is reported to the developer automatically.'**
+  String get questionFeedbackHelp;
+
+  /// No description provided for @questionErrorNote.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong? (optional)'**
+  String get questionErrorNote;
+
+  /// No description provided for @markQuestionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark error and skip'**
+  String get markQuestionError;
+
+  /// No description provided for @generationElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Elapsed {seconds}s · {count} questions available'**
+  String generationElapsed(int seconds, int count);
+
+  /// No description provided for @slowGenerationHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'This model is taking longer. You can answer cached questions or end practice to cancel. A timeout will not trigger an automatic paid retry.'**
+  String get slowGenerationHelp;
+
+  /// No description provided for @stageReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading study material excerpts…'**
+  String get stageReading;
+
+  /// No description provided for @stageGuidance.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading sample papers and question requirements…'**
+  String get stageGuidance;
+
+  /// No description provided for @stageRequesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the model to write questions…'**
+  String get stageRequesting;
+
+  /// No description provided for @stageValidating.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking answers, citations and duplicates…'**
+  String get stageValidating;
+
+  /// No description provided for @stageSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving verified questions to this library…'**
+  String get stageSaving;
+
+  /// No description provided for @stageRetrying.
+  ///
+  /// In en, this message translates to:
+  /// **'The provider is busy. Waiting before a limited retry…'**
+  String get stageRetrying;
+
+  /// No description provided for @unsafeMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'The library metadata contains a link or another unsafe path. Use ordinary folders and files.'**
+  String get unsafeMetadata;
+
+  /// No description provided for @feedbackSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save question feedback. Please try again.'**
+  String get feedbackSaveError;
+
+  /// No description provided for @configureAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Configure AI'**
+  String get configureAi;
+
+  /// No description provided for @openAiCompatible.
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible API'**
+  String get openAiCompatible;
+
+  /// No description provided for @generationConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'AI for new questions'**
+  String get generationConnection;
+
+  /// No description provided for @switchConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get switchConnection;
+
+  /// No description provided for @noActiveConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No AI connection selected'**
+  String get noActiveConnection;
+
+  /// No description provided for @connectionSelectionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Save multiple connections and explicitly select one for new questions. Switching keeps existing questions. A failed connection never falls back to another automatically.'**
+  String get connectionSelectionHelp;
+
+  /// No description provided for @savedConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved connections'**
+  String get savedConnections;
+
+  /// No description provided for @addConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Add connection'**
+  String get addConnection;
+
+  /// No description provided for @subscriptionConnectionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with a ChatGPT account and choose a model.'**
+  String get subscriptionConnectionHelp;
+
+  /// No description provided for @compatibleConnectionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the official OpenAI API or any compatible service, including CLIProxyAPI.'**
+  String get compatibleConnectionHelp;
+
+  /// No description provided for @currentConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get currentConnection;
+
+  /// No description provided for @useConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get useConnection;
+
+  /// No description provided for @editConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editConnection;
+
+  /// No description provided for @deleteConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete connection'**
+  String get deleteConnection;
+
+  /// No description provided for @deleteConnectionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”? If it is active, generation stops without selecting another connection. Existing questions stay.'**
+  String deleteConnectionHelp(String name);
+
+  /// No description provided for @connectionNeedsLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get connectionNeedsLogin;
+
+  /// No description provided for @connectionName.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection name'**
+  String get connectionName;
+
+  /// No description provided for @subscriptionSaveHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in saves the account and available model automatically. Only your first connection is selected automatically; adding another does not replace the current choice.'**
+  String get subscriptionSaveHelp;
+
+  /// No description provided for @compatibleAddressHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Defaults to the official OpenAI address. For CLIProxyAPI or another compatible service, enter its API base URL ending in /v1.'**
+  String get compatibleAddressHelp;
+
+  /// No description provided for @connectionSaveHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing is optional. Save keeps this connection independently; Save and use explicitly selects it for subsequent generation.'**
+  String get connectionSaveHelp;
+
+  /// No description provided for @saveAndUseConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and use'**
+  String get saveAndUseConnection;
+
+  /// No description provided for @saveConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'Save connection'**
+  String get saveConnection;
+
+  /// No description provided for @guidancePreservesQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving keeps existing questions and your current answer selection. Updated requirements apply to subsequent generation only.'**
+  String get guidancePreservesQuestions;
+
+  /// No description provided for @invalidConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved AI connections could not be read. Your existing configuration was kept.'**
+  String get invalidConnections;
+
+  /// No description provided for @connectionNameError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a connection name (1–80 characters).'**
+  String get connectionNameError;
+
+  /// No description provided for @connectionSaveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save AI connections. Please try again.'**
+  String get connectionSaveError;
+
+  /// No description provided for @connectionSavedActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection saved and selected for new questions.'**
+  String get connectionSavedActive;
+
+  /// No description provided for @connectionSavedInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection saved. The current AI connection is unchanged.'**
+  String get connectionSavedInactive;
+
+  /// No description provided for @connectionRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection removed. Other saved connections were kept.'**
+  String get connectionRemoved;
 }
 
 class _AppLocalizationsDelegate

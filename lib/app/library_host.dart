@@ -1,14 +1,14 @@
+// Switches entire library sessions and waits for active work before closing database handles.
+
 import 'dart:async';
 import 'dart:io';
 
-import 'package:drift/native.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 import '../domain/study_library.dart';
 import '../domain/models.dart';
-import '../infrastructure/persistence/database.dart';
 import '../infrastructure/persistence/library_catalog.dart';
 import '../infrastructure/platform/document_access.dart';
 import '../infrastructure/platform/library_files.dart';
@@ -29,10 +29,12 @@ class LibraryHost extends StatefulWidget {
     required this.catalog,
     required this.initial,
     this.updates,
+    this.initialUnavailable = false,
   });
   final LibraryCatalog catalog;
   final AppDependencies initial;
   final UpdateController? updates;
+  final bool initialUnavailable;
   @override
   State<LibraryHost> createState() => _LibraryHostState();
 }
@@ -41,18 +43,24 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
   late AppDependencies _dependencies = widget.initial;
   bool _switching = false, _dialogOpen = false;
   String? _error;
+  late bool _unavailable = widget.initialUnavailable;
+  bool get _hasLibrary => widget.catalog.selectedId.isNotEmpty && !_unavailable;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    if (_unavailable) _error = 'open';
     widget.updates?.prepareToExit = () async {
       if (_switching ||
           _dialogOpen ||
           _dependencies.library.busy ||
           _dependencies.practice.busy ||
           _dependencies.settings.busy ||
-          _dependencies.language.saving) {
+          _dependencies.guidance.busy ||
+          _dependencies.language.saving ||
+          _dependencies.appearance.saving ||
+          _dependencies.questionLanguage.saving) {
         throw const AppFailure(
           'Finish the current operation before installing an update.',
         );
@@ -66,17 +74,21 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && !_switching && !_dialogOpen) {
+      if (_dependencies.practice.active) return;
       unawaited(_dependencies.library.scan());
     }
   }
 
   Future<void> _select(StudyLibrary library) async {
     if (_switching ||
-        library.id == widget.catalog.selectedId ||
+        (library.id == widget.catalog.selectedId && !_unavailable) ||
         _dependencies.library.busy ||
         _dependencies.practice.busy ||
         _dependencies.settings.busy ||
-        _dependencies.language.saving) {
+        _dependencies.guidance.busy ||
+        _dependencies.language.saving ||
+        _dependencies.appearance.saving ||
+        _dependencies.questionLanguage.saving) {
       return;
     }
     setState(() {
@@ -87,22 +99,16 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
     AppDependencies? next;
     try {
       await old.coordinator.stop();
-      final db = library.legacy
-          ? widget.catalog.database
-          : QuizDatabase(
-              NativeDatabase.createInBackground(
-                File(widget.catalog.databasePath(library)),
-              ),
-            );
+      final db = await widget.catalog.openLibrary(library);
       try {
         next = await AppDependencies.create(
           database: db,
           settingsDatabase: widget.catalog.database,
-          ownsDatabase: !library.legacy,
+          ownsDatabase: true,
           libraryFiles: DirectoryLibraryFiles(library.directory),
         );
       } catch (_) {
-        if (!library.legacy) await db.close();
+        await db.close();
         rethrow;
       }
       if (!mounted) {
@@ -116,6 +122,7 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
       }
       setState(() {
         _dependencies = next!;
+        _unavailable = false;
       });
       // Let providers and router detach before disposing the previous session.
       await WidgetsBinding.instance.endOfFrame;
@@ -123,7 +130,12 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
       if (!mounted) return;
       await _dependencies.library.scan();
       if (mounted) setState(() => _switching = false);
-    } catch (_) {
+    } catch (error, stack) {
+      assert(() {
+        debugPrint('Library open failed (${error.runtimeType}): $error');
+        debugPrintStack(stackTrace: stack);
+        return true;
+      }());
       if (next != null && !identical(next, _dependencies)) await next.dispose();
       if (mounted) {
         setState(() {
@@ -163,7 +175,11 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
       }
       await FolderPermissions.remember(canonical);
       if (mounted) setState(() => _error = null);
-      await _dependencies.library.scan();
+      if (_unavailable) {
+        await _select(widget.catalog.selected);
+      } else {
+        await _dependencies.library.scan();
+      }
     } catch (_) {
       if (mounted) setState(() => _error = 'grant');
     } finally {
@@ -176,7 +192,10 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
         _dependencies.library.busy ||
         _dependencies.practice.busy ||
         _dependencies.settings.busy ||
-        _dependencies.language.saving) {
+        _dependencies.guidance.busy ||
+        _dependencies.language.saving ||
+        _dependencies.appearance.saving ||
+        _dependencies.questionLanguage.saving) {
       throw const AppFailure(
         'Finish the current operation before backing up or restoring.',
       );
@@ -188,6 +207,9 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
     } finally {
       if (mounted) setState(() => _switching = false);
     }
+    if (mounted && !_hasLibrary && widget.catalog.libraries.isNotEmpty) {
+      await _select(widget.catalog.libraries.first);
+    }
   }
 
   Widget _controls(BuildContext context) {
@@ -196,7 +218,24 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
         _dependencies.library.busy ||
         _dependencies.practice.busy ||
         _dependencies.settings.busy ||
-        _dependencies.language.saving;
+        _dependencies.guidance.busy ||
+        _dependencies.language.saving ||
+        _dependencies.appearance.saving ||
+        _dependencies.questionLanguage.saving;
+    if (widget.catalog.libraries.isEmpty || widget.catalog.selectedId.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(context.l10n.noLibrariesBody),
+          const SizedBox(height: 16),
+          FilledButton.icon(
+            onPressed: locked ? null : () => _create(context),
+            icon: const Icon(Icons.create_new_folder_outlined),
+            label: Text(context.l10n.createLibrary),
+          ),
+        ],
+      );
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -250,13 +289,23 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
                 icon: const Icon(Icons.folder_open),
                 label: Text(context.l10n.grantFolderAccess),
               ),
+            if (_unavailable)
+              OutlinedButton.icon(
+                onPressed: locked
+                    ? null
+                    : () => _select(widget.catalog.selected),
+                icon: const Icon(Icons.refresh),
+                label: Text(context.l10n.reopenLibrary),
+              ),
             OutlinedButton.icon(
-              onPressed: locked ? null : () => _dependencies.library.scan(),
+              onPressed: locked || !_hasLibrary
+                  ? null
+                  : () => _dependencies.library.scan(),
               icon: const Icon(Icons.sync),
               label: Text(context.l10n.scanFolder),
             ),
             TextButton.icon(
-              onPressed: locked
+              onPressed: locked || !_hasLibrary
                   ? null
                   : () => _dependencies.library.scan(full: true),
               icon: const Icon(Icons.fact_check_outlined),
@@ -295,23 +344,30 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
         OmniQuizApp(
           key: ObjectKey(_dependencies),
           dependencies: _dependencies,
+          hasLibrary: _hasLibrary,
           updates: widget.updates,
           libraryControls: ListenableBuilder(
             listenable: Listenable.merge([
               _dependencies.library,
               _dependencies.practice,
               _dependencies.settings,
+              _dependencies.guidance,
               _dependencies.language,
+              _dependencies.appearance,
+              _dependencies.questionLanguage,
             ]),
             builder: (context, _) => _controls(context),
           ),
-          currentLibraryName: widget.catalog.selected.name,
+          currentLibraryName: widget.catalog.selectedId.isNotEmpty
+              ? widget.catalog.selected.name
+              : null,
           settingsControls: BackupPanel(
+            canExport: _hasLibrary,
             actions: PlatformBackupActions(
               LibraryBackup(
                 widget.catalog,
                 activeDatabase: _dependencies.database,
-                activeId: widget.catalog.selectedId,
+                activeId: _hasLibrary ? widget.catalog.selectedId : null,
               ),
             ),
             runExclusive: _maintenance,

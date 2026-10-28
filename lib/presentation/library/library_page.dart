@@ -1,3 +1,5 @@
+// Presents material import, status and exclusions; view models own disk and repository operations.
+
 import '../../l10n/localization.dart';
 
 import 'package:flutter/material.dart';
@@ -7,13 +9,31 @@ import 'package:provider/provider.dart';
 import 'library_view_model.dart';
 import '../shared/widgets.dart';
 
+/// Material-list presentation; imports, removals and scans are delegated to its view model.
 class LibraryPage extends StatelessWidget {
-  const LibraryPage({super.key, this.controls});
+  const LibraryPage({
+    super.key,
+    this.controls,
+    this.hasLibrary = true,
+    this.unavailable = false,
+  });
   final Widget? controls;
+  final bool hasLibrary;
+  final bool unavailable;
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<LibraryViewModel>();
     final stats = vm.stats;
+    if (!hasLibrary) {
+      return PageFrame(
+        eyebrow: context.l10n.libraryEyebrow,
+        title: unavailable
+            ? context.l10n.libraryTitle
+            : context.l10n.noLibrariesTitle,
+        subtitle: context.l10n.librarySubtitle,
+        children: [?controls],
+      );
+    }
     return PageFrame(
       eyebrow: context.l10n.libraryEyebrow,
       title: context.l10n.libraryTitle,
@@ -90,7 +110,10 @@ class LibraryPage extends StatelessWidget {
           vm.canImportZip
               ? context.l10n.zipSupportedFiles
               : context.l10n.supportedFiles,
-          style: TextStyle(fontSize: 12, color: Colors.black54),
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 20),
         if (vm.busy)
@@ -283,7 +306,12 @@ class LibraryPage extends StatelessWidget {
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(color: Colors.black54)),
+            Text(
+              label,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),

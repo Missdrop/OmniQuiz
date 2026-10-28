@@ -1,3 +1,7 @@
+// Switching entire library dependency graphs cancels old work and disposes database handles safely.
+
+import 'package:omniquiz/domain/study_library.dart';
+
 import 'dart:async';
 import 'dart:io';
 
@@ -21,6 +25,66 @@ import 'support/folder_permissions.dart';
 
 void main() {
   mockFolderPermissions();
+  testWidgets(
+    'an unavailable portable library keeps Settings accessible and can reopen',
+    (tester) async {
+      late Directory root;
+      late _TrackedDatabase global;
+      late LibraryCatalog catalog;
+      late AppDependencies initial;
+      await tester.runAsync(() async {
+        root = await Directory.systemTemp.createTemp('omniquiz-reopen-');
+        global = _TrackedDatabase(NativeDatabase.memory());
+        catalog = LibraryCatalog(global, root.path);
+        final library = await catalog.create('Reconnected course');
+        await catalog.select(library);
+        await File(p.join(library.directory, 'notes.md'))
+            .writeAsString('Retrieval practice strengthens learning.');
+        initial = await AppDependencies.create(
+          database: QuizDatabase(NativeDatabase.memory()),
+          settingsDatabase: global,
+          credentialStore: MemoryCredentials(),
+          ai: FakeGenerator(),
+        );
+        await initial.language.select('en');
+      });
+      await tester.pumpWidget(
+        LibraryHost(
+          catalog: catalog,
+          initial: initial,
+          initialUnavailable: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Reopen library'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.tune_rounded));
+      await tester.pumpAndSettle();
+      expect(find.text('Interface language'), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.auto_stories_outlined));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Reopen library'));
+      await tester.tap(find.text('Reopen library'));
+      for (var i = 0; i < 250; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 40)),
+        );
+        await tester.pump(const Duration(milliseconds: 100));
+        if (find.text('notes.md').evaluate().isNotEmpty) break;
+      }
+      expect(find.text('notes.md'), findsOneWidget);
+      expect(find.text('Reopen library'), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+      for (var i = 0; i < 200 && !global.closed.isCompleted; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 30)),
+        );
+        await tester.pump();
+      }
+      expect(global.closed.isCompleted, isTrue);
+      await tester.runAsync(() => root.delete(recursive: true));
+    },
+  );
   testWidgets(
     'switching cancels generation, shows only the selected library and creates libraries on mobile',
     (tester) async {
@@ -49,6 +113,17 @@ void main() {
         );
         catalog = LibraryCatalog(global, root.path);
         await catalog.load();
+        final fixtureFolder = await Directory(
+          p.join(root.path, 'fixture-materials'),
+        ).create();
+        catalog.libraries.add(
+          StudyLibrary(
+            id: 'default',
+            name: 'Test library',
+            directory: fixtureFolder.path,
+          ),
+        );
+        await catalog.select(catalog.libraries.single);
         initial = await AppDependencies.create(
           database: global,
           ownsDatabase: false,

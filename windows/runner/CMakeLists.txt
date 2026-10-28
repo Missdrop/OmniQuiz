@@ -1,3 +1,5 @@
+# Compiles the Win32 host and embeds application icon/version resources.
+
 cmake_minimum_required(VERSION 3.14)
 project(runner LANGUAGES CXX)
 

@@ -1,3 +1,5 @@
+// Owns update UI state and opt-in downloads; Store builds cannot use standalone installation paths.
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -9,7 +11,9 @@ import 'package:pub_semver/pub_semver.dart';
 import '../../infrastructure/updates/release_updater.dart';
 import '../../infrastructure/updates/update_installer.dart';
 import '../../infrastructure/updates/update_preferences.dart';
+import '../../app/distribution.dart';
 
+/// Observable update phases, including recoverable download or installation failures.
 enum UpdateStatus {
   idle,
   checking,
@@ -23,6 +27,7 @@ enum UpdateStatus {
   cancelled,
 }
 
+/// A user-driven update state machine; dismissing a notice never consents to installation.
 class UpdateController extends ChangeNotifier {
   UpdateController(
     this.preferences, {
@@ -30,6 +35,7 @@ class UpdateController extends ChangeNotifier {
     UpdateInstaller? installer,
     Future<String> Function()? versionReader,
     Future<Directory> Function()? cacheDirectory,
+    this.storeBuild = microsoftStoreBuild,
   }) : service = service ?? ReleaseUpdater(),
        installer = installer ?? UpdateInstaller(),
        versionReader =
@@ -41,6 +47,7 @@ class UpdateController extends ChangeNotifier {
              p.join((await getTemporaryDirectory()).path, 'updates'),
            ));
   final UpdatePreferences preferences;
+  final bool storeBuild;
   final ReleaseUpdater service;
   final UpdateInstaller installer;
   final Future<String> Function() versionReader;
@@ -71,6 +78,13 @@ class UpdateController extends ChangeNotifier {
 
   Future<void> initialize() => _initializing ??= _initialize();
   Future<void> _initialize() async {
+    if (storeBuild) {
+      autoCheck = false;
+      loaded = true;
+      version = await versionReader();
+      _notify();
+      return;
+    }
     try {
       final settings = await preferences.load();
       autoCheck = settings['autoCheck'] as bool? ?? true;
@@ -86,6 +100,7 @@ class UpdateController extends ChangeNotifier {
   }
 
   Future<void> setAutoCheck(bool enabled) async {
+    if (storeBuild) return;
     if (saving) return;
     saving = true;
     saveFailed = false;
@@ -123,6 +138,7 @@ class UpdateController extends ChangeNotifier {
   }
 
   Future<void> check({bool manual = true}) async {
+    if (storeBuild) return;
     if (busy || _disposed) return;
     status = UpdateStatus.checking;
     _notify();
@@ -160,6 +176,7 @@ class UpdateController extends ChangeNotifier {
   }
 
   Future<void> download() async {
+    if (storeBuild) return;
     final selected = release;
     final target = asset;
     if (busy || selected == null || target == null || _disposed) return;
@@ -202,6 +219,7 @@ class UpdateController extends ChangeNotifier {
   }
 
   Future<void> install() async {
+    if (storeBuild) return;
     if (busy || downloaded == null) return;
     status = UpdateStatus.installing;
     _notify();

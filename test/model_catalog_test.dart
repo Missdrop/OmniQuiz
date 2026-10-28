@@ -1,3 +1,5 @@
+// Compatible model discovery validates responses and does not leak endpoint secrets through redirects.
+
 import 'dart:convert';
 
 import 'package:drift/native.dart';

@@ -1,3 +1,5 @@
+// Basic application rendering smoke checks using local dependencies.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omniquiz/app/theme.dart';

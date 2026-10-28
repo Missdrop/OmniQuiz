@@ -3,7 +3,7 @@
 Rechecked against the current official sign-in, sessions, inference, limits,
 UI guidance and DevKit documentation. Public OIDC discovery was also fetched;
 its issuer, authorization/token endpoints, JWKS and revocation endpoint match
-these docs. An experimental direct implementation is now present. On 2026-10-22,
+these docs. A direct implementation is now present. On 2026-10-22,
 an explicitly authorized real account completed sign-in and plan-funded inference
 on both the iOS 27.1 simulator and Android API 36 emulator; physical phones remain untested.
 
@@ -16,8 +16,9 @@ The required experience is independent phone login without a gateway, computer,
 or server. The primary implementation now uses the official dynamic-registration
 flow directly in Dart. CLIProxyAPI remains an optional compatible endpoint.
 
-Settings exposes experimental sign-in, saved account registrations, account model
-selection, a small inference test before activation, sign-out and a usage link.
+Settings exposes sign-in, saved account registrations, account model
+selection, an optional inference test, sign-out and a usage link. Successful
+sign-in saves the account and activates the first available model automatically.
 The ChatGPT connection is an explicit profile mode. API-key connections remain
 available, but generation never silently falls back between billing modes.
 
@@ -125,7 +126,7 @@ an alternative integration, not a prerequisite and not an authentication bypass.
 | --- | --- |
 | Windows/Linux | Best initial validation targets: browser authorization and a listener bound only to `127.0.0.1`, with a per-attempt ephemeral port. Test occupied ports, cancellation, wrong state and request timeouts. |
 | macOS | Same desktop flow, but Release now includes network-server access for the listener. Validate the signed Release app. |
-| Android | Experimental until tested: the loopback listener must remain available while the system browser is foregrounded. Test process/activity lifecycle, receiving the callback, explicit return to OmniQuiz and subsequent refresh. Existing Internet permission/local cleartext configuration does not prove the login works. |
+| Android | Validation requirements: the loopback listener must remain available while the system browser is foregrounded. Test process/activity lifecycle, receiving the callback, explicit return to OmniQuiz and subsequent refresh. Existing Internet permission/local cleartext configuration does not prove the login works. |
 | iOS | Requires a feasibility spike: switching to the browser can suspend the app/listener. The reviewed OpenAI docs specify loopback, not a custom URL scheme or Universal Link recipe. Do not replace the callback with one of those without documented server support. |
 
 These mobile assessments are engineering inferences from the documented callback

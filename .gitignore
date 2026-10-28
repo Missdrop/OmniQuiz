@@ -14,6 +14,8 @@
 *.db-wal
 *.sqlite
 *.sqlite3
+# Portable study state, sample papers and personal authoring requirements.
+.omniquiz/
 
 # Flutter / Dart
 .dart_tool/

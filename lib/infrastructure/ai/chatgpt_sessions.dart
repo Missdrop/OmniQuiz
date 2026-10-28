@@ -1,3 +1,5 @@
+// Stores account registrations securely and serializes refreshes without persisting tokens in SQL.
+
 import 'dart:convert';
 
 import 'package:uuid/uuid.dart';
@@ -141,6 +143,7 @@ class ChatGptSessions {
     };
   }
 
+  /// Share one refresh per account: rotating a token twice could invalidate a login.
   Future<String> access(String id) => _refreshing.putIfAbsent(
     id,
     () => _access(id).whenComplete(() {

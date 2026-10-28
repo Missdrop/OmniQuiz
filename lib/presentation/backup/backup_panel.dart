@@ -1,3 +1,5 @@
+// Presents exclusive backup operations and distinguishes successful exports from missing originals.
+
 import 'package:flutter/material.dart';
 
 import '../../application/ports/backup.dart';
@@ -5,13 +7,16 @@ import '../../domain/models.dart';
 import '../../l10n/localization.dart';
 import '../shared/widgets.dart';
 
+/// Runs user-confirmed archive operations through a host-provided exclusivity gate.
 class BackupPanel extends StatefulWidget {
   const BackupPanel({
     super.key,
     required this.actions,
     required this.runExclusive,
+    this.canExport = true,
   });
   final BackupActions actions;
+  final bool canExport;
   final Future<void> Function(Future<void> Function()) runExclusive;
   @override
   State<BackupPanel> createState() => _BackupPanelState();
@@ -97,7 +102,9 @@ class _BackupPanelState extends State<BackupPanel> {
             runSpacing: 12,
             children: [
               OutlinedButton.icon(
-                onPressed: _busy ? null : () => _run(restore: false),
+                onPressed: _busy || !widget.canExport
+                    ? null
+                    : () => _run(restore: false),
                 icon: const Icon(Icons.save_alt),
                 label: Text(context.l10n.exportBackup),
               ),

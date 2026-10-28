@@ -1,3 +1,5 @@
+// Validates versioned archive metadata and distinguishes archive paths from restored locations.
+
 import 'dart:convert';
 
 import 'package:path/path.dart' as p;
@@ -47,6 +49,7 @@ class BackupManifest {
   });
 }
 
+/// Portable metadata for a copied library database and its archived material files.
 class BackupLibrary {
   const BackupLibrary({
     required this.name,
@@ -85,6 +88,7 @@ class BackupLibrary {
   };
 }
 
+/// Maps one archived file to its original identity without trusting it as a restore path.
 class BackupMaterial {
   const BackupMaterial({
     required this.entry,
@@ -96,6 +100,16 @@ class BackupMaterial {
   factory BackupMaterial.fromJson(Map<String, dynamic> json) {
     final entry = json['entry'] as String;
     final path = json['path'] as String;
+    // Metadata restores may carry authoring files, never replace the database or logs.
+    if (path.startsWith('.omniquiz/') &&
+        path != '.omniquiz/guidance/requirements.md' &&
+        path != '.omniquiz/guidance/pasted-example.md' &&
+        !RegExp(
+          r'^\.omniquiz/guidance/examples/.+\.(pdf|txt|md|markdown)$',
+          caseSensitive: false,
+        ).hasMatch(path)) {
+      throw const FormatException('Invalid metadata path');
+    }
     if (!RegExp(r'^libraries/[0-9a-f-]{36}/files/[0-9a-f-]{36}$')
             .hasMatch(entry) ||
         p.posix.isAbsolute(path) ||

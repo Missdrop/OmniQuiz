@@ -1,3 +1,5 @@
+// Bootstraps local databases, legal notices and the correct distribution update channel.
+
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -8,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'app/library_host.dart';
+import 'app/distribution.dart';
 import 'infrastructure/persistence/library_catalog.dart';
 import 'infrastructure/platform/library_files.dart';
 import 'app/dependencies.dart';
@@ -23,6 +26,9 @@ Future<void> main() async {
     yield LicenseEntryWithLineBreaks([
       'OmniQuiz',
     ], await rootBundle.loadString('LICENSE'));
+    yield LicenseEntryWithLineBreaks([
+      'Noto Sans SC',
+    ], await rootBundle.loadString('assets/fonts/OFL.txt'));
   });
   try {
     final directory = await getApplicationSupportDirectory();
@@ -34,25 +40,34 @@ Future<void> main() async {
     );
     final catalog = LibraryCatalog(database, directory.path);
     await catalog.load();
-    final selected = catalog.selected;
-    final studyDatabase = selected.legacy
-        ? database
-        : QuizDatabase(
-            NativeDatabase.createInBackground(
-              File(catalog.databasePath(selected)),
-            ),
-          );
+    final selected = catalog.libraries.isEmpty ? null : catalog.selected;
+    QuizDatabase studyDatabase;
+    var unavailable = false;
+    try {
+      studyDatabase = selected == null
+          ? QuizDatabase(NativeDatabase.memory())
+          : await catalog.openLibrary(selected);
+    } catch (_) {
+      // An unplugged library must not prevent access to global settings or grants.
+      unavailable = true;
+      studyDatabase = QuizDatabase(NativeDatabase.memory());
+    }
     final dependencies = await AppDependencies.create(
       database: studyDatabase,
       settingsDatabase: database,
-      ownsDatabase: !selected.legacy,
-      libraryFiles: DirectoryLibraryFiles(selected.directory),
+      ownsDatabase: true,
+      libraryFiles: selected == null || unavailable
+          ? null
+          : DirectoryLibraryFiles(selected.directory),
     );
     runApp(
       LibraryHost(
         catalog: catalog,
         initial: dependencies,
-        updates: UpdateController(SqlUpdatePreferences(database)),
+        initialUnavailable: unavailable,
+        updates: microsoftStoreBuild
+            ? null
+            : UpdateController(SqlUpdatePreferences(database)),
       ),
     );
   } catch (_) {
@@ -61,6 +76,8 @@ Future<void> main() async {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         theme: buildTheme(),
+        darkTheme: buildTheme(brightness: Brightness.dark),
+        themeMode: ThemeMode.system,
         home: Builder(
           builder: (context) => Scaffold(
             body: Center(

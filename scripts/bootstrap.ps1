@@ -1,3 +1,5 @@
+# Bootstraps pinned Flutter and pub dependencies inside the workspace; native SDK setup is separate.
+
 . "$PSScriptRoot/environment.ps1"
 $sdk = Join-Path $projectRoot '.tooling/flutter'
 if (!(Test-Path (Join-Path $sdk 'bin/flutter.bat'))) {

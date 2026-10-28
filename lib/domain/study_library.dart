@@ -1,4 +1,6 @@
-/// Identity and material location; the app keeps each library's database private.
+// Identifies a subject workspace without depending on UI, SQL or platform file pickers.
+
+/// Identity and material location; portable state lives inside its .omniquiz folder.
 class StudyLibrary {
   const StudyLibrary({
     required this.id,

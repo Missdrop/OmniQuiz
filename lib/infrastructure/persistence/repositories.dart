@@ -1,3 +1,5 @@
+// Implements revision checks, answer transactions and job leases at the SQLite boundary.
+
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
@@ -8,6 +10,7 @@ import '../../domain/policies.dart';
 import 'codec.dart';
 import 'database.dart';
 
+/// Publishes material revisions and retires questions tied to replaced source text.
 class SqlMaterialRepository implements MaterialRepository {
   SqlMaterialRepository(this.db);
   final QuizDatabase db;
@@ -128,6 +131,7 @@ class SqlMaterialRepository implements MaterialRepository {
   }
 }
 
+/// Queries ready/review queues while excluding stale and explicitly hidden questions.
 class SqlQuestionRepository implements QuestionRepository {
   SqlQuestionRepository(this.db);
   final QuizDatabase db;
@@ -195,6 +199,73 @@ class SqlQuestionRepository implements QuestionRepository {
   Future<void> flagQuestion(String id) =>
       db.customStatement('UPDATE questions SET flagged=1 WHERE id=?', [id]);
   @override
+  Future<QuestionRating?> feedback(String id) async {
+    final row = await db
+        .customSelect(
+          'SELECT rating FROM feedback WHERE question_id=?',
+          variables: [Variable(id)],
+        )
+        .getSingleOrNull();
+    return row == null
+        ? null
+        : QuestionRating.values.byName(row.read<String>('rating'));
+  }
+
+  @override
+  Future<List<QuestionFeedback>> generationFeedback(String? scope) async {
+    final rows = await db
+        .customSelect(
+          '''SELECT q.payload, f.rating, f.note FROM feedback f
+      JOIN questions q ON q.id=f.question_id JOIN documents d ON d.id=q.document_id
+      WHERE q.revision=d.revision ${scope == null ? '' : 'AND q.document_id=?'}
+      ORDER BY f.at DESC, f.rowid DESC LIMIT 6''',
+          variables: [if (scope != null) Variable(scope)],
+        )
+        .get();
+    String clip(String text, int max) =>
+        String.fromCharCodes(text.runes.take(max));
+    final result = <QuestionFeedback>[];
+    var budget = 6000;
+    for (final row in rows) {
+      final question = questionFromJson(
+        jsonDecode(row.read<String>('payload')),
+      );
+      final feedback = QuestionFeedback(
+        rating: QuestionRating.values.byName(row.read<String>('rating')),
+        prompt: clip(question.prompt, 500),
+        options: [
+          for (final option in question.options)
+            clip('${option.id}: ${option.text}', 100),
+        ],
+        explanation: clip(question.explanation, 400),
+        note: clip(row.read<String>('note'), 1000),
+      );
+      final size = jsonEncode(feedback.toJson()).length;
+      if (size > budget) break;
+      result.add(feedback);
+      budget -= size;
+    }
+    return result;
+  }
+
+  @override
+  Future<void> rate(String id, QuestionRating rating, {String note = ''}) =>
+      db.transaction(() async {
+        if (note.length > 1000) {
+          throw const AppFailure('Feedback must not exceed 1000 characters.');
+        }
+        await db.customStatement(
+          'INSERT OR REPLACE INTO feedback (question_id,rating,note,at) VALUES (?,?,?,?)',
+          [
+            id,
+            rating.name,
+            note,
+            DateTime.now().toUtc().millisecondsSinceEpoch,
+          ],
+        );
+        if (rating == QuestionRating.error) await flagQuestion(id);
+      });
+  @override
   Future<StudyStats> stats() async {
     final r = await db.customSelect(
       '''SELECT
@@ -214,12 +285,15 @@ class SqlQuestionRepository implements QuestionRepository {
   }
 }
 
+/// Commits an attempt once and advances its review schedule in the same transaction.
 class SqlProgressRepository implements ProgressRepository {
   SqlProgressRepository(this.db, this.policy);
   final QuizDatabase db;
   final ReviewPolicy policy;
   @override
   Future<void> submit(AnswerAttempt a) => db.transaction(() async {
+    // A stable attempt ID makes a UI retry idempotent. This check must precede
+    // reading and advancing the schedule, or a double tap could count twice.
     if (await db
             .customSelect(
               'SELECT id FROM attempts WHERE id=?',
@@ -286,6 +360,7 @@ class SqlProgressRepository implements ProgressRepository {
   });
 }
 
+/// Serializes non-secret profiles and invalidates incompatible queued work.
 class SqlProfileRepository implements ProfileRepository {
   SqlProfileRepository(this.db);
   final QuizDatabase db;
@@ -307,6 +382,7 @@ class SqlProfileRepository implements ProfileRepository {
   });
 }
 
+/// Enforces current epochs and leases before accepting generated questions.
 class SqlJobRepository implements JobRepository {
   SqlJobRepository(this.db, this.clock);
   final QuizDatabase db;
@@ -340,6 +416,13 @@ class SqlJobRepository implements JobRepository {
         'chunks': j.request.chunks.map(chunkToJson).toList(),
         'count': j.request.count,
         'recentPrompts': j.request.recentPrompts,
+        'additionalRequirements': j.request.additionalRequirements,
+        'qualityFeedback': j.request.qualityFeedback
+            .map((item) => item.toJson())
+            .toList(),
+        'referenceExamples': j.request.referenceExamples
+            .map((e) => e.toJson())
+            .toList(),
       }),
     ],
   );
@@ -350,7 +433,7 @@ class SqlJobRepository implements JobRepository {
       WHERE id=? AND (state='queued' OR (state='retryScheduled' AND retry_at<=?))
       AND epoch=(SELECT CAST(value AS INTEGER) FROM settings WHERE key='epoch')""",
       variables: [
-        Variable(now.add(const Duration(minutes: 3)).millisecondsSinceEpoch),
+        Variable(now.add(const Duration(minutes: 5)).millisecondsSinceEpoch),
         Variable(id),
         Variable(now.millisecondsSinceEpoch),
       ],
@@ -411,7 +494,7 @@ class SqlJobRepository implements JobRepository {
   @override
   Future<void> fail(String id, String message, {bool cancelled = false}) =>
       db.customStatement(
-        "UPDATE jobs SET state=?, message=?, request='{}' WHERE id=? AND state!='completed'",
+        "UPDATE jobs SET state=?, message=?, request='{}' WHERE id=? AND state IN ('queued','running','retryScheduled')",
         [cancelled ? 'cancelled' : 'failed', message, id],
       );
   @override

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AppDisplayName" xml:space="preserve"><value>OmniQuiz</value></data>
+  <data name="AppDescription" xml:space="preserve"><value>Continuous AI practice from your learning materials.</value></data>
+</root>

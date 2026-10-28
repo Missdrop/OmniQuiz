@@ -1,3 +1,5 @@
+// Reads public release metadata and verifies bounded downloads before exposing an installation file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -7,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:pub_semver/pub_semver.dart';
 
+/// Release download metadata, including expected byte count and optional SHA-256 digest.
 class UpdateAsset {
   const UpdateAsset(this.name, this.url, this.size, this.digest);
   final String name;
@@ -15,6 +18,7 @@ class UpdateAsset {
   final String? digest;
 }
 
+/// A stable release version, notes and assets eligible for platform selection.
 class AppRelease {
   const AppRelease(this.version, this.tag, this.notes, this.assets);
   final Version version;

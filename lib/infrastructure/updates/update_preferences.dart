@@ -1,12 +1,16 @@
+// Persists skipped versions and automatic-check preferences without holding release payloads.
+
 import 'dart:convert';
 
 import '../persistence/database.dart';
 
+/// Persists update choices independently of network and installer state.
 abstract interface class UpdatePreferences {
   Future<Map<String, dynamic>> load();
   Future<void> save(Map<String, dynamic> value);
 }
 
+/// SQLite adapter for automatic-check and skipped-version settings.
 class SqlUpdatePreferences implements UpdatePreferences {
   SqlUpdatePreferences(this.database);
   final QuizDatabase database;

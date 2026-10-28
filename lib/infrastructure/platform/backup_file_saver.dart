@@ -1,3 +1,5 @@
+// Delegates archive export to native document providers instead of loading a second byte copy.
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';

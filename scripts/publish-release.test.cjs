@@ -1,3 +1,5 @@
+// Exercises release selection, replacement and failure paths using isolated fake GitHub state.
+
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

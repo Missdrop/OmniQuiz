@@ -1,3 +1,5 @@
+// Generation serialization, buffer bounds, cancellation and retry policy with a controllable provider.
+
 import 'dart:async';
 
 import 'package:drift/native.dart';
@@ -103,10 +105,32 @@ void main() {
         coordinator.replenish(),
       ]);
       expect((await questions.ready(null)).length, 20);
-      expect(ai.calls, 2);
+      expect(ai.calls, 4);
       expect(ai.maxActive, 1);
     },
   );
+  test('a generation timeout stops paid retries and retains its diagnostic after stopping', () async {
+    ai.failure = const AppFailure(
+      'Generation timed out. A retry may incur another API charge.',
+    );
+    final messages = <String>[];
+    final subscription = coordinator.events.listen(
+      (event) => messages.add(event.message),
+    );
+    await coordinator.start(null);
+    await Future<void>.delayed(Duration.zero);
+    expect(ai.calls, 1);
+    expect(coordinator.status.error, isTrue);
+    expect(coordinator.enabled, isFalse);
+    expect(messages, contains('Reading study material excerpts…'));
+    await coordinator.stop();
+    final row = await db
+        .customSelect('SELECT state,message FROM jobs')
+        .getSingle();
+    expect(row.read<String>('state'), 'failed');
+    expect(row.read<String>('message'), contains('timed out'));
+    await subscription.cancel();
+  });
   test('pausing rejects a late provider result', () async {
     ai.gate = Completer<void>();
     final work = coordinator.start(null);

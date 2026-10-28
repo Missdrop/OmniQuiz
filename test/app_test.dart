@@ -1,3 +1,5 @@
+// End-to-end widget flow for import, setup, answering and review across desktop and mobile layouts.
+
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -83,7 +85,7 @@ void main() {
       expect(deps.practice.current, isNotNull);
       await tester.tap(find.widgetWithText(OutlinedButton, 'B').first);
       await tester.pump();
-      await tester.tap(find.text('Check answer'));
+      expect(find.text('Check answer'), findsNothing);
       await tester.runAsync(() async {
         await Future<void>.delayed(const Duration(milliseconds: 100));
       });
@@ -109,7 +111,7 @@ void main() {
       });
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('test-model'), findsOneWidget);
+      expect(find.textContaining('test-model'), findsOneWidget);
       expect(find.text('test-key'), findsNothing);
       await tester.tap(find.text('Library').first);
       await tester.runAsync(() async {

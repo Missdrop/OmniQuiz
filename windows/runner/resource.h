@@ -1,3 +1,5 @@
+// Resource identifiers shared by the Windows application icon and version metadata.
+
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by Runner.rc

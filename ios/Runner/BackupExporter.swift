@@ -1,3 +1,5 @@
+// Keeps the system document exporter and its completion alive until selection or cancellation.
+
 import Flutter
 import UIKit
 

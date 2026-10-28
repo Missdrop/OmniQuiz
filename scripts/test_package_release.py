@@ -1,3 +1,5 @@
+"""Verify package contents, signing boundaries and installer tooling without publishing releases."""
+
 import contextlib
 import os
 import pathlib
@@ -11,6 +13,8 @@ from package_release import app_version, windows_manifest, macos_dmg, verify_mac
 
 
 class PackagingTests(unittest.TestCase):
+    """Keep release assembly failures local by mocking external platform tools."""
+
     def test_macos_repairs_only_stale_ad_hoc_outer_seals(self):
         with patch('package_release.subprocess.run', side_effect=[
             subprocess.CompletedProcess([], 1),

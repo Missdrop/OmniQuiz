@@ -1,20 +1,21 @@
-import 'package:flutter/foundation.dart';
+// Defines shared typography, contrast and control geometry for both supported appearances.
+
 import 'package:flutter/material.dart';
 
-ThemeData buildTheme() {
+const appFontFamily = 'OmniQuizSans';
+
+ThemeData buildTheme({Brightness brightness = Brightness.light}) {
+  final dark = brightness == Brightness.dark;
   const green = Color(0xFF245C46);
   final scheme = ColorScheme.fromSeed(
     seedColor: green,
-    brightness: Brightness.light,
-    surface: const Color(0xFFF7F8F3),
+    brightness: brightness,
+    surface: dark ? const Color(0xFF111914) : const Color(0xFFF7F8F3),
   );
-  return ThemeData(
+  final base = ThemeData(
     useMaterial3: true,
-    fontFamily: switch (defaultTargetPlatform) {
-      TargetPlatform.windows => 'Microsoft YaHei UI',
-      TargetPlatform.macOS || TargetPlatform.iOS => 'PingFang SC',
-      _ => null,
-    },
+    brightness: brightness,
+    fontFamily: appFontFamily,
     fontFamilyFallback: const [
       'Microsoft YaHei',
       'PingFang SC',
@@ -26,20 +27,26 @@ ThemeData buildTheme() {
     scaffoldBackgroundColor: scheme.surface,
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: dark ? scheme.surfaceContainerLow : Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      helperStyle: const TextStyle(
+        fontFamily: appFontFamily,
+        fontSize: 14,
+        height: 1.5,
+        letterSpacing: 0,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFBCC9BE)),
+        borderSide: BorderSide(color: scheme.outlineVariant),
       ),
     ),
     cardTheme: CardThemeData(
       margin: EdgeInsets.zero,
-      color: Colors.white,
+      color: dark ? scheme.surfaceContainerLow : Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFE3E8DD)),
+        side: BorderSide(color: scheme.outlineVariant),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
@@ -60,6 +67,19 @@ ThemeData buildTheme() {
       style: TextButton.styleFrom(
         minimumSize: const Size(48, 48),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      ),
+    ),
+  );
+  return base.copyWith(
+    textTheme: base.textTheme.copyWith(
+      bodySmall: base.textTheme.bodySmall?.copyWith(
+        fontSize: 14,
+        height: 1.5,
+        letterSpacing: 0,
+      ),
+      bodyMedium: base.textTheme.bodyMedium?.copyWith(
+        height: 1.5,
+        letterSpacing: 0,
       ),
     ),
   );

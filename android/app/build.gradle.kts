@@ -1,3 +1,5 @@
+// Defines app identity, native requirements and signing; private signing files stay outside source control.
+
 import java.util.Properties
 
 plugins {

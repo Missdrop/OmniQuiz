@@ -1,3 +1,7 @@
+// Independent library data and shared global settings across persisted workspace selections.
+
+import 'package:omniquiz/domain/study_library.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -34,6 +38,17 @@ void main() {
     );
     catalog = LibraryCatalog(global, root.path);
     await catalog.load();
+    final fixtureFolder = await Directory(
+      p.join(root.path, 'fixture-materials'),
+    ).create();
+    catalog.libraries.add(
+      StudyLibrary(
+        id: 'default',
+        name: 'Test library',
+        directory: fixtureFolder.path,
+      ),
+    );
+    await catalog.select(catalog.libraries.single);
   });
   tearDown(() async {
     await global.close();
@@ -70,7 +85,7 @@ void main() {
     expect(reloaded.selected.id, item.id);
     expect(
       reloaded.databasePath(reloaded.libraries.first),
-      p.join(root.path, 'omniquiz.sqlite'),
+      p.join(reloaded.libraries.first.directory, '.omniquiz', 'quiz.sqlite'),
     );
     expect(
       (await SqlMaterialRepository(global).documents()).single.id,

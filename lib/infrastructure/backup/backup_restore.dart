@@ -1,3 +1,5 @@
+// Restores detached copies first; the catalog is published only after all copies succeed.
+
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -7,6 +9,7 @@ import '../../application/ports/repositories.dart';
 import '../../domain/study_library.dart';
 import '../persistence/library_catalog.dart';
 import '../platform/library_files.dart';
+import '../persistence/library_workspace.dart';
 import 'backup_database.dart';
 import 'backup_manifest.dart';
 
@@ -19,6 +22,8 @@ class BackupRestore {
   final List<Directory> _created = [];
 
   Future<int> apply(BackupManifest manifest) async {
+    // Catalog publication is the commit point. Rollback may delete only this
+    // restore's new directories, never an existing library or the input archive.
     var published = false;
     try {
       final restored = <StudyLibrary>[];
@@ -47,6 +52,7 @@ class BackupRestore {
     final name =
         '${record.name.substring(0, record.name.length.clamp(0, 65))} (restored)';
     final library = StudyLibrary(id: id, name: name, directory: materials.path);
+    await LibraryWorkspace(library.directory).ensure();
     final copy = await File(p.join(stage, record.database))
         .copy(catalog.databasePath(library));
     final origins = await _materials(record.files, materials.path);

@@ -1,3 +1,5 @@
+// OAuth identity, token refresh, revocation and subscription transport using deterministic HTTP fixtures.
+
 import 'dart:async';
 import 'dart:convert';
 

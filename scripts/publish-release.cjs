@@ -1,3 +1,5 @@
+// Publishes only the intended release identity and assets; release orchestration is separate from packaging.
+
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -11,11 +13,13 @@ const assets = [
   'OmniQuiz-ios-unsigned.tar.gz',
 ];
 
+/** Missing release/tag metadata is normal; authentication and server errors are not. */
 async function optional(request) {
   try { return (await request()).data; }
   catch (error) { if (error.status === 404) return null; throw error; }
 }
 
+/** Validate every asset before mutating drafts; never replace an already published stable release. */
 module.exports = async function publish({ github, context, core, nightly, directory = 'dist' }) {
   const repo = context.repo;
   const tag = nightly ? 'nightly' : context.ref.replace(/^refs\/tags\//, '');

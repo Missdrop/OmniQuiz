@@ -1,3 +1,5 @@
+// Pure question invariants and review scheduling without platform or persistence dependencies.
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omniquiz/domain/models.dart';
 import 'package:omniquiz/domain/policies.dart';
@@ -59,8 +61,8 @@ void main() {
   test('buffer respects its target and low watermark', () {
     const policy = BufferPolicy();
     expect(policy.nextBatch(6, filling: false), 0);
-    expect(policy.nextBatch(4, filling: false), 10);
-    expect(policy.nextBatch(14, filling: true), 6);
+    expect(policy.nextBatch(4, filling: false), 5);
+    expect(policy.nextBatch(14, filling: true), 5);
     expect(policy.nextBatch(20, filling: true), 0);
   });
   test('profile rejects insecure remote URLs and embedded credentials', () {

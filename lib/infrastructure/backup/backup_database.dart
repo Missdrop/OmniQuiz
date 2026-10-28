@@ -1,4 +1,7 @@
+// Scrubs account settings and pending jobs while retaining library data and authoring preferences.
+
 import 'dart:isolate';
+import 'dart:convert';
 
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 import 'package:path/path.dart' as p;
@@ -6,6 +9,7 @@ import 'package:path/path.dart' as p;
 import '../persistence/database.dart';
 import '../persistence/scan_state_store.dart';
 import '../../application/libraries/scan_state.dart';
+import '../../domain/generation_guidance.dart';
 
 /// SQLite snapshot hygiene and validation are independent of ZIP/file picking.
 class BackupDatabase {
@@ -19,6 +23,7 @@ class BackupDatabase {
     'attempts': 'id, question_id, option_id, correct, at',
     'reviews': 'question_id, streak, mistakes, due_at',
     'jobs': 'id, epoch, scope, request, state, attempt, lease_until, retry_at, message',
+    'feedback': 'question_id, rating, note, at',
   };
 
   static Future<void> snapshot(QuizDatabase database, String target) async {
@@ -30,7 +35,7 @@ class BackupDatabase {
     final copy = sqlite.sqlite3.open(target);
     try {
       copy.execute(
-        "DELETE FROM settings WHERE key NOT IN ('epoch', 'library_scan')",
+        "DELETE FROM settings WHERE key NOT IN ('epoch', 'library_scan', 'generation_guidance')",
       );
       copy.execute(
         "UPDATE jobs SET state='cancelled', request='{}' WHERE state!='completed'",
@@ -54,6 +59,15 @@ class BackupDatabase {
         throw const FormatException('Invalid backup database');
       }
       _validateSchema(db);
+      final guidance = db.select(
+        "SELECT value FROM settings WHERE key='generation_guidance'",
+      );
+      if (guidance.isNotEmpty) {
+        GenerationGuidance.fromJson(
+          jsonDecode(guidance.single['value'] as String)
+              as Map<String, dynamic>,
+        );
+      }
       final scan = db.select(
         "SELECT value FROM settings WHERE key='library_scan'",
       );
@@ -62,7 +76,7 @@ class BackupDatabase {
       }
       if (db
           .select(
-            "SELECT key FROM settings WHERE key NOT IN ('epoch', 'library_scan')",
+            "SELECT key FROM settings WHERE key NOT IN ('epoch', 'library_scan', 'generation_guidance')",
           )
           .isNotEmpty) {
         throw const FormatException('Unexpected settings in backup');
@@ -73,6 +87,10 @@ class BackupDatabase {
   }
 
   static void _validateSchema(sqlite.Database db) {
+    final version =
+        db.select('PRAGMA user_version').single.values.single as int;
+    final required = {..._tables}
+      ..removeWhere((key, _) => key == 'feedback' && version < 3);
     final found = <String>{};
     for (final row in db.select(
       "SELECT name,type,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
@@ -85,10 +103,10 @@ class BackupDatabase {
         throw const FormatException('Unexpected schema object');
       }
     }
-    if (!found.containsAll(_tables.keys)) {
+    if (!found.containsAll(required.keys)) {
       throw const FormatException('Missing backup tables');
     }
-    for (final table in _tables.entries) {
+    for (final table in required.entries) {
       db.select('SELECT ${table.value} FROM ${table.key} LIMIT 0');
     }
   }

@@ -1,3 +1,5 @@
+// Builds one library session while sharing only global account and interface preferences.
+
 import 'dart:io';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -27,19 +29,33 @@ import '../presentation/practice/practice_view_model.dart';
 import '../presentation/review/review_view_model.dart';
 import '../presentation/settings/settings_view_model.dart';
 import '../presentation/settings/language_view_model.dart';
+import '../presentation/settings/appearance_view_model.dart';
+import '../presentation/settings/question_language_view_model.dart';
 import '../infrastructure/persistence/preferences_repository.dart';
+import '../infrastructure/persistence/generation_guidance_repository.dart';
+import '../presentation/practice/guidance_view_model.dart';
+import '../infrastructure/persistence/file_guidance_repository.dart';
+import '../infrastructure/persistence/library_workspace.dart';
+import '../infrastructure/persistence/generation_log.dart';
+import '../infrastructure/persistence/connection_repository.dart';
+import '../infrastructure/persistence/selected_connection_profile.dart';
 
+/// Owns a disposable library dependency graph; global settings may use a separate database.
 class AppDependencies {
-  AppDependencies._(
-    this.database,
-    this.coordinator,
-    this.library,
-    this.practice,
-    this.review,
-    this.settings,
-    this.language,
-    this.ownsDatabase,
-  );
+  AppDependencies._({
+    required this.database,
+    required this.coordinator,
+    required this.library,
+    required this.practice,
+    required this.review,
+    required this.settings,
+    required this.language,
+    required this.appearance,
+    required this.questionLanguage,
+    required this.guidance,
+    required this.ownsDatabase,
+    this.generationLog,
+  });
   final QuizDatabase database;
   final bool ownsDatabase;
   final GenerationCoordinator coordinator;
@@ -48,6 +64,10 @@ class AppDependencies {
   final ReviewViewModel review;
   final SettingsViewModel settings;
   final LanguageViewModel language;
+  final AppearanceViewModel appearance;
+  final QuestionLanguageViewModel questionLanguage;
+  final GuidanceViewModel guidance;
+  final GenerationLog? generationLog;
 
   static Future<AppDependencies> create({
     required QuizDatabase database,
@@ -59,14 +79,34 @@ class AppDependencies {
     CredentialStore? credentialStore,
     AiQuestionGenerator? ai,
     ModelCatalog? modelCatalog,
+    BufferPolicy bufferPolicy = const BufferPolicy(),
   }) async {
     final materials = SqlMaterialRepository(database);
     final language = LanguageViewModel(
       SqlPreferencesRepository(settingsDatabase ?? database),
     );
     await language.load();
+    final appearance = AppearanceViewModel(
+      SqlPreferencesRepository(settingsDatabase ?? database),
+    );
+    await appearance.load();
+    final questionLanguage = QuestionLanguageViewModel(
+      SqlPreferencesRepository(settingsDatabase ?? database),
+    );
+    await questionLanguage.load();
     final questions = SqlQuestionRepository(database);
-    final profiles = SqlProfileRepository(settingsDatabase ?? database);
+    final parser = ParserRegistry([TextDocumentParser(), PdfDocumentParser()]);
+    final GenerationGuidanceRepository guidanceRepository = libraryFiles == null
+        ? SqlGenerationGuidanceRepository(database)
+        : FileGenerationGuidanceRepository(
+            LibraryWorkspace(libraryFiles.directory),
+            SqlGenerationGuidanceRepository(database),
+            parser,
+          );
+    final connectionRepository = SqlConnectionRepository(
+      settingsDatabase ?? database,
+    );
+    final profiles = SelectedConnectionProfile(connectionRepository);
     final credentials =
         credentialStore ??
         PlatformCredentialStore(
@@ -81,14 +121,19 @@ class AppDependencies {
     final jobs = SqlJobRepository(database, clock);
     await jobs.recover();
     final chatGpt = ChatGptSessions(credentials);
+    late final GenerationCoordinator coordinator;
+    final journal = libraryFiles == null
+        ? null
+        : GenerationLog(LibraryWorkspace(libraryFiles.directory));
     final generator =
         ai ??
         ChatCompletionsGenerator(
           credentials,
           QuestionValidator(ids),
           chatGpt: ChatGptResponses(chatGpt),
+          onProgress: (message) => coordinator.reportProgress(message),
         );
-    final coordinator = GenerationCoordinator(
+    coordinator = GenerationCoordinator(
       materials: materials,
       questions: questions,
       profiles: profiles,
@@ -96,20 +141,34 @@ class AppDependencies {
       generator: generator,
       ids: ids,
       clock: clock,
+      questionLanguage: () => questionLanguage.resolved,
+      guidance: guidanceRepository,
+      onStatus: journal?.record,
+      policy: bufferPolicy,
     );
-    final importer = ImportMaterials(
-      materials,
-      ParserRegistry([TextDocumentParser(), PdfDocumentParser()]),
+    final access = documentAccess ?? PlatformDocumentAccess();
+    final practice = PracticeViewModel(
+      questions,
+      SqlProgressRepository(database, const ReviewPolicy()),
+      coordinator,
       ids,
       clock,
     );
+    final guidance = GuidanceViewModel(
+      guidanceRepository,
+      access,
+      parser,
+      practice.applyGuidanceChange,
+    );
+    await guidance.load();
+    final importer = ImportMaterials(materials, parser, ids, clock);
     return AppDependencies._(
-      database,
-      coordinator,
-      LibraryViewModel(
+      database: database,
+      coordinator: coordinator,
+      library: LibraryViewModel(
         materials,
         questions,
-        documentAccess ?? PlatformDocumentAccess(),
+        access,
         importer,
         coordinator,
         files: libraryFiles,
@@ -123,15 +182,9 @@ class AppDependencies {
               ),
         archives: archiveAccess ?? ZipDocumentAccess(),
       ),
-      PracticeViewModel(
-        questions,
-        SqlProgressRepository(database, const ReviewPolicy()),
-        coordinator,
-        ids,
-        clock,
-      ),
-      ReviewViewModel(questions),
-      SettingsViewModel(
+      practice: practice,
+      review: ReviewViewModel(questions),
+      settings: SettingsViewModel(
         profiles,
         credentials,
         ConfigureProvider(profiles, credentials, ids),
@@ -139,23 +192,37 @@ class AppDependencies {
         coordinator,
         catalog: modelCatalog ?? CompatibleModelCatalog(),
         chatGpt: chatGpt,
+        questionLanguage: () => questionLanguage.resolved,
+        connectionRepository: connectionRepository,
+        applyConnectionChange: practice.applyGuidanceChange,
+        endPractice: practice.endPractice,
       ),
-      language,
-      ownsDatabase,
+      language: language,
+      appearance: appearance,
+      questionLanguage: questionLanguage,
+      guidance: guidance,
+      ownsDatabase: ownsDatabase,
+      generationLog: journal,
     );
   }
 
   Future<void>? _disposeFuture;
+
+  /// Shutdown is idempotent because both host disposal and library switches can race.
   Future<void> dispose() => _disposeFuture ??= _dispose();
 
   Future<void> _dispose() async {
     await library.stopScan();
     practice.dispose();
     await coordinator.dispose();
+    await generationLog?.flush();
     library.dispose();
     review.dispose();
     settings.dispose();
     language.dispose();
+    appearance.dispose();
+    questionLanguage.dispose();
+    guidance.dispose();
     if (ownsDatabase) await database.close();
   }
 }

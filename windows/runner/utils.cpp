@@ -1,3 +1,5 @@
+// Console setup and command-line UTF-16/UTF-8 conversions for the desktop entry point.
+
 #include "utils.h"
 
 #include <flutter_windows.h>

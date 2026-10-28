@@ -1,3 +1,5 @@
+// Exports a bounded cache archive through SAF; worker I/O returns its result on the UI thread.
+
 package io.github.missdrop.omniquiz
 
 import android.app.Activity

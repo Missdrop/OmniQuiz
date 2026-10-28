@@ -1,3 +1,5 @@
+// Owns normal macOS application-close behavior without adding background services.
+
 import Cocoa
 import FlutterMacOS
 

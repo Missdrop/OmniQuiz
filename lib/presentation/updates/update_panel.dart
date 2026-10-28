@@ -1,3 +1,5 @@
+// Renders optional update prompts and defers installation when users dismiss or postpone them.
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -52,6 +54,7 @@ String updateStatusText(BuildContext context, UpdateController vm) {
   };
 }
 
+/// Settings controls for the standalone update channel.
 class UpdatePanel extends StatelessWidget {
   const UpdatePanel({super.key, required this.controller});
   final UpdateController controller;
@@ -127,6 +130,7 @@ Future<void> showUpdateDialog(
   builder: (_) => UpdateDialog(controller: controller),
 );
 
+/// Release details and explicit download/install choices for one update.
 class UpdateDialog extends StatelessWidget {
   const UpdateDialog({super.key, required this.controller});
   final UpdateController controller;

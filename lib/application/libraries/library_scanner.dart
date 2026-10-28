@@ -1,20 +1,25 @@
+// Uses metadata hints and explicit exclusions to scan incrementally without deleting original files.
+
 import '../../domain/models.dart';
 import '../ports/repositories.dart';
 import '../use_cases/import_materials.dart';
 import 'library_files.dart';
 import 'scan_state.dart';
 
+/// Cooperative cancellation shared across scanner and file iteration.
 class ScanCancellation {
   bool cancelled = false;
   void cancel() => cancelled = true;
 }
 
+/// A lightweight checked-file count and current path for progress presentation.
 class ScanProgress {
   const ScanProgress(this.checked, this.name);
   final int checked;
   final String name;
 }
 
+/// Summarizes completed imports, exclusions, failures and missing originals.
 class ScanResult {
   const ScanResult(
     this.imported,

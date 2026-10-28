@@ -1,6 +1,9 @@
+// Hosts Flutter and bridges UTF-8 localized titles to the native UTF-16 window caption.
+
 #include "flutter_window.h"
 
 #include <optional>
+#include <flutter/standard_method_codec.h>
 
 #include "flutter/generated_plugin_registrant.h"
 
@@ -26,6 +29,41 @@ bool FlutterWindow::OnCreate() {
   }
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
+  window_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(), "omniquiz/window",
+          &flutter::StandardMethodCodec::GetInstance());
+  window_channel_->SetMethodCallHandler(
+      // Dart strings arrive as UTF-8; SetWindowTextW requires a validated UTF-16 copy.
+      [this](const flutter::MethodCall<flutter::EncodableValue>& call,
+             std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
+        if (call.method_name() != "setTitle") {
+          result->NotImplemented();
+          return;
+        }
+        const auto* title = call.arguments()
+                                ? std::get_if<std::string>(call.arguments())
+                                : nullptr;
+        if (!title || title->empty() || title->size() > 256) {
+          result->Error("invalid_title", "Expected a non-empty UTF-8 title.");
+          return;
+        }
+        const int bytes = static_cast<int>(title->size());
+        const int length = MultiByteToWideChar(
+            CP_UTF8, MB_ERR_INVALID_CHARS, title->data(), bytes, nullptr, 0);
+        if (length == 0) {
+          result->Error("invalid_title", "Invalid UTF-8 title.");
+          return;
+        }
+        std::wstring caption(static_cast<size_t>(length), L'\0');
+        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, title->data(), bytes,
+                            caption.data(), length);
+        if (!SetWindowTextW(GetHandle(), caption.c_str())) {
+          result->Error("window_title", "Could not set window title.");
+          return;
+        }
+        result->Success();
+      });
 
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
@@ -40,6 +78,10 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  if (window_channel_) {
+    window_channel_->SetMethodCallHandler(nullptr);
+    window_channel_ = nullptr;
+  }
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
   }

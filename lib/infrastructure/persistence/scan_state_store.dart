@@ -1,3 +1,5 @@
+// Stores incremental scan hints and exclusions in one versioned library setting.
+
 import 'dart:convert';
 
 import '../../application/libraries/scan_state.dart';

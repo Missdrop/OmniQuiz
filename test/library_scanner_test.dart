@@ -1,3 +1,5 @@
+// Incremental hints, explicit exclusions, cancellation and missing originals never delete source files.
+
 import 'dart:io';
 
 import 'package:drift/native.dart';

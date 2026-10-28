@@ -1,3 +1,5 @@
+// Revision hashing, parsing and partial failures without publishing unsupported or unreadable material.
+
 import 'dart:convert';
 
 import 'package:drift/native.dart';

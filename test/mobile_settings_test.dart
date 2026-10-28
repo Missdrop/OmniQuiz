@@ -1,3 +1,5 @@
+// Account and model controls remain usable on narrow Android/iOS layouts with long labels and large text.
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -50,8 +52,11 @@ void main() {
           );
           final l = await AppLocalizations.delegate.load(Locale(language));
           await tester.pumpWidget(
-            ChangeNotifierProvider.value(
-              value: deps.settings,
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: deps.settings),
+                ChangeNotifierProvider.value(value: deps.questionLanguage),
+              ],
               child: MaterialApp(
                 theme: buildTheme().copyWith(platform: platform),
                 locale: Locale(language),
@@ -72,24 +77,17 @@ void main() {
           expect(find.text(l.chatGptSignInAgain), findsOneWidget);
           await tester.ensureVisible(find.text(l.chatGptSignOut));
           final fields = find.byType(DropdownButtonFormField<String>);
-          expect(fields, findsNWidgets(3));
+          expect(fields, findsNWidgets(2));
           final account = tester.getRect(fields.at(0));
           final model = tester.getRect(fields.at(1));
-          final languageField = tester.getRect(fields.at(2));
           expect(model.top - account.bottom, greaterThan(24));
-          expect(languageField.top - model.bottom, greaterThanOrEqualTo(24));
           expect(
             tester
                 .widget<DropdownButtonFormField<String>>(fields.at(1))
                 .initialValue,
             'test-model',
           );
-          expect(
-            tester
-                .widget<DropdownButtonFormField<String>>(fields.at(2))
-                .initialValue,
-            'English',
-          );
+          expect(find.text(l.questionLanguage), findsNothing);
           await tester.ensureVisible(find.text(l.testConnection));
           expect(tester.takeException(), isNull);
           await tester.pumpWidget(const SizedBox());

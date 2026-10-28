@@ -1,3 +1,5 @@
+// Native window lifetime, DPI changes and child-view resizing; Flutter owns application state.
+
 #include "win32_window.h"
 
 #include <dwmapi.h>

@@ -1,3 +1,5 @@
+// GTK application type declaration shared by the Linux runner entry point.
+
 #ifndef FLUTTER_MY_APPLICATION_H_
 #define FLUTTER_MY_APPLICATION_H_
 

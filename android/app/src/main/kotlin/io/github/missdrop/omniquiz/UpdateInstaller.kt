@@ -1,3 +1,5 @@
+// Validates APK identity, signing certificates and version before requesting OS-controlled installation.
+
 package io.github.missdrop.omniquiz
 
 import android.app.Activity

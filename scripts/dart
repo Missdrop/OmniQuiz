@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Runs the local Dart SDK with the same cache/config isolation used by Flutter.
 set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export PUB_CACHE="$PROJECT_ROOT/.tooling/pub-cache"

@@ -12,6 +12,7 @@ import xml.etree.ElementTree as ET
 
 
 def app_version():
+    """Read a numeric three-part release version within MSI field limits."""
     match = re.search(r'^version:\s*(\d+)\.(\d+)\.(\d+)',
                       pathlib.Path('pubspec.yaml').read_text(), re.M)
     if not match:
@@ -65,6 +66,7 @@ def windows_manifest(source, output):
 def wix_executable():
     # Hosted Windows runners set WIX to the legacy WiX 3 install directory.
     # Use the same pinned tool that CI installs and loads extensions into.
+    """Resolve project-local WiX tooling rather than trusting an unrelated legacy override."""
     executable = pathlib.Path('.tooling/wix/wix.exe').resolve()
     if not executable.is_file():
         raise FileNotFoundError(
@@ -73,6 +75,7 @@ def wix_executable():
 
 
 def windows_package(destination):
+    """Stage the runtime and generate a stable-component MSI alongside the portable payload."""
     wix = wix_executable()
     source = pathlib.Path('build/windows/x64/runner/Release')
     if not (source / 'omniquiz.exe').is_file():
@@ -110,6 +113,7 @@ def verify_macos_bundle(source):
 
 
 def macos_dmg(source, destination):
+    """Stage the app and Applications link before creating and verifying the disk image."""
     with tempfile.TemporaryDirectory(prefix='omniquiz-dmg-') as temporary:
         staging = pathlib.Path(temporary)
         subprocess.run(['ditto', str(source), str(staging / 'OmniQuiz.app')], check=True)
@@ -122,6 +126,7 @@ def macos_dmg(source, destination):
 
 
 def package(target):
+    """Package one supported platform; do not publish tags or upload release assets."""
     destination = pathlib.Path('dist')
     destination.mkdir(exist_ok=True)
     if target == 'android':

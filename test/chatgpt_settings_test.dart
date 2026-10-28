@@ -1,3 +1,5 @@
+// Account/model activation and presentation independently from optional connection probing.
+
 import 'dart:convert';
 
 import 'package:drift/native.dart';
@@ -142,11 +144,13 @@ void main() {
     addTearDown(() => debugDefaultTargetPlatformOverride = null);
     final theme = buildTheme();
     for (final style in [
+      theme.textTheme.bodySmall,
       theme.textTheme.bodyMedium,
       theme.textTheme.titleLarge,
       theme.textTheme.labelLarge,
+      theme.inputDecorationTheme.helperStyle,
     ]) {
-      expect(style!.fontFamily, 'Microsoft YaHei UI');
+      expect(style!.fontFamily, appFontFamily);
     }
   });
 }

@@ -1,3 +1,5 @@
+// Stages replacements and invokes system installation while preserving explicit OS consent.
+
 import 'dart:ffi';
 import 'dart:io';
 

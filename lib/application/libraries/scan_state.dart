@@ -1,3 +1,5 @@
+// Describes scan hints; imported content revisions remain the authority for material identity.
+
 /// Metadata is a scan hint, never a replacement for an imported content revision.
 class FileStamp {
   const FileStamp(this.origin, this.name, this.size, this.modified);
@@ -41,6 +43,7 @@ class ScanRecord {
   );
 }
 
+/// Persists scan metadata and exclusions without exposing SQL to scanning use cases.
 abstract interface class ScanStateStore {
   Future<Map<String, ScanRecord>> load();
   Future<void> save(Map<String, ScanRecord> records);

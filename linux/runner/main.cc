@@ -1,3 +1,5 @@
+// Starts the GTK application host; application navigation and data remain in Dart.
+
 #include "my_application.h"
 
 int main(int argc, char** argv) {

@@ -1,3 +1,5 @@
+// Coordinates archive, snapshot and restoration lifetimes without owning the caller database.
+
 import 'dart:io';
 import 'dart:isolate';
 

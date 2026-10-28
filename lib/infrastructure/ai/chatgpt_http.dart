@@ -1,3 +1,5 @@
+// Constrains OAuth HTTP requests to expected hosts and avoids logging authorization secrets.
+
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;

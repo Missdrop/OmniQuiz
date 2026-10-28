@@ -1,3 +1,5 @@
+// Native mobile UI/keyboard audit with screenshots; populated practice scenarios use local fixtures.
+
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -11,6 +13,8 @@ import 'package:omniquiz/infrastructure/persistence/database.dart';
 import 'package:omniquiz/main.dart' as app;
 import 'package:omniquiz/presentation/library/create_library_dialog.dart';
 import 'package:omniquiz/presentation/settings/model_picker.dart';
+import 'package:omniquiz/presentation/settings/connection_editor.dart';
+import 'package:omniquiz/domain/ai_connection.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../test/ai_test.dart' show MemoryCredentials;
@@ -90,8 +94,8 @@ void main() {
     await tap(tester, find.text('体验示例资料'));
     await capture(tester, '05-imported-library');
     await tap(tester, find.byIcon(Icons.play_circle_outline));
-    await tap(tester, find.text('生成题目'));
-    await capture(tester, '06-generation-confirmation');
+    await tap(tester, find.text('样题与出题要求'));
+    await capture(tester, '06-guidance-draft');
     await tap(tester, find.text('取消'));
     await tap(tester, find.byIcon(Icons.history_rounded));
     await capture(tester, '07-empty-review');
@@ -131,21 +135,49 @@ void main() {
       'oaiapp_fixture': 'long-account-name-for-layout@example.test',
     };
     deps.settings.chatGptModels = ['other-model', 'test-model'];
+    await deps.settings.connectionRepository!.save(
+      AiConnection(
+        id: 'subscription-fixture',
+        name: 'My subscription',
+        profile: deps.settings.profile!,
+      ),
+      activate: true,
+    );
+    await deps.settings.load();
+    deps.settings.chatGptAccounts = {
+      'oaiapp_fixture': 'long-account-name-for-layout@example.test',
+    };
     runApp(OmniQuizApp(dependencies: deps));
     await tester.pumpAndSettle();
     await tap(tester, find.byIcon(Icons.tune_rounded));
+    await tap(tester, find.text('Configure AI'));
+    await tap(
+      tester,
+      find.descendant(
+        of: find.byKey(const ValueKey('connection-subscription-fixture')),
+        matching: find.text('Edit'),
+      ),
+    );
     await tester.ensureVisible(find.text('Sign in again'));
     await capture(tester, '08-account');
-    await tester.ensureVisible(find.text('Test connection'));
+    await tester.ensureVisible(
+      find.descendant(
+        of: find.byType(ConnectionEditor),
+        matching: find.text('Test connection'),
+      ),
+    );
     await capture(tester, '09-model-language');
-    final model = find.byWidgetPredicate(
-      (widget) =>
-          widget is DropdownButtonFormField<String> &&
-          widget.initialValue == 'test-model',
+    final model = find.descendant(
+      of: find.byType(ConnectionEditor),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is DropdownButtonFormField<String> &&
+            widget.initialValue == 'test-model',
+      ),
     );
     await tap(tester, model);
     await capture(tester, '10-model-dropdown');
-    await tap(tester, find.text('other-model').last);
+    await tap(tester, find.text('test-model').last);
 
     // Exercise the same searchable modal used by API model discovery, offline.
     final context = tester.element(find.byType(Scaffold).first);
@@ -160,9 +192,13 @@ void main() {
     await tap(tester, find.text('other-model').last);
     expect(find.byType(ModelPicker), findsNothing);
 
+    await tap(tester, find.byType(BackButton).first);
+    await tap(tester, find.byType(BackButton).first);
+
     await tap(tester, find.byIcon(Icons.play_circle_outline));
+    await tap(tester, find.text('Start practice'));
     await tap(tester, find.widgetWithText(OutlinedButton, 'B').first);
-    await tap(tester, find.text('Check answer'));
+    expect(find.text('Check answer'), findsNothing);
     await tester.ensureVisible(find.text('A useful mistake.'));
     await capture(tester, '12-answer-feedback');
     await tap(tester, find.byIcon(Icons.history_rounded));

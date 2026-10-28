@@ -1,3 +1,5 @@
+# Builds the latest main preview and avoids publishing artifacts from superseded commits.
+
 name: Rolling prerelease
 on:
   push:

@@ -1,9 +1,12 @@
+// Hashes, parses and chunks materials before publishing their new document revision.
+
 import 'package:crypto/crypto.dart';
 
 import '../../domain/models.dart';
 import '../../domain/policies.dart';
 import '../ports/repositories.dart';
 
+/// Publishes parsed chunks only after the complete input has passed validation.
 class ImportMaterials {
   ImportMaterials(this.materials, this.parser, this.ids, this.clock);
   final MaterialRepository materials;

@@ -1,4 +1,7 @@
+// Serializes provider/account actions and activates validated settings through repository ports.
+
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../application/generation/coordinator.dart';
 import '../../application/ports/repositories.dart';
@@ -6,7 +9,11 @@ import '../../application/ports/model_catalog.dart';
 import '../../application/use_cases/configure_provider.dart';
 import '../../domain/models.dart';
 import '../../infrastructure/ai/chatgpt_sessions.dart';
+import '../../domain/ai_connection.dart';
+import '../../application/ports/connection_repository.dart';
+part 'settings_connections.dart';
 
+/// Serializes account and API configuration actions so paid requests can be quiesced first.
 class SettingsViewModel extends ChangeNotifier {
   SettingsViewModel(
     this.profiles,
@@ -16,6 +23,10 @@ class SettingsViewModel extends ChangeNotifier {
     this.coordinator, {
     this.catalog,
     this.chatGpt,
+    this.questionLanguage,
+    this.connectionRepository,
+    this.applyConnectionChange,
+    this.endPractice,
   });
   final ProfileRepository profiles;
   final CredentialStore credentials;
@@ -24,6 +35,12 @@ class SettingsViewModel extends ChangeNotifier {
   final GenerationCoordinator coordinator;
   final ModelCatalog? catalog;
   final ChatGptSessions? chatGpt;
+  final String Function()? questionLanguage;
+  final ConnectionRepository? connectionRepository;
+  final Future<void> Function(Future<void> Function())? applyConnectionChange;
+  final Future<void> Function()? endPractice;
+  AiConnections connections = AiConnections();
+  final Map<String, List<String>> _accountModels = {};
   Map<String, String> chatGptAccounts = {};
   List<String> chatGptModels = [];
   String? chatGptAccount;
@@ -32,6 +49,7 @@ class SettingsViewModel extends ChangeNotifier {
   ProviderProfile? profile;
   bool busy = false, loaded = false;
   String? message;
+  bool actionFailed = false;
   bool _disposed = false;
   void _notify() {
     if (!_disposed) notifyListeners();
@@ -45,13 +63,19 @@ class SettingsViewModel extends ChangeNotifier {
     super.dispose();
   }
 
+  /// Loads non-secret configuration and safe account labels; no probe is sent.
   Future<void> load() async {
+    actionFailed = false;
     try {
+      if (connectionRepository != null) {
+        connections = await connectionRepository!.load();
+      }
       profile = await profiles.load();
       chatGptAccounts = await chatGpt?.accounts() ?? {};
       if (profile?.chatGpt == true) chatGptAccount = profile!.credentialRef;
     } catch (_) {
       message = 'Could not load provider settings.';
+      actionFailed = true;
     }
     loaded = true;
     _notify();
@@ -75,29 +99,40 @@ class SettingsViewModel extends ChangeNotifier {
     }
   }
 
+  /// Activates the first available model after a successful browser authorization.
   Future<void> signInChatGpt({bool newAccount = false}) =>
-      _chatGptAction(() async {
-        late String id;
-        chatGptModels = [];
-        signingIn = true;
-        _notify();
-        try {
-          id = await chatGpt!.signIn(
-            clientId: newAccount ? null : chatGptAccount,
-          );
-        } finally {
-          signingIn = false;
-          chatGptAccounts = await chatGpt!.accounts();
-          chatGptAccount = chatGpt!.lastRegistration ?? chatGptAccount;
-        }
-        chatGptAccount = id;
-        await _loadAndUseChatGpt(id, firstModel: true);
-      });
-  Future<void> selectChatGpt(String id) => _chatGptAction(() async {
-    chatGptAccount = id;
-    chatGptModels = [];
-    await _loadAndUseChatGpt(id);
-  });
+      connectionRepository != null
+      ? connectSubscription(
+          id: newAccount ? null : _selectedSubscription?.id,
+          name: _selectedSubscription?.name ?? 'ChatGPT',
+          account: newAccount ? null : chatGptAccount,
+        ).then((_) {})
+      : _chatGptAction(() async {
+          late String id;
+          chatGptModels = [];
+          signingIn = true;
+          _notify();
+          try {
+            id = await chatGpt!.signIn(
+              clientId: newAccount ? null : chatGptAccount,
+            );
+          } finally {
+            signingIn = false;
+            chatGptAccounts = await chatGpt!.accounts();
+            chatGptAccount = chatGpt!.lastRegistration ?? chatGptAccount;
+          }
+          chatGptAccount = id;
+          await _loadAndUseChatGpt(id, firstModel: true);
+        });
+
+  /// Changes account explicitly, retaining its saved model only if still available.
+  Future<void> selectChatGpt(String id) => connectionRepository != null
+      ? _selectSavedSubscription(id)
+      : _chatGptAction(() async {
+          chatGptAccount = id;
+          chatGptModels = [];
+          await _loadAndUseChatGpt(id);
+        });
   Future<void> _loadAndUseChatGpt(String id, {bool firstModel = false}) async {
     try {
       chatGptModels = (await chatGpt!.models(id))
@@ -117,7 +152,10 @@ class SettingsViewModel extends ChangeNotifier {
             chatGptModels.contains(saved?.model)
         ? saved!.model
         : chatGptModels.first;
-    await _saveChatGpt(model, saved?.language ?? '简体中文');
+    await _saveChatGpt(
+      model,
+      questionLanguage?.call() ?? saved?.language ?? '简体中文',
+    );
   }
 
   Future<void> _saveChatGpt(
@@ -140,16 +178,31 @@ class SettingsViewModel extends ChangeNotifier {
     message = 'ChatGPT is ready. New questions will use your selected account.';
   }
 
+  /// Optionally probes before saving; ordinary model selection does not incur a test call.
   Future<void> useChatGpt(String model, String language, {bool test = true}) =>
-      _chatGptAction(() async {
-        await _saveChatGpt(model, language, test: test);
-      });
-  Future<void> signOutChatGpt() => _chatGptAction(() async {
-    final revoked = await chatGpt!.signOut(chatGptAccount!);
-    chatGptModels = [];
-    message = revoked ? 'Signed out of ChatGPT.' : 'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.';
-  });
+      connectionRepository != null
+      ? (test
+            ? probeSubscription(chatGptAccount!, model)
+            : saveSubscriptionConnection(
+                id: _selectedSubscription?.id,
+                name: _selectedSubscription?.name ?? 'ChatGPT',
+                account: chatGptAccount!,
+                model: model,
+              ).then((_) {}))
+      : _chatGptAction(() async {
+          await _saveChatGpt(model, language, test: test);
+        });
 
+  /// Removes local access even if remote revocation cannot currently be confirmed.
+  Future<void> signOutChatGpt() => connectionRepository != null
+      ? disconnectSubscription(chatGptAccount!)
+      : _chatGptAction(() async {
+          final revoked = await chatGpt!.signOut(chatGptAccount!);
+          chatGptModels = [];
+          message = revoked ? 'Signed out of ChatGPT.' : 'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.';
+        });
+
+  /// Reuses a saved secret only when the endpoint still matches its saved profile.
   Future<List<String>> loadModels(String url, String key, bool noKey) async {
     if (busy || _disposed || catalog == null) return [];
     busy = true;
@@ -177,6 +230,7 @@ class SettingsViewModel extends ChangeNotifier {
     }
   }
 
+  /// Saves an API draft without treating an omitted key as permission to erase it.
   Future<bool> save(
     String url,
     String model,
@@ -185,6 +239,22 @@ class SettingsViewModel extends ChangeNotifier {
     String language,
     bool noKey,
   ) async {
+    if (connectionRepository != null) {
+      final active = connections.active;
+      final saved = await saveApiConnection(
+        id: active?.profile.chatGpt == false ? active!.id : null,
+        name: active?.profile.chatGpt == false
+            ? active!.name
+            : Uri.tryParse(url)?.host ?? 'API',
+        url: url,
+        model: model,
+        key: key,
+        jsonMode: jsonMode,
+        noKey: noKey,
+        activate: true,
+      );
+      return saved != null;
+    }
     if (busy) return false;
     busy = true;
     message = null;
@@ -211,6 +281,7 @@ class SettingsViewModel extends ChangeNotifier {
     }
   }
 
+  /// Probes a draft connection without activating it or changing stored credentials.
   Future<void> test(
     String url,
     String model,

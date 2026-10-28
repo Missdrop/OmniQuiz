@@ -1,9 +1,11 @@
+// Owns the SQLite schema and generation epoch used to invalidate interrupted or stale work.
+
 import 'package:drift/drift.dart';
 
 /// SQL is confined to persistence adapters. Schema changes require a migration.
 class QuizDatabase extends GeneratedDatabase {
   QuizDatabase(super.executor);
-  static const currentSchemaVersion = 2;
+  static const currentSchemaVersion = 3;
   @override
   int get schemaVersion => currentSchemaVersion;
   @override
@@ -23,6 +25,7 @@ class QuizDatabase extends GeneratedDatabase {
           'CREATE INDEX chunk_document ON chunks(document_id)',
         );
       }
+      if (from < 3) await customStatement(_feedbackSchema);
     },
     beforeOpen: (_) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -51,8 +54,14 @@ class QuizDatabase extends GeneratedDatabase {
     'CREATE INDEX question_scope ON questions(document_id, stale, flagged)',
     'CREATE INDEX attempt_question ON attempts(question_id)',
     'CREATE INDEX review_due ON reviews(due_at)',
+    _feedbackSchema,
   ];
+  static const _feedbackSchema = '''CREATE TABLE feedback (
+    question_id TEXT PRIMARY KEY REFERENCES questions(id),
+    rating TEXT NOT NULL CHECK(rating IN ('good','bad','error')),
+    note TEXT NOT NULL DEFAULT '', at INTEGER NOT NULL)''';
 
+  /// Invalidates queued/running jobs, not historical attempts or review schedules.
   Future<void> invalidateGeneration() async {
     await customStatement(
       "UPDATE settings SET value = CAST(value AS INTEGER) + 1 WHERE key = 'epoch'",

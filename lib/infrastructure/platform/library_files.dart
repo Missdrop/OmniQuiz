@@ -1,3 +1,5 @@
+// Copies and scans within a library root without following links or overwriting distinct files.
+
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
@@ -10,6 +12,7 @@ import '../../domain/models.dart';
 import 'document_access.dart';
 import 'folder_permissions.dart';
 
+/// Implements safe scanning and idempotent copying under one canonical library root.
 class DirectoryLibraryFiles implements LibraryFiles {
   DirectoryLibraryFiles(this.directory);
   @override

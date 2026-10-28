@@ -1,3 +1,5 @@
+// Groups shared preferences, AI connections, privacy and the appropriate update distribution UI.
+
 import '../../l10n/localization.dart';
 
 import 'package:flutter/material.dart';
@@ -5,12 +7,17 @@ import 'package:provider/provider.dart';
 
 import 'settings_view_model.dart';
 import 'language_view_model.dart';
-import 'model_picker.dart';
-import 'chatgpt_panel.dart';
+import 'appearance_view_model.dart';
+import 'question_language_view_model.dart';
+import 'connection_manager.dart';
 import '../shared/widgets.dart';
+import '../shared/support_links.dart';
+import '../../app/distribution.dart';
+import 'privacy_policy_page.dart';
 import '../updates/update_controller.dart';
 import '../updates/update_panel.dart';
 
+/// Keeps shared preferences above one entry point for named AI connections.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, this.controls, this.updates});
   final Widget? controls;
@@ -20,46 +27,19 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  final _url = TextEditingController(text: 'https://api.openai.com/v1');
-  final _model = TextEditingController();
-  final _key = TextEditingController();
-  bool _json = false, _noKey = false, _visible = false;
-  String _language = '简体中文';
   @override
   void initState() {
     super.initState();
     final vm = context.read<SettingsViewModel>();
-    void applyProfile() {
-      if (!mounted) return;
-      final profile = vm.profile;
-      if (profile == null || profile.chatGpt) return;
-      setState(() {
-        _url.text = profile.baseUrl;
-        _model.text = profile.model;
-        _json = profile.jsonMode;
-        _language = profile.language;
-      });
-    }
-
-    if (vm.loaded) {
-      applyProfile();
-    } else {
-      vm.load().then((_) => applyProfile());
-    }
-  }
-
-  @override
-  void dispose() {
-    _url.dispose();
-    _model.dispose();
-    _key.dispose();
-    super.dispose();
+    if (!vm.loaded) vm.load();
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<SettingsViewModel>();
     final language = context.watch<LanguageViewModel>();
+    final appearance = context.watch<AppearanceViewModel>();
+    final questionLanguage = context.watch<QuestionLanguageViewModel>();
     return PageFrame(
       eyebrow: context.l10n.settingsEyebrow,
       title: context.l10n.settingsTitle,
@@ -73,6 +53,35 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                DropdownButtonFormField<ThemeMode>(
+                  isExpanded: true,
+                  key: ValueKey('theme-${appearance.mode.name}'),
+                  initialValue: appearance.mode,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.appearance,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: ThemeMode.system,
+                      child: Text(context.l10n.systemTheme),
+                    ),
+                    DropdownMenuItem(
+                      value: ThemeMode.light,
+                      child: Text(context.l10n.lightTheme),
+                    ),
+                    DropdownMenuItem(
+                      value: ThemeMode.dark,
+                      child: Text(context.l10n.darkTheme),
+                    ),
+                  ],
+                  onChanged: appearance.saving
+                      ? null
+                      : (value) {
+                          if (value != null) appearance.select(value);
+                        },
+                ),
+                if (appearance.saveFailed) Text(context.l10n.themeSaveError),
+                const SizedBox(height: 24),
                 DropdownButtonFormField<String>(
                   key: ValueKey('interface-${language.language}'),
                   initialValue: language.language,
@@ -98,197 +107,118 @@ class _SettingsPageState extends State<SettingsPage> {
                 Text(context.l10n.appLanguageHelp),
                 if (language.saveFailed)
                   Notice(context.l10n.languageSaveError, error: true),
+                const SizedBox(height: 24),
+                DropdownButtonFormField<String>(
+                  key: ValueKey(
+                    'question-language-${questionLanguage.language}',
+                  ),
+                  initialValue: questionLanguage.language,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.questionLanguage,
+                    helperText: context.l10n.questionLanguageHelp,
+                    helperMaxLines: 3,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: 'system',
+                      child: Text(context.l10n.systemLanguage),
+                    ),
+                    const DropdownMenuItem(value: '简体中文', child: Text('简体中文')),
+                    const DropdownMenuItem(
+                      value: 'English',
+                      child: Text('English'),
+                    ),
+                  ],
+                  onChanged: questionLanguage.saving
+                      ? null
+                      : (value) {
+                          if (value != null) questionLanguage.select(value);
+                        },
+                ),
+                if (questionLanguage.saveFailed)
+                  Notice(context.l10n.languageSaveError, error: true),
               ],
             ),
           ),
         ),
         const SizedBox(height: 20),
         if (!vm.loaded) const LinearProgressIndicator(),
-        if (vm.message != null) Notice(vm.message!),
-        const ChatGptPanel(),
-        const SizedBox(height: 20),
-        Card(
-          child: Padding(
-            padding: EdgeInsets.all(
-              MediaQuery.sizeOf(context).width < 600 ? 16 : 24,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.aiProvider,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                ExpansionTile(
-                  tilePadding: EdgeInsets.zero,
-                  title: Text(context.l10n.gatewayTitle),
-                  children: [
-                    Text(context.l10n.gatewayHelp),
-                    const SizedBox(height: 12),
-                    SelectableText(context.l10n.gatewayAddressHelp),
-                    const SizedBox(height: 12),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _url,
-                  enabled: !vm.busy,
-                  keyboardType: TextInputType.url,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.apiBaseUrl,
-                    helperText: context.l10n.apiBaseUrlHelp,
-                    helperMaxLines: 3,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _model,
-                  enabled: !vm.busy,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.modelId,
-                    hintText: context.l10n.modelHint,
-                  ),
-                ),
-                if (vm.catalog != null)
-                  TextButton.icon(
-                    key: const ValueKey('load-models'),
-                    onPressed: vm.busy || !vm.loaded
-                        ? null
-                        : () async {
-                            final models = await vm.loadModels(
-                              _url.text,
-                              _key.text,
-                              _noKey,
-                            );
-                            if (!context.mounted || models.isEmpty) return;
-                            final selected = await showDialog<String>(
-                              context: context,
-                              builder: (_) => ModelPicker(models: models),
-                            );
-                            if (mounted && selected != null) {
-                              setState(() => _model.text = selected);
-                            }
-                          },
-                    icon: const Icon(Icons.list_alt),
-                    label: Text(context.l10n.loadModels),
-                  ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: _key,
-                  enabled: !vm.busy && !_noKey,
-                  obscureText: !_visible,
-                  enableSuggestions: false,
-                  autocorrect: false,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.apiKey,
-                    hintText: vm.profile == null || vm.profile!.chatGpt
-                        ? context.l10n.pasteKey
-                        : context.l10n.keepKey,
-                    suffixIcon: IconButton(
-                      tooltip: _visible
-                          ? context.l10n.hideKey
-                          : context.l10n.showKey,
-                      onPressed: () => setState(() => _visible = !_visible),
-                      icon: Icon(
-                        _visible ? Icons.visibility_off : Icons.visibility,
-                      ),
-                    ),
-                  ),
-                ),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(context.l10n.noKey),
-                  value: _noKey,
-                  onChanged: vm.busy
-                      ? null
-                      : (value) => setState(() => _noKey = value!),
-                ),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(context.l10n.jsonMode),
-                  subtitle: Text(context.l10n.jsonModeHelp),
-                  value: _json,
-                  onChanged: vm.busy
-                      ? null
-                      : (value) => setState(() => _json = value),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  initialValue: _language,
-                  key: ValueKey(_language),
-                  decoration: InputDecoration(
-                    labelText: context.l10n.questionLanguage,
-                    helperText: context.l10n.questionLanguageHelp,
-                    helperMaxLines: 3,
-                  ),
-                  items: ['简体中文', 'English']
-                      .map((v) => DropdownMenuItem(value: v, child: Text(v)))
-                      .toList(),
-                  onChanged: vm.busy
-                      ? null
-                      : (value) => setState(() => _language = value!),
-                ),
-                const SizedBox(height: 24),
-                Wrap(
-                  key: const ValueKey('provider-actions'),
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    FilledButton(
-                      onPressed: vm.busy || !vm.loaded
-                          ? null
-                          : () async {
-                              final saved = await vm.save(
-                                _url.text,
-                                _model.text,
-                                _key.text,
-                                _json,
-                                _language,
-                                _noKey,
-                              );
-                              if (saved && mounted) _key.clear();
-                            },
-                      child: Text(context.l10n.saveSettings),
-                    ),
-                    OutlinedButton(
-                      onPressed: vm.busy || !vm.loaded
-                          ? null
-                          : () => vm.test(
-                              _url.text,
-                              _model.text,
-                              _key.text,
-                              _json,
-                              _noKey,
-                            ),
-                      child: Text(context.l10n.testConnection),
-                    ),
-                  ],
-                ),
-                if (vm.busy)
-                  Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: LinearProgressIndicator(),
-                  ),
-              ],
-            ),
-          ),
-        ),
+        if (vm.message != null) Notice(vm.message!, error: vm.actionFailed),
+        const ConnectionSummary(),
         const SizedBox(height: 20),
         ?widget.controls,
-        if (widget.updates != null) ...[
+        if (microsoftStoreBuild) ...[
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.updateTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(context.l10n.storeUpdatesHelp),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: () => openSupportLink(
+                      context,
+                      Uri.parse(
+                        'ms-windows-store://pdp/?ProductId=$microsoftStoreId',
+                      ),
+                      context.l10n.openMicrosoftStore,
+                    ),
+                    icon: const Icon(Icons.storefront_outlined),
+                    label: Text(context.l10n.openMicrosoftStore),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+        if (!microsoftStoreBuild && widget.updates != null) ...[
           const SizedBox(height: 20),
           UpdatePanel(controller: widget.updates!),
           const SizedBox(height: 20),
         ],
         Notice(context.l10n.privacyNotice),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            TextButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const PrivacyPolicyPage(),
+                ),
+              ),
+              icon: const Icon(Icons.privacy_tip_outlined),
+              label: Text(context.l10n.privacyPolicy),
+            ),
+            TextButton.icon(
+              onPressed: () => openSupportLink(
+                context,
+                aiReportUri,
+                context.l10n.reportToDeveloper,
+              ),
+              icon: const Icon(Icons.flag_outlined),
+              label: Text(context.l10n.reportToDeveloper),
+            ),
+          ],
+        ),
         Text(
-          'OmniQuiz · GPL-3.0-only',
-          style: TextStyle(color: Colors.black54),
+          '${context.l10n.appName} · GPL-3.0-only',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         TextButton(
           onPressed: () => showLicensePage(
             context: context,
-            applicationName: 'OmniQuiz',
+            applicationName: context.l10n.appName,
             applicationVersion: widget.updates?.version,
             applicationLegalese:
                 'Copyright © 2026 Missdrop\nLicensed under GPL-3.0-only',

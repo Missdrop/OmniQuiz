@@ -1,3 +1,5 @@
+// Locates the configured Flutter SDK and declares Gradle plugin versions for the Android build.
+
 pluginManagement {
     val flutterSdkPath =
         run {

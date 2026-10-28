@@ -1,3 +1,5 @@
+// Desktop staging and replacement helpers preserve a restartable app when installation is cancelled or fails.
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';

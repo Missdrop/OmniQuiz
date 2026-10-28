@@ -1,3 +1,5 @@
+// Extracts readable text from supported formats; parsing is separate from document publication.
+
 import 'dart:convert';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -7,6 +9,7 @@ import 'package:pdfrx/pdfrx.dart';
 import '../../application/ports/repositories.dart';
 import '../../domain/models.dart';
 
+/// Parses UTF-8 text/Markdown outside the UI isolate.
 class TextDocumentParser implements DocumentParser {
   @override
   bool supports(String filename) =>
@@ -25,6 +28,7 @@ class TextDocumentParser implements DocumentParser {
   });
 }
 
+/// Extracts page text and releases the native PDF handle even when parsing fails.
 class PdfDocumentParser implements DocumentParser {
   @override
   bool supports(String filename) => filename.toLowerCase().endsWith('.pdf');
@@ -61,6 +65,7 @@ class PdfDocumentParser implements DocumentParser {
   }
 }
 
+/// Dispatches supported formats through one consistent parsing contract.
 class ParserRegistry implements DocumentParser {
   ParserRegistry(this.parsers);
   final List<DocumentParser> parsers;

@@ -1,3 +1,5 @@
+// Live UI language changes preserve provider drafts and remain navigable with accessibility text scaling.
+
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -160,10 +162,6 @@ void main() {
       await settle();
       await tester.tap(find.text('Settings').first);
       await settle();
-      await tester.enterText(
-        find.widgetWithText(TextField, 'Model ID'),
-        'unsaved-model',
-      );
       await tester.ensureVisible(find.byKey(const ValueKey('interface-en')));
       await tester.tap(find.byKey(const ValueKey('interface-en')));
       await settle();
@@ -173,8 +171,9 @@ void main() {
       });
       await settle();
       expect(find.text('界面语言'), findsOneWidget);
+      expect(find.text('万物一点通'), findsOneWidget);
       expect(find.text('设置'), findsOneWidget);
-      expect(find.text('unsaved-model'), findsOneWidget);
+      expect(find.text('配置 AI'), findsOneWidget);
       expect(deps.settings.profile, isNull);
       expect(deps.language.language, 'zh');
       await capture('settings-zh-desktop');
@@ -195,12 +194,8 @@ void main() {
       await capture('library-zh-mobile');
       await tester.tap(find.text('练习').last);
       await settle();
-      expect(find.text('生成题目'), findsOneWidget);
-      await tester.tap(find.text('生成题目'));
-      await settle();
-      expect(find.text('开始生成练习题？'), findsOneWidget);
-      await tester.tap(find.text('取消'));
-      await settle();
+      expect(find.text('开始练习'), findsOneWidget);
+      expect(find.text('生成题目'), findsNothing);
       await tester.runAsync(() async {
         await deps.settings.save(
           'https://example.com/v1',
@@ -215,7 +210,7 @@ void main() {
       });
       await settle();
       expect(find.text('20 道待答'), findsOneWidget);
-      expect(deps.settings.profile!.language, 'English');
+      expect(deps.settings.profile!.language, deps.questionLanguage.resolved);
       expect(deps.language.language, 'zh');
       await tester.runAsync(() async {
         deps.practice.choose('b');
@@ -254,6 +249,7 @@ void main() {
         ]) {
           await settle();
           await tester.ensureVisible(find.byIcon(icon).first);
+          await tester.pumpAndSettle();
           await tester.tap(find.byIcon(icon).first);
           await settle();
           expect(tester.takeException(), isNull, reason: '$size $icon');

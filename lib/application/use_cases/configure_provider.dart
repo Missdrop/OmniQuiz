@@ -1,7 +1,10 @@
+// Validates provider changes and manages credential references without storing secrets in profiles.
+
 import '../ports/repositories.dart';
 import '../../domain/models.dart';
 import '../../domain/policies.dart';
 
+/// Validates a connection and changes its secure credential reference consistently.
 class ConfigureProvider {
   ConfigureProvider(this.profiles, this.credentials, this.ids);
   final ProfileRepository profiles;

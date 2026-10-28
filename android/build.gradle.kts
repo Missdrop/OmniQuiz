@@ -1,3 +1,5 @@
+// Shares repositories and build-output locations across the Android project.
+
 allprojects {
     repositories {
         google()

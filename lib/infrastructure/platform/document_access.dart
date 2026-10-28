@@ -1,3 +1,5 @@
+// Reads user-selected materials with explicit size and format bounds before parsing.
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +8,7 @@ import 'package:path/path.dart' as p;
 import '../../application/ports/repositories.dart';
 import '../../domain/models.dart';
 
+/// Reads selected files into bounded import inputs using native picker permissions.
 class PlatformDocumentAccess implements DocumentAccess {
   static const extensions = ['txt', 'md', 'markdown', 'pdf'];
   static const maxBytes = 20 * 1024 * 1024;

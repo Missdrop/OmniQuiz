@@ -1,3 +1,5 @@
+// Reads and writes bounded archives with path checks before anything enters live app storage.
+
 import 'dart:io';
 import 'dart:typed_data';
 

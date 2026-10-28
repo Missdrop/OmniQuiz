@@ -1,3 +1,5 @@
+// Native secure-storage/browser loopback checks using synthetic identities, never a real OpenAI login.
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';

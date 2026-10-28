@@ -10,6 +10,92 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get appName => 'OmniQuiz';
+
+  @override
+  String get guidanceTitle => 'Examples and question requirements';
+
+  @override
+  String get guidanceHelp =>
+      'Sample questions and papers guide style and difficulty, not factual answers. Answers must remain grounded in study materials. Currently supports four-option single-choice questions. Settings belong to this library; requirements and sample excerpts are sent to your selected AI when generating. Files are stored in .omniquiz/guidance inside this library; external edits are read for subsequent batches.';
+
+  @override
+  String get extraRequirements => 'Additional question requirements';
+
+  @override
+  String get extraRequirementsHint =>
+      'For example: medium difficulty; focus on applying concepts, use plausible distractors, and explain why other options are incorrect.';
+
+  @override
+  String get pasteExamples => 'Paste sample questions or paper text (optional)';
+
+  @override
+  String get importExamples => 'Import sample questions / papers';
+
+  @override
+  String get guidanceFormats =>
+      'TXT, Markdown and text-based PDF. Up to 8 files, 20 MB each, with 120,000 characters of reference text in total; pasted text is limited to 20,000. Long papers rotate through excerpts (about 12,000 characters per batch). Originals stay unchanged. Scanned files need OCR first.';
+
+  @override
+  String exampleCharacters(int count) {
+    return '$count characters · Expand to preview';
+  }
+
+  @override
+  String get removeExample => 'Remove example';
+
+  @override
+  String get replaceGuidanceBuffer => 'Regenerate unanswered questions';
+
+  @override
+  String get replaceGuidanceBufferHelp =>
+      'Keeps answer history and reviews. Active practice continues with the new requirements and uses service allowance. When unchecked, existing cached questions stay unchanged and guidance applies only to future generation.';
+
+  @override
+  String get saveGuidance => 'Save question settings';
+
+  @override
+  String get guidanceEnabled =>
+      'This library\'s examples / question requirements are enabled';
+
+  @override
+  String get guidanceLimitError =>
+      'Size or count limit exceeded. Shorten requirements, split papers or remove examples.';
+
+  @override
+  String get guidanceLoadError =>
+      'Could not load question settings. Save them again to repair them.';
+
+  @override
+  String get guidanceImportError =>
+      'Could not import samples. Check their format and readable text.';
+
+  @override
+  String get guidanceSaveError =>
+      'Question settings were not saved. Please try again.';
+
+  @override
+  String get guidanceInvalidExamples =>
+      'Invalid or duplicate examples. Please import them again.';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get privacyLoadFailed =>
+      'Could not load the privacy policy. Please reopen this page.';
+
+  @override
+  String get reportToDeveloper => 'Report AI content to developer';
+
+  @override
+  String get storeUpdatesHelp =>
+      'This edition is distributed and updated by Microsoft Store. Use the Store to check for and install updates.';
+
+  @override
+  String get openMicrosoftStore => 'Open Microsoft Store';
+
+  @override
   String get gatewayTitle =>
       'Use ChatGPT or other accounts through CLIProxyAPI';
 
@@ -19,7 +105,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gatewayAddressHelp =>
-      'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose the experimental ChatGPT sign-in above.';
+      'On this computer: http://127.0.0.1:8317/v1\nOn a phone: your gateway\'s reachable HTTPS address ending in /v1. A phone\'s localhost refers to the phone, not your computer. Keep the gateway running. For standalone use, choose ChatGPT sign-in above.';
 
   @override
   String get loadModels => 'Load available models';
@@ -55,6 +141,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localByDesign => 'Local by design';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get systemTheme => 'Follow system';
+
+  @override
+  String get lightTheme => 'Light mode';
+
+  @override
+  String get darkTheme => 'Dark mode';
+
+  @override
+  String get switchToLight => 'Switch to light mode';
+
+  @override
+  String get switchToDark => 'Switch to dark mode';
+
+  @override
+  String get themeSaveError =>
+      'Could not save appearance settings. Please retry.';
+
+  @override
+  String get startPractice => 'Start practice';
+
+  @override
+  String get endPractice => 'End practice';
+
+  @override
+  String get retryPractice => 'Retry refill';
+
+  @override
+  String get practiceSessionHelp =>
+      'Starting practice automatically refills questions as you run low. Leaving this page or ending practice stops requests. New questions require an internet connection and use your selected service allowance.';
+
+  @override
+  String get practiceAutoReady =>
+      'Practice is active. More questions will be prepared as you run low.';
+
+  @override
+  String get waitingForQuestion => 'Preparing your next question…';
+
+  @override
+  String get waitingForQuestionBody =>
+      'Your next question will appear automatically. You do not need to start again. If the connection fails, check the message above.';
 
   @override
   String get libraryEyebrow => 'Your learning space';
@@ -138,7 +270,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get practiceSubtitle =>
-      'Fresh questions from your materials, ready before you need them.';
+      'Start once and keep practicing. Questions refill automatically from your materials.';
 
   @override
   String get practiceScope => 'Practice scope';
@@ -177,7 +309,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get firstQuestionBody =>
-      'Import your notes, connect an AI provider, then start generating.\nOnce saved, questions work offline too.';
+      'Import your notes, connect an AI provider, then select Start practice.\nQuestions refill while you practice. Saved questions also work offline.';
 
   @override
   String get openLibrary => 'Open library';
@@ -205,7 +337,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get hideQuestionBody =>
-      'If the question is incorrect or ambiguous, remove it from practice and review. This report stays on your device.';
+      'Hide an incorrect or inappropriate question locally. To ask the developer to address it, choose Report AI content to developer and fill out and submit the GitHub form. Reports are public: do not include private materials or credentials. Question content is not attached automatically.';
 
   @override
   String get hideQuestion => 'Hide question';
@@ -220,7 +352,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get wrongAnswer => 'A useful mistake.';
 
   @override
-  String get fullSource => 'Read the full source excerpt';
+  String get fullSource => 'View original source';
 
   @override
   String get aiDisclaimer =>
@@ -327,11 +459,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appLanguageHelp =>
-      'Applies immediately and is saved on this device. Question language is configured separately below.';
+      'Applies immediately and is saved on this device.';
 
   @override
   String get questionLanguageHelp =>
-      'Applies to newly generated questions and explanations. Existing questions keep their original language.';
+      'Shared by all AI connections. New questions and explanations follow the system language by default; existing questions stay unchanged.';
+
+  @override
+  String get noLibrariesTitle => 'Create your first library';
+
+  @override
+  String get noLibrariesBody =>
+      'No libraries yet. Create one before importing your learning materials.';
 
   @override
   String get languageSaveError =>
@@ -639,7 +778,17 @@ class AppLocalizationsEn extends AppLocalizations {
       'Questions, mistakes and progress belong to this library. Folders scan on launch, switch and resume; scan manually anytime.';
 
   @override
-  String get openLibraryError => 'Could not open this library. Try again.';
+  String get openLibraryError =>
+      'Could not open this library. Reconnect its folder or grant folder access, then reopen it.';
+
+  @override
+  String get reopenLibrary => 'Reopen library';
+
+  @override
+  String get zoomIn => 'Zoom in';
+
+  @override
+  String get zoomOut => 'Zoom out';
 
   @override
   String get scanFolderError =>
@@ -800,11 +949,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get chatGptTitle => 'ChatGPT subscription · experimental';
+  String get chatGptTitle => 'ChatGPT subscription';
 
   @override
   String get chatGptHelp =>
-      'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here. Phone sign-in is experimental and still needs real-device validation.';
+      'Sign in on this device using your eligible ChatGPT plan. No API key, computer, or gateway is needed. Complete authorization in the browser, then return here.';
 
   @override
   String get chatGptActive => 'Selected for generation';
@@ -987,4 +1136,170 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateInstallPermission =>
       'Allow OmniQuiz to install updates in system settings, then return and choose Continue installation.';
+
+  @override
+  String get pdfSourceUnavailable =>
+      'The original PDF is missing, changed or unavailable. Showing the saved text excerpt instead; reconnect or reimport the source to view the page.';
+
+  @override
+  String get questionGood => 'Good';
+
+  @override
+  String get feedbackNextGeneration =>
+      'Saved. Your feedback will guide subsequent generation.';
+
+  @override
+  String get questionBad => 'Not good';
+
+  @override
+  String get questionError => 'Something wrong?';
+
+  @override
+  String get questionFeedbackHelp =>
+      'Your rating and optional note will accompany the next generation request to improve subsequent questions. Marking an error hides this question but keeps answer history. Nothing is reported to the developer automatically.';
+
+  @override
+  String get questionErrorNote => 'What is wrong? (optional)';
+
+  @override
+  String get markQuestionError => 'Mark error and skip';
+
+  @override
+  String generationElapsed(int seconds, int count) {
+    return 'Elapsed ${seconds}s · $count questions available';
+  }
+
+  @override
+  String get slowGenerationHelp =>
+      'This model is taking longer. You can answer cached questions or end practice to cancel. A timeout will not trigger an automatic paid retry.';
+
+  @override
+  String get stageReading => 'Reading study material excerpts…';
+
+  @override
+  String get stageGuidance =>
+      'Reading sample papers and question requirements…';
+
+  @override
+  String get stageRequesting => 'Waiting for the model to write questions…';
+
+  @override
+  String get stageValidating => 'Checking answers, citations and duplicates…';
+
+  @override
+  String get stageSaving => 'Saving verified questions to this library…';
+
+  @override
+  String get stageRetrying =>
+      'The provider is busy. Waiting before a limited retry…';
+
+  @override
+  String get unsafeMetadata =>
+      'The library metadata contains a link or another unsafe path. Use ordinary folders and files.';
+
+  @override
+  String get feedbackSaveError =>
+      'Could not save question feedback. Please try again.';
+
+  @override
+  String get configureAi => 'Configure AI';
+
+  @override
+  String get openAiCompatible => 'OpenAI-compatible API';
+
+  @override
+  String get generationConnection => 'AI for new questions';
+
+  @override
+  String get switchConnection => 'Switch';
+
+  @override
+  String get noActiveConnection => 'No AI connection selected';
+
+  @override
+  String get connectionSelectionHelp =>
+      'Save multiple connections and explicitly select one for new questions. Switching keeps existing questions. A failed connection never falls back to another automatically.';
+
+  @override
+  String get savedConnections => 'Saved connections';
+
+  @override
+  String get addConnection => 'Add connection';
+
+  @override
+  String get subscriptionConnectionHelp =>
+      'Sign in with a ChatGPT account and choose a model.';
+
+  @override
+  String get compatibleConnectionHelp =>
+      'Use the official OpenAI API or any compatible service, including CLIProxyAPI.';
+
+  @override
+  String get currentConnection => 'Current';
+
+  @override
+  String get useConnection => 'Use';
+
+  @override
+  String get editConnection => 'Edit';
+
+  @override
+  String get deleteConnection => 'Delete connection';
+
+  @override
+  String deleteConnectionHelp(String name) {
+    return 'Delete “$name”? If it is active, generation stops without selecting another connection. Existing questions stay.';
+  }
+
+  @override
+  String get connectionNeedsLogin => 'Sign-in required';
+
+  @override
+  String get connectionName => 'Connection name';
+
+  @override
+  String get subscriptionSaveHelp =>
+      'Sign-in saves the account and available model automatically. Only your first connection is selected automatically; adding another does not replace the current choice.';
+
+  @override
+  String get compatibleAddressHelp =>
+      'Defaults to the official OpenAI address. For CLIProxyAPI or another compatible service, enter its API base URL ending in /v1.';
+
+  @override
+  String get connectionSaveHelp =>
+      'Testing is optional. Save keeps this connection independently; Save and use explicitly selects it for subsequent generation.';
+
+  @override
+  String get saveAndUseConnection => 'Save and use';
+
+  @override
+  String get saveConnection => 'Save connection';
+
+  @override
+  String get guidancePreservesQuestions =>
+      'Saving keeps existing questions and your current answer selection. Updated requirements apply to subsequent generation only.';
+
+  @override
+  String get invalidConnections =>
+      'Saved AI connections could not be read. Your existing configuration was kept.';
+
+  @override
+  String get connectionNameError =>
+      'Enter a connection name (1–80 characters).';
+
+  @override
+  String get connectionSaveError =>
+      'Could not save AI connections. Please try again.';
+
+  @override
+  String get connectionSavedActive =>
+      'Connection saved and selected for new questions.';
+
+  @override
+  String get connectionSavedInactive =>
+      'Connection saved. The current AI connection is unchanged.';
+
+  @override
+  String get connectionRemoved =>
+      'Connection removed. Other saved connections were kept.';
 }

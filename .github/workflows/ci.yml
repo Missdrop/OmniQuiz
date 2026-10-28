@@ -1,3 +1,5 @@
+# Validates repository changes using isolated build/test jobs; it does not publish a release.
+
 name: Build and test
 on:
   workflow_call:

@@ -1,3 +1,5 @@
+// Source grounding, malformed model output and compatible API requests; credentials and HTTP are in-memory fixtures.
+
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';

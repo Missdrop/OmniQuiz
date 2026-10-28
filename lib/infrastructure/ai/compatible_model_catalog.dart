@@ -1,3 +1,5 @@
+// Discovers compatible model identifiers; endpoint credentials must not follow redirects.
+
 import 'dart:async';
 import 'dart:convert';
 

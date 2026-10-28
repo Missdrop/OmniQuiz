@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Runs local Flutter with isolated caches and platform-specific native-asset tool overrides.
 set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export PUB_CACHE="$PROJECT_ROOT/.tooling/pub-cache"

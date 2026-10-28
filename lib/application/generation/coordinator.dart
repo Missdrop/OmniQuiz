@@ -1,18 +1,24 @@
+// Serializes generation, leases and retries; cancellation tokens reject late paid responses.
+
 import 'dart:async';
 import 'dart:math';
 
 import '../../domain/models.dart';
 import '../../domain/policies.dart';
+import '../../domain/generation_guidance.dart';
 import '../ports/repositories.dart';
 
+/// User-facing progress for a batch, separate from whether a practice session is active.
 class GenerationStatus {
   const GenerationStatus(
     this.message, {
     this.running = false,
     this.error = false,
+    this.startedAt,
   });
   final String message;
   final bool running, error;
+  final DateTime? startedAt;
 }
 
 /// Owns at most one generation loop; no widgets, SQL or provider DTOs here.
@@ -26,6 +32,9 @@ class GenerationCoordinator {
     required this.ids,
     required this.clock,
     this.policy = const BufferPolicy(),
+    this.questionLanguage,
+    this.guidance,
+    this.onStatus,
   });
   final MaterialRepository materials;
   final QuestionRepository questions;
@@ -35,6 +44,11 @@ class GenerationCoordinator {
   final IdGenerator ids;
   final Clock clock;
   final BufferPolicy policy;
+  final String Function()? questionLanguage;
+  final GenerationGuidanceRepository? guidance;
+  final void Function(GenerationStatus)? onStatus;
+  DateTime? _startedAt;
+  int _guidanceBatch = 0;
   final _events = StreamController<GenerationStatus>.broadcast();
   Stream<GenerationStatus> get events => _events.stream;
   GenerationStatus status = const GenerationStatus('Ready when you are');
@@ -47,20 +61,37 @@ class GenerationCoordinator {
   Completer<void>? _retryWait;
   bool get enabled => _enabled;
   void _emit(String message, {bool running = false, bool error = false}) {
-    if (_disposed) return;
-    status = GenerationStatus(message, running: running, error: error);
+    if (_disposed || (running && !_enabled)) return;
+    status = GenerationStatus(
+      message,
+      running: running,
+      error: error,
+      startedAt: _startedAt,
+    );
     _events.add(status);
+    onStatus?.call(status);
   }
 
+  /// Transport phases are advisory and cannot revive a stopped session.
+  void reportProgress(String message) {
+    if (_enabled && !_disposed) _emit(message, running: true);
+  }
+
+  /// Starts one scoped session and fills its bounded buffer, rejecting intervening stops.
   Future<void> start(String? scope) async {
-    await stop();
+    final stopping = stop();
+    final token = _token;
+    await stopping;
+    if (_disposed || token != _token) return;
     _enabled = true;
+    _startedAt = clock.now();
     _scope = scope;
     _cursor = Random().nextInt(10000);
     _emit('Preparing your next questions…', running: true);
     await replenish();
   }
 
+  /// Cancels future work immediately; the token also invalidates an already returned result.
   Future<void> stop() async {
     _enabled = false;
     _token++;
@@ -84,6 +115,7 @@ class GenerationCoordinator {
     await _loop;
   }
 
+  /// Joins an existing fill before considering another, preventing overlapping paid calls.
   Future<void> replenish() async {
     if (!_enabled || _disposed) return;
     final previous = _loop;
@@ -114,6 +146,8 @@ class GenerationCoordinator {
           _emit('$available questions ready');
           return;
         }
+        _startedAt = clock.now();
+        _emit('Reading study material excerpts…', running: true);
         final job = await _prepareJob(count);
         if (!_current(token)) return;
         _job = job;
@@ -139,15 +173,29 @@ class GenerationCoordinator {
   }
 
   Future<GenerationJob> _prepareJob(int count) async {
-    final profile = await profiles.load();
+    // Snapshot provider, source and guidance together. A retry reuses this request;
+    // editing guidance cancels the epoch instead of changing an in-flight prompt.
+    var profile = await profiles.load();
     if (profile == null) {
       throw const AppFailure('Configure your AI provider in Settings first.');
+    }
+    if (questionLanguage != null) {
+      profile = ProviderProfile(
+        baseUrl: profile.baseUrl,
+        model: profile.model,
+        credentialRef: profile.credentialRef,
+        jsonMode: profile.jsonMode,
+        chatGpt: profile.chatGpt,
+        language: questionLanguage!(),
+      );
     }
     final selected = await materials.generationChunks(_scope, _cursor, 3);
     if (selected.isEmpty) {
       throw const AppFailure('Import study materials first.');
     }
     _cursor += selected.length;
+    _emit('Reading sample papers and question requirements…', running: true);
+    final preferences = await guidance?.load() ?? GenerationGuidance();
     return GenerationJob(
       id: ids.next(),
       epoch: await jobs.epoch(),
@@ -157,11 +205,16 @@ class GenerationCoordinator {
         chunks: selected,
         count: count,
         recentPrompts: await questions.recentPrompts(_scope),
+        additionalRequirements: preferences.requirements,
+        qualityFeedback: await questions.generationFeedback(_scope),
+        referenceExamples: preferences.excerpts(_guidanceBatch++),
       ),
     );
   }
 
   Future<bool> _executeJob(GenerationJob job, int token) async {
+    // The provider may have consumed quota even when a response is lost. Only
+    // explicitly retryable failures are retried, and only within this bounded loop.
     for (var attempt = 0; attempt < 3 && _current(token); attempt++) {
       if (!await jobs.claim(job.id, clock.now())) return false;
       _emit(
@@ -173,6 +226,7 @@ class GenerationCoordinator {
       try {
         final generated = await generator.generate(job.request);
         if (!_current(token)) return false;
+        _emit('Saving verified questions to this library…', running: true);
         final complete = await jobs.complete(job, generated);
         if (!complete) {
           _enabled = false;
@@ -187,6 +241,10 @@ class GenerationCoordinator {
         if (delay > const Duration(minutes: 2)) rethrow;
         await jobs.retry(job.id, clock.now().add(delay));
         if (!_current(token)) return false;
+        _emit(
+          'The provider is busy. Waiting before a limited retry…',
+          running: true,
+        );
         await _waitBeforeRetry(delay);
       }
     }

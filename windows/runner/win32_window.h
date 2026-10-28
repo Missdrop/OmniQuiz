@@ -1,3 +1,5 @@
+// Win32 host contract used by the Flutter runner, independent of application repositories.
+
 #ifndef RUNNER_WIN32_WINDOW_H_
 #define RUNNER_WIN32_WINDOW_H_
 

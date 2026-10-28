@@ -1,3 +1,5 @@
+// Bridges persistent folder grants on platforms that require security-scoped access.
+
 import 'dart:io';
 
 import 'package:flutter/services.dart';

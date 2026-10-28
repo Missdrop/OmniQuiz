@@ -1,3 +1,5 @@
+// Opt-in update notices, skips, downloads, digest checks and installer transitions with fake services.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';

@@ -1,3 +1,5 @@
+// Applies interface language independently from generation language and provider configuration.
+
 import 'package:flutter/material.dart';
 
 import '../../application/ports/preferences_repository.dart';

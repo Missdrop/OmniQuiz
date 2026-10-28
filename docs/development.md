@@ -271,7 +271,7 @@ replacing the running test application.
   reviews graduate a question. Early correct practice records the attempt without
   changing the review streak or due date; an incorrect answer resets the streak.
 - Data stays on one device. Cloud sync, OCR, folder watching,
-  are not included in this release. Direct ChatGPT authorization is experimental.
+  are not included in this release. Direct ChatGPT authorization is supported.
 
 ## ZIP material import
 
@@ -296,20 +296,44 @@ while other valid documents are imported normally.
 
 ## Library storage and lifecycle
 
-`omniquiz.sqlite` remains the default library database. Existing documents,
-questions, attempts and reviews stay in place. Its `settings` table also stores
-the library catalog, active library, global AI profile and interface language.
-Other libraries use `libraries/<uuid>/quiz.sqlite` under application support;
-managed source folders use `libraries/<uuid>/materials`. External source folders
-contain only the user's materials. Library names never become file paths.
+The application-support `omniquiz.sqlite` stores the catalog and global settings.
+Each library now owns `<material folder>/.omniquiz/quiz.sqlite`, including questions,
+attempts, reviews, quality feedback and jobs. `LibraryCatalog.openLibrary` migrates
+a consistent sanitized snapshot from the old centralized database when necessary;
+the original stays as a recovery copy. A stored library-root marker rebases source
+origins and scan exclusions when a complete portable folder is moved and reattached.
+Managed source folders still use `libraries/<uuid>/materials`; external folders
+also contain their own `.omniquiz` state. Library names never become file paths.
 Overlapping source directories are rejected to keep copied files in one library.
 
 Each session receives its own material, question, progress and job repositories.
-Only AI preferences and language use the global database; API secrets remain in
+AI connections and interface preferences use the global database; API secrets remain in
 system secure storage. Switching stops the old generator, replaces the router
 and all study view models, then disposes the old session after detaching widgets.
 Delayed model responses cannot publish into the next library. A global database
 handle is shared intentionally and is never closed by a study session.
+
+`FileGenerationGuidanceRepository` reads `.omniquiz/guidance/requirements.md`,
+`pasted-example.md` and supported original files under `examples/` for each batch.
+Save stages and swaps the complete guidance folder, rolling back if the SQL cache
+write fails. The SQL copy preserves old extracted-only samples and backup support.
+Study scans skip metadata; backups explicitly include guidance originals and the
+sanitized DB, excluding logs. Guidance saves never retire existing questions.
+Recent scoped quality votes and notes enter the next generation request as bounded,
+untrusted preferences; they never become factual evidence or trigger separate calls.
+Generation phases and timings are recorded in a bounded `generation.log`, without
+prompts, source contents or credentials. Requests use five-question batches and a
+three-minute timeout; the job lease allows five minutes for transport and storage.
+
+Named connections live under `settings.ai_connections` with an explicit active ID.
+`SelectedConnectionProfile` resolves that selection for generation; `profile` is
+only an atomic projection for migration/interoperability. `AiConnectionType`
+separates subscription transport from the shared OpenAI-compatible transport;
+CLIProxyAPI uses the latter. Connection edits and probes stay isolated until an
+explicit activation. Active changes quiesce/resume the practice session while
+retaining questions; deletion/sign-out stops it without a fallback. New transport
+types require a typed dispatcher case and configuration presentation, without
+changing the connection catalog or credential-reference lifecycle.
 
 macOS uses the `omniquiz/folders` platform channel to retain security-scoped
 bookmarks in app preferences and restore access after restart. Both macOS builds
@@ -463,7 +487,7 @@ Physical-device testing remains outstanding.
 
 OmniQuiz can use a user-operated CLIProxyAPI instance through its standard
 OpenAI-compatible client API. This connects to subscription accounts authenticated
-by the gateway. Standalone devices can instead use experimental direct ChatGPT sign-in in Settings. The
+by the gateway. Standalone devices can instead use direct ChatGPT sign-in in Settings. The
 [comparison](chatgpt-sign-in.md#current-implementation-standalone-devices) explains the tradeoff.
 
 1. Install [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) or its linked
@@ -503,3 +527,59 @@ cover the client behavior. Complete a real signed Android/iOS device test agains
 your authenticated gateway (model listing, question generation, network loss,
 app resume and expired upstream login) before treating that deployment as
 verified. Compiling an APK or receiving a model catalog alone is insufficient.
+
+## Microsoft Store package
+
+The Store uses a separate Windows build with `OMNIQUIZ_STORE=true`. It disables
+GitHub update checks, downloads and installers and directs updates to Microsoft
+Store. Standalone builds retain the optional GitHub updater.
+
+From the repository root on Windows, with Flutter, Visual Studio C++ tools and
+the Windows 10/11 SDK installed:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/package_store.ps1
+python scripts/verify_store_package.py
+```
+
+The script builds x64 Release, bundles the VS redistributable DLLs, indexes
+English/Chinese package names with MakePRI, and validates the MSIX using MakeAppx.
+It uses the public identity in `packaging/windows/store.json` and writes
+`dist/OmniQuiz-store-x64-1.0.0.0.msix` for the current 1.0.0 app version.
+The fourth version component is zero as required by the Store. When publishing a
+new version, update the app version or pass `-Version x.y.z.0`.
+
+The upload package is unsigned; Microsoft Store signs accepted submissions.
+Do not distribute it as a ready-to-install sideload package. The app targets
+Windows Desktop x64, Windows 10 build 19041 or later. The `runFullTrust`
+capability is required by the classic Win32 Flutter process and native file and
+credential APIs; the app does not request elevation.
+
+Full Windows App Certification Kit testing requires an elevated Windows session.
+Local MakeAppx validation and successful developer-mode registration/launch do
+not establish Store certification. For manual development registration, use the
+staging path recorded in `.tooling/store-package.json`; never replace an existing
+user package just to run a test. Remove only registrations created for testing.
+
+Before packaging a standalone installer again, run a normal Windows Release
+build without the Store define. Packaging outputs and Store screenshots belong
+in ignored `dist/`, not in source control. Never put test API keys, accounts or
+private materials in the package or public listing.
+
+### Reading and testing question guidance
+
+`GenerationGuidance` owns input limits and rotating sample excerpts. The guidance
+repository stores each library's settings and invalidates pending jobs in the
+same transaction. `GuidanceViewModel` keeps imports as a temporary draft;
+`PracticeViewModel.applyGuidanceChange` cancels in-flight work before saving and
+respects an explicit session end during the write. `study_prompt.dart` assembles
+the shared API/subscription prompt, keeping sample papers separate from citable
+study sources. The question validator still accepts evidence only from sources.
+
+Run `scripts/flutter test` and `scripts/flutter analyze` (the `.ps1` wrappers on
+Windows). `test/generation_guidance_test.dart` covers limits, atomic imports,
+backup persistence, both AI routes and session races. Native smoke tests in
+`integration_test/` additionally require the target platform's SDK. Generated
+localization, plugin registrants and third-party code are regenerated rather than
+manually documented; maintained modules explain their purpose, and interface and
+workflow comments describe ownership, cancellation and persistence boundaries.

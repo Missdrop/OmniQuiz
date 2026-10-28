@@ -1,7 +1,10 @@
+// Shared page, notice and empty-state primitives keep spacing and theme contrast consistent.
+
 import 'package:flutter/material.dart';
 
 import '../../l10n/localization.dart';
 
+/// Responsive, scrollable content frame shared by library, practice and settings pages.
 class PageFrame extends StatelessWidget {
   const PageFrame({
     super.key,
@@ -43,7 +46,10 @@ class PageFrame extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               subtitle,
-              style: const TextStyle(color: Color(0xFF65736A), height: 1.6),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.6,
+              ),
             ),
             const SizedBox(height: 28),
             ...children,
@@ -54,6 +60,7 @@ class PageFrame extends StatelessWidget {
   );
 }
 
+/// A localized status/error surface using theme-matched foreground contrast.
 class Notice extends StatelessWidget {
   const Notice(this.text, {super.key, this.error = false});
   final String text;
@@ -64,16 +71,24 @@ class Notice extends StatelessWidget {
     margin: const EdgeInsets.only(bottom: 16),
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
-      color: error ? const Color(0xFFFFE8E2) : const Color(0xFFE7EFE5),
+      color: error
+          ? Theme.of(context).colorScheme.errorContainer
+          : Theme.of(context).colorScheme.secondaryContainer,
       borderRadius: BorderRadius.circular(12),
     ),
     child: Text(
       context.l10n.diagnostic(text),
-      style: const TextStyle(height: 1.5),
+      style: TextStyle(
+        height: 1.5,
+        color: error
+            ? Theme.of(context).colorScheme.onErrorContainer
+            : Theme.of(context).colorScheme.onSecondaryContainer,
+      ),
     ),
   );
 }
 
+/// An actionable empty state that remains readable at narrow widths.
 class EmptyCard extends StatelessWidget {
   const EmptyCard({
     super.key,

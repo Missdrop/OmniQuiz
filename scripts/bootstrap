@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Fetches the pinned Flutter checkout locally before resolving application dependencies.
 set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 mkdir -p "$PROJECT_ROOT/.tooling"

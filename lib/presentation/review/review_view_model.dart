@@ -1,8 +1,11 @@
+// Loads review entries and errors independently from the current practice question.
+
 import 'package:flutter/foundation.dart';
 
 import '../../application/ports/repositories.dart';
 import '../../domain/models.dart';
 
+/// Loads the review queue and exposes recoverable repository failures.
 class ReviewViewModel extends ChangeNotifier {
   ReviewViewModel(this.questions);
   final QuestionRepository questions;

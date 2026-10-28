@@ -1,3 +1,5 @@
+// Owns browser authorization, the loopback callback and PKCE lifetime for one login attempt.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -9,6 +11,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../domain/models.dart';
 import '../platform/auth_foreground.dart';
 
+/// Owns one browser callback listener and its state, nonce and PKCE verifier.
 class ChatGptLogin {
   ChatGptLogin({
     Future<bool> Function(Uri)? launch,
@@ -43,6 +46,7 @@ class ChatGptLogin {
     }
   }
 
+  /// Returns a one-use authorization result only after the exact loopback callback matches.
   Future<Map<String, String>> authorize(String host, {String? clientId}) async {
     if (_pending != null) {
       throw const AppFailure('ChatGPT sign-in is already running.');
@@ -101,6 +105,8 @@ class ChatGptLogin {
         throw const FormatException();
       }
       if (Platform.isAndroid) {
+        // Android can suspend network access while the browser is foregrounded;
+        // exchange the single-use code only after explicit return to the app.
         await waitForAuthForeground(
           cancelled: cancelSignal.future,
           timeout: timeout,

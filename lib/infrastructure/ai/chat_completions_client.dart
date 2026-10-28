@@ -1,3 +1,5 @@
+// Handles compatible HTTP transport, bounded reads and failures without scheduling paid retries.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -11,7 +13,7 @@ import '../../domain/models.dart';
 class ChatCompletionsClient {
   ChatCompletionsClient({
     http.Client Function()? clientFactory,
-    this.timeout = const Duration(seconds: 90),
+    this.timeout = const Duration(minutes: 3),
   }) : _factory = clientFactory ?? http.Client.new;
   final http.Client Function() _factory;
   final Duration timeout;

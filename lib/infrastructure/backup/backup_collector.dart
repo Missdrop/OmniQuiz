@@ -1,7 +1,8 @@
+// Snapshots library databases and originals into a portable archive staging directory.
+
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
@@ -14,6 +15,7 @@ import '../platform/library_files.dart';
 import 'backup_archive.dart';
 import 'backup_database.dart';
 import 'backup_manifest.dart';
+import '../persistence/library_workspace.dart';
 
 /// Collects one consistent DB snapshot plus source files for each library.
 /// The caller pauses this installation's active workflows before collecting.
@@ -80,6 +82,43 @@ class BackupCollector {
       seen.add(input.origin);
     }
     await _legacyOriginals(id, documents, seen, files);
+    final guidance = Directory(
+      LibraryWorkspace(library.directory).guidancePath,
+    );
+    if (await FileSystemEntity.type(guidance.path, followLinks: false) ==
+        FileSystemEntityType.directory) {
+      await for (final entity in guidance.list(
+        recursive: true,
+        followLinks: false,
+      )) {
+        if (entity is Link) {
+          throw const AppFailure('A source file could not be backed up.');
+        }
+        if (entity is! File) continue;
+        if (await entity.length() > 20 * 1024 * 1024) {
+          throw const AppFailure('Backup is too large.');
+        }
+        final relative = p
+            .relative(entity.path, from: library.directory)
+            .replaceAll('\\', '/');
+        if (relative != '.omniquiz/guidance/requirements.md' &&
+            relative != '.omniquiz/guidance/pasted-example.md' &&
+            !RegExp(
+              r'^\.omniquiz/guidance/examples/.+\.(pdf|txt|md|markdown)$',
+              caseSensitive: false,
+            ).hasMatch(relative)) {
+          continue;
+        }
+        files.add(
+          await _material(
+            id,
+            'guidance:$relative',
+            relative,
+            await entity.readAsBytes(),
+          ),
+        );
+      }
+    }
     return BackupLibrary(name: library.name, database: entry, files: files);
   }
 
@@ -87,16 +126,8 @@ class BackupCollector {
     StudyLibrary library,
     String target,
   ) async {
-    final shared = library.legacy || library.id == activeId;
-    final db = library.legacy
-        ? catalog.database
-        : library.id == activeId
-        ? activeDatabase!
-        : QuizDatabase(
-            NativeDatabase.createInBackground(
-              File(catalog.databasePath(library)),
-            ),
-          );
+    final shared = library.id == activeId && activeDatabase != null;
+    final db = shared ? activeDatabase! : await catalog.openLibrary(library);
     try {
       final documents = await SqlMaterialRepository(db).documents();
       await BackupDatabase.snapshot(db, target);

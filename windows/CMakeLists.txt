@@ -1,3 +1,5 @@
+# Builds and installs the complete Windows runner payload, plugins and Dart native assets.
+
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
 project(omniquiz LANGUAGES CXX)

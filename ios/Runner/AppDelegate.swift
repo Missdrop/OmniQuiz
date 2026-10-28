@@ -1,3 +1,5 @@
+// Registers plugins and native archive export for Flutter implicit-engine scenes.
+
 import Flutter
 import UIKit
 
@@ -11,6 +13,7 @@ import UIKit
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    // Scene-based Flutter engines need registration here, not a retained root controller.
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "OmniQuizBackupExporter") {
       BackupExporter.register(with: registrar)

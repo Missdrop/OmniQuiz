@@ -1,3 +1,5 @@
+// SQL transactions enforce idempotent answers, current revisions and leased job completion.
+
 import 'dart:convert';
 
 import 'package:omniquiz/infrastructure/persistence/codec.dart';

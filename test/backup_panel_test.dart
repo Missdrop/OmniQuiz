@@ -1,3 +1,5 @@
+// User confirmation, cancellation and operation feedback for backup import/export controls.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omniquiz/application/ports/backup.dart';

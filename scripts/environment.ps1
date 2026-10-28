@@ -1,3 +1,5 @@
+# Sets process-local SDK/cache paths so builds and tests use reproducible workspace tooling.
+
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
 $env:PUB_CACHE = Join-Path $projectRoot '.tooling/pub-cache'

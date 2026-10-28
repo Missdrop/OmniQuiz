@@ -1,3 +1,7 @@
+// Portable snapshots preserve study history while scrubbing profiles, credentials and interrupted jobs.
+
+import 'package:omniquiz/domain/study_library.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -38,6 +42,17 @@ void main() {
     );
     catalog = LibraryCatalog(global, root.path);
     await catalog.load();
+    final fixtureFolder = await Directory(
+      p.join(root.path, 'fixture-materials'),
+    ).create();
+    catalog.libraries.add(
+      StudyLibrary(
+        id: 'default',
+        name: 'Test library',
+        directory: fixtureFolder.path,
+      ),
+    );
+    await catalog.select(catalog.libraries.single);
     deps = await AppDependencies.create(
       database: global,
       ownsDatabase: false,

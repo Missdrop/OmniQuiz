@@ -1,10 +1,14 @@
+// Presents account/model actions without exposing registration identifiers as display labels.
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../l10n/localization.dart';
 import 'settings_view_model.dart';
+import 'question_language_view_model.dart';
 
+/// Renders saved accounts and models while keeping registration IDs out of user labels.
 class ChatGptPanel extends StatelessWidget {
   const ChatGptPanel({super.key});
   @override
@@ -12,7 +16,7 @@ class ChatGptPanel extends StatelessWidget {
     final vm = context.watch<SettingsViewModel>();
     final l = context.l10n;
     if (vm.chatGpt == null) return const SizedBox.shrink();
-    final language = vm.profile?.language ?? '简体中文';
+    final language = context.watch<QuestionLanguageViewModel>().resolved;
     final savedModel = vm.profile?.credentialRef == vm.chatGptAccount
         ? vm.profile?.model
         : null;
@@ -135,21 +139,6 @@ class ChatGptPanel extends StatelessWidget {
                       },
               ),
               const SizedBox(height: 24),
-              DropdownButtonFormField<String>(
-                initialValue: language,
-                key: ValueKey(language),
-                isExpanded: true,
-                decoration: InputDecoration(labelText: l.questionLanguage),
-                items: ['简体中文', 'English']
-                    .map((id) => DropdownMenuItem(value: id, child: Text(id)))
-                    .toList(),
-                onChanged: vm.busy
-                    ? null
-                    : (id) {
-                        if (id != null) vm.useChatGpt(model, id, test: false);
-                      },
-              ),
-              const SizedBox(height: 20),
               FilledButton(
                 onPressed: vm.busy
                     ? null

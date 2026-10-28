@@ -10,6 +10,84 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get appName => '万物一点通';
+
+  @override
+  String get guidanceTitle => '样题与出题要求';
+
+  @override
+  String get guidanceHelp =>
+      '样题、样卷仅参考题型风格和难度，知识与答案仍以学习资料为准。目前支持四选一单选题。设置只保存在当前资料库；出题时会将要求和样题摘录发送给所选 AI。 文件保存在资料库的 .omniquiz/guidance 中，外部修改会在后续补题时重新读取。';
+
+  @override
+  String get extraRequirements => '额外出题要求';
+
+  @override
+  String get extraRequirementsHint =>
+      '例如：中等难度，侧重概念应用，增加易混淆概念的干扰项；解析说明其他选项为什么不对。';
+
+  @override
+  String get pasteExamples => '粘贴样题或样卷内容（可选）';
+
+  @override
+  String get importExamples => '导入样题／样卷';
+
+  @override
+  String get guidanceFormats =>
+      '支持 TXT、Markdown、文字型 PDF；最多 8 个文件，每个不超过 20 MB，参考文本合计最多 12 万字符。粘贴最多 2 万字符。长样卷分批参考，每批最多约 1.2 万字符；原文件不修改。扫描件需先 OCR。';
+
+  @override
+  String exampleCharacters(int count) {
+    return '$count 字符 · 点击查看摘录';
+  }
+
+  @override
+  String get removeExample => '移除样题';
+
+  @override
+  String get replaceGuidanceBuffer => '重新生成未作答题目';
+
+  @override
+  String get replaceGuidanceBufferHelp =>
+      '保留答题历史和错题；若正在练习，将按新要求继续补题并消耗所选服务额度。不勾选时，已有缓存题目保持不变，新要求仅用于后续生成。';
+
+  @override
+  String get saveGuidance => '保存出题设置';
+
+  @override
+  String get guidanceEnabled => '已启用当前资料库的样题／出题要求';
+
+  @override
+  String get guidanceLimitError => '超过长度或数量限制，请缩短要求、拆分样卷或移除部分样题。';
+
+  @override
+  String get guidanceLoadError => '出题设置读取失败，可重新保存修复。';
+
+  @override
+  String get guidanceImportError => '无法导入样题，请检查文件格式和可读取文本。';
+
+  @override
+  String get guidanceSaveError => '出题设置未保存，请重试。';
+
+  @override
+  String get guidanceInvalidExamples => '样题无效或重复，请重新导入。';
+
+  @override
+  String get privacyPolicy => '隐私政策';
+
+  @override
+  String get privacyLoadFailed => '隐私政策暂时无法读取，请重新打开此页。';
+
+  @override
+  String get reportToDeveloper => '向开发者报告 AI 内容';
+
+  @override
+  String get storeUpdatesHelp => '此版本由 Microsoft Store 分发和更新，请在商店中检查及安装更新。';
+
+  @override
+  String get openMicrosoftStore => '打开 Microsoft Store';
+
+  @override
   String get gatewayTitle => '通过 CLIProxyAPI 使用 ChatGPT 等账号';
 
   @override
@@ -18,7 +96,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gatewayAddressHelp =>
-      '本机电脑：http://127.0.0.1:8317/v1\n手机：填写手机可访问的 HTTPS 网关地址，以 /v1 结尾。手机上的 localhost 指手机自身，不是你的电脑。使用时需保持网关运行。独立使用请选上方实验性 ChatGPT 登录。';
+      '本机电脑：http://127.0.0.1:8317/v1\n手机：填写手机可访问的 HTTPS 网关地址，以 /v1 结尾。手机上的 localhost 指手机自身，不是你的电脑。使用时需保持网关运行。独立使用请选上方 ChatGPT 登录。';
 
   @override
   String get loadModels => '获取可用模型';
@@ -52,6 +130,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localByDesign => '数据保存在本地';
+
+  @override
+  String get appearance => '外观';
+
+  @override
+  String get systemTheme => '跟随系统';
+
+  @override
+  String get lightTheme => '白天模式';
+
+  @override
+  String get darkTheme => '黑夜模式';
+
+  @override
+  String get switchToLight => '切换到白天模式';
+
+  @override
+  String get switchToDark => '切换到黑夜模式';
+
+  @override
+  String get themeSaveError => '未能保存外观设置，请重试。';
+
+  @override
+  String get startPractice => '开始练习';
+
+  @override
+  String get endPractice => '结束练习';
+
+  @override
+  String get retryPractice => '重试补题';
+
+  @override
+  String get practiceSessionHelp =>
+      '开始后，待答题不足时会自动补题。离开练习页或结束练习即停止；生成新题需要联网并消耗所选服务额度。';
+
+  @override
+  String get practiceAutoReady => '练习进行中，题量不足时会自动补题。';
+
+  @override
+  String get waitingForQuestion => '正在准备下一题…';
+
+  @override
+  String get waitingForQuestionBody => '题目准备好后会自动显示，无需重复点击开始。若连接失败，请查看上方提示。';
 
   @override
   String get libraryEyebrow => '你的学习空间';
@@ -130,7 +251,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reviewPracticeSubtitle => '先回忆答案，再查看解析。';
 
   @override
-  String get practiceSubtitle => '根据你的资料提前生成题目，让练习顺畅进行。';
+  String get practiceSubtitle => '点击开始，连续练习。我们会根据你的资料自动补充后续题目。';
 
   @override
   String get practiceScope => '练习范围';
@@ -167,7 +288,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reviewCaughtUpBody => '下次复习到期时再来，或到错题复习中选择其他题目。';
 
   @override
-  String get firstQuestionBody => '导入资料、配置 AI 服务商，然后开始生成题目。\n已保存的题目也可以离线练习。';
+  String get firstQuestionBody =>
+      '导入资料并配置 AI，然后点击“开始练习”。\n练习期间会自动补题，已保存的题目也可离线作答。';
 
   @override
   String get openLibrary => '打开资料库';
@@ -194,7 +316,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hideQuestionTitle => '隐藏这道题？';
 
   @override
-  String get hideQuestionBody => '如果题目存在错误或歧义，可以将其从练习和复习中移除。这条反馈只保存在本机。';
+  String get hideQuestionBody =>
+      '可以在本机隐藏错误或不当的题目。若要让开发者处理，请点击“向开发者报告 AI 内容”，在 GitHub 页面填写并确认提交。报告公开可见，请勿包含私人资料或凭据；应用不会自动附加题目内容。';
 
   @override
   String get hideQuestion => '隐藏题目';
@@ -209,7 +332,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wrongAnswer => '这次错题，就是下次进步的起点。';
 
   @override
-  String get fullSource => '查看完整资料片段';
+  String get fullSource => '查看原始资料';
 
   @override
   String get aiDisclaimer => '题目由 AI 生成。如果答案有疑问，请核对原文。';
@@ -310,10 +433,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get systemLanguage => '跟随系统';
 
   @override
-  String get appLanguageHelp => '立即生效并保存在本机。出题语言可在下方单独设置。';
+  String get appLanguageHelp => '立即生效并保存在本机。';
 
   @override
-  String get questionLanguageHelp => '用于新生成的题目与解析，已有题目保留原语言。';
+  String get questionLanguageHelp => '所有 AI 接入方式共用，用于新题目与解析；默认跟随系统，已有题目不变。';
+
+  @override
+  String get noLibrariesTitle => '创建你的第一个资料库';
+
+  @override
+  String get noLibrariesBody => '还没有资料库。先创建资料库，再导入学习资料。';
 
   @override
   String get languageSaveError => '无法保存界面语言，请重试。';
@@ -584,7 +713,16 @@ class AppLocalizationsZh extends AppLocalizations {
       '题目、错题和进度仅属于当前库。启动、切换及返回应用时扫描；也可手动扫描。';
 
   @override
-  String get openLibraryError => '无法打开资料库，请重试。';
+  String get openLibraryError => '无法打开资料库。请重新连接文件夹或授予访问权限，然后重新打开。';
+
+  @override
+  String get reopenLibrary => '重新打开资料库';
+
+  @override
+  String get zoomIn => '放大';
+
+  @override
+  String get zoomOut => '缩小';
 
   @override
   String get scanFolderError => '无法扫描资料库目录。请检查目录是否已连接，并重新授权目录访问。';
@@ -728,11 +866,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get chatGptTitle => 'ChatGPT 订阅 · 实验性功能';
+  String get chatGptTitle => 'ChatGPT 订阅';
 
   @override
   String get chatGptHelp =>
-      '在本设备登录并授权使用符合条件的 ChatGPT 订阅，无需 API 密钥、电脑或网关。在浏览器完成授权后返回这里。手机登录属于实验性功能，仍需实机验证。';
+      '在本设备登录并授权使用符合条件的 ChatGPT 订阅，无需 API 密钥、电脑或网关。在浏览器完成授权后返回这里。';
 
   @override
   String get chatGptActive => '当前出题连接';
@@ -898,4 +1036,157 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get updateInstallPermission =>
       '请在系统设置中允许 OmniQuiz 安装更新，然后返回并点击“继续安装”。';
+
+  @override
+  String get pdfSourceUnavailable =>
+      '原始 PDF 已丢失、被修改或暂不可访问。以下显示保存的文字摘录；重新连接或导入原文件后可查看原始页面。';
+
+  @override
+  String get questionGood => '好';
+
+  @override
+  String get feedbackNextGeneration => '已记录，后续补题会参考你的评价。';
+
+  @override
+  String get questionBad => '不好';
+
+  @override
+  String get questionError => '出错了？';
+
+  @override
+  String get questionFeedbackHelp =>
+      '评价和可选备注会随下一次出题请求发送给 AI，帮助改进后续题目。标记出错会隐藏这道题，答题历史保留。不会自动向开发者提交报告。';
+
+  @override
+  String get questionErrorNote => '哪里有问题？（可选）';
+
+  @override
+  String get markQuestionError => '标记出错并跳过';
+
+  @override
+  String generationElapsed(int seconds, int count) {
+    return '已用时 $seconds 秒 · 还有 $count 道可答';
+  }
+
+  @override
+  String get slowGenerationHelp =>
+      '当前模型耗时较长。可以继续作答缓存题目，或结束练习取消请求；超时后不会自动重复付费请求。';
+
+  @override
+  String get stageReading => '正在读取学习资料片段…';
+
+  @override
+  String get stageGuidance => '正在读取样题、样卷和出题要求…';
+
+  @override
+  String get stageRequesting => '正在等待模型生成题目…';
+
+  @override
+  String get stageValidating => '正在检查选项、答案、原文引用并去重…';
+
+  @override
+  String get stageSaving => '正在将校验通过的题目保存到当前题库…';
+
+  @override
+  String get stageRetrying => '服务暂时繁忙，等待后将有限重试…';
+
+  @override
+  String get unsafeMetadata => '资料库元数据中存在链接或不安全的路径，请改用普通文件夹和文件。';
+
+  @override
+  String get feedbackSaveError => '无法保存题目反馈，请重试。';
+
+  @override
+  String get configureAi => '配置 AI';
+
+  @override
+  String get openAiCompatible => 'OpenAI 兼容 API';
+
+  @override
+  String get generationConnection => '出题使用';
+
+  @override
+  String get switchConnection => '切换';
+
+  @override
+  String get noActiveConnection => '尚未选择 AI 连接';
+
+  @override
+  String get connectionSelectionHelp =>
+      '可保存多个连接，明确选择一个用于后续出题。切换不清空现有题目；连接失败时不会自动改用其他连接。';
+
+  @override
+  String get savedConnections => '已保存的连接';
+
+  @override
+  String get addConnection => '添加连接';
+
+  @override
+  String get subscriptionConnectionHelp => '登录 ChatGPT 账号并选择模型。';
+
+  @override
+  String get compatibleConnectionHelp =>
+      '使用 OpenAI 官方 API 或兼容服务，包括 CLIProxyAPI。';
+
+  @override
+  String get currentConnection => '当前使用';
+
+  @override
+  String get useConnection => '使用';
+
+  @override
+  String get editConnection => '编辑';
+
+  @override
+  String get deleteConnection => '删除连接';
+
+  @override
+  String deleteConnectionHelp(String name) {
+    return '删除“$name”？若正在使用此连接，将停止补题，不会自动选择其他连接。现有题目保留。';
+  }
+
+  @override
+  String get connectionNeedsLogin => '需要登录';
+
+  @override
+  String get connectionName => '连接名称';
+
+  @override
+  String get subscriptionSaveHelp =>
+      '登录后自动保存账号和可用模型。仅首次配置会自动启用；添加其他连接不会覆盖当前选择。';
+
+  @override
+  String get compatibleAddressHelp =>
+      '默认为 OpenAI 官方地址。使用 CLIProxyAPI 或其他兼容服务时，填写其以 /v1 结尾的 API 地址。';
+
+  @override
+  String get connectionSaveHelp =>
+      '测试连接是可选操作。“保存连接”独立保存配置；“保存并使用”才明确切换后续出题所用的连接。';
+
+  @override
+  String get saveAndUseConnection => '保存并使用';
+
+  @override
+  String get saveConnection => '保存连接';
+
+  @override
+  String get guidancePreservesQuestions => '保存后保留现有题目和当前已选答案，新要求仅在后续生成时使用。';
+
+  @override
+  String get invalidConnections => '无法读取已保存的 AI 连接，原有配置已保留。';
+
+  @override
+  String get connectionNameError => '请输入连接名称（1–80 个字符）。';
+
+  @override
+  String get connectionSaveError => '无法保存 AI 连接，请重试。';
+
+  @override
+  String get connectionSavedActive => '连接已保存，后续出题将使用此连接。';
+
+  @override
+  String get connectionSavedInactive => '连接已保存，当前使用的 AI 连接保持不变。';
+
+  @override
+  String get connectionRemoved => '连接已删除，其他连接配置保留。';
 }

@@ -1,0 +1,31 @@
+OmniQuiz Privacy Policy
+Updated: October 28, 2026
+
+Developer: Missdrop
+Contact and feedback: https://github.com/Missdrop/OmniQuiz/issues
+
+1. Local data
+Study materials, extracted text, generated questions, answers, mistakes and settings are stored on your device. We do not operate a backend receiving this data. The app contains no advertising, usage analytics or automatic crash reporting to the developer.
+
+Sample papers are copied into the library's .omniquiz/guidance/examples folder; pasted samples and question requirements are editable local files. These files, extracted text and the library's question/answer/review database are included in exported library backups. Quality votes and optional error notes are stored in that database. Bounded local generation logs record timestamps, processing stages and controlled error messages, without prompts, source content, credentials or account details; these logs are not included in backups. During generation, your requirements and bounded sample excerpts are sent to the selected AI service along with study-material excerpts.
+
+2. AI services and transmitted materials
+The app requests the selected AI service when you start practice, test a connection or perform another related action. Question generation sends selected material excerpts, instructions and recent questions used to reduce repetition to the service or gateway you configure. Connection tests send test requests. The service receives the authentication information needed for the request and network information such as your IP address.
+Third parties handle received data under their own policies. Retention, processing locations and uses depend on the selected service. If you use a gateway, it and its upstream providers process the requests. Do not send other people's personal information or sensitive materials without permission.
+
+Recent question ratings, rated-question summaries and optional error notes are included in subsequent generation requests to help the selected AI improve question quality. A rating does not issue a separate inference request or automatically submit a developer report. Feedback remains subject to source-grounding rules.
+
+3. Accounts and credentials
+ChatGPT sign-in processes your account email, identifiers, app registration information and authorization tokens to display the account, load models and use the authorized service. Sign-in and authorization refresh connect to OpenAI. API keys and login credentials are kept in operating-system secure storage and excluded from app-exported library backups. AI connections may require a service account or paid allowance. The app does not process payment-card or payment information.
+
+4. Updates
+Standalone releases connect to GitHub to check versions according to your settings, and download installation files only after you choose to update. You can disable startup checks, skip updates or cancel downloads. Microsoft Store builds are distributed and updated by Microsoft Store and do not use the app's GitHub download/installation feature. GitHub, Microsoft Store and your operating system handle requests, downloads and Store diagnostics under their own policies.
+
+5. Reporting inappropriate or incorrect AI content
+The app provides a GitHub issue-reporting link. Opening it loads a new public issue form; the app does not automatically attach questions, materials, accounts or credentials. You enter and confirm the report yourself. Submitted reports are public and hosted by GitHub; retention and deletion are subject to GitHub's rules. Do not include private materials, account information or keys. The developer reviews reports and takes appropriate action, such as fixes or improvements, according to the issue.
+
+6. Controls and deletion
+You can stop generation, change services, sign out of ChatGPT and revoke the app connection in ChatGPT settings. Removing a document in the app excludes it from scans; it does not delete the original file or necessarily remove all related historical data. Sign out first to clear app-saved login credentials. After closing the app, deleting a library's .omniquiz directory clears its portable study state, samples and requirements; source materials outside that directory remain. Device-level settings and retained pre-migration database copies live in the app data directory and must be managed separately. Manage original files, exported backups and data already received by third parties separately. Backups may contain private learning materials; keep them secure.
+
+7. Scope and changes
+This policy applies to OmniQuiz. Your selected AI service, gateway, GitHub, Microsoft Store and operating system have their own policies. We update this policy when functionality or data handling changes, and include the version's policy text in the app. Contact the project using the link above if you have questions; do not post sensitive information publicly.

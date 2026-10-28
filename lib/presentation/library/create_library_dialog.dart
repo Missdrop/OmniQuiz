@@ -1,3 +1,5 @@
+// Keeps creation input local until a valid workspace can be added and selected.
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -8,6 +10,7 @@ import '../../infrastructure/platform/document_access.dart';
 import '../../infrastructure/platform/folder_permissions.dart';
 import '../../l10n/localization.dart';
 
+/// Validates workspace naming and optional external-folder access before publication.
 class CreateLibraryDialog extends StatefulWidget {
   const CreateLibraryDialog({super.key, required this.catalog});
   final LibraryCatalog catalog;

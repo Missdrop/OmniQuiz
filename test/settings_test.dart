@@ -1,3 +1,5 @@
+// Provider changes and secure credential reuse distinguish user input errors from transport failures.
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:omniquiz/application/use_cases/configure_provider.dart';

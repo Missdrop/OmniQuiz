@@ -1,3 +1,5 @@
+// Adapts backup import/export to system dialogs and treats cancellation as a normal outcome.
+
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';

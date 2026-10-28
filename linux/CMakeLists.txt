@@ -1,3 +1,5 @@
+# Builds the GTK runner and assembles its complete relocatable Flutter payload.
+
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.13)
 project(runner LANGUAGES CXX)

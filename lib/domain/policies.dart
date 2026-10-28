@@ -1,5 +1,8 @@
+// Pure scheduling and buffer rules; clocks and identifiers are injectable for deterministic tests.
+
 import 'models.dart';
 
+/// Pure review scheduling; early correct answers must not advance due-time mastery.
 class ReviewPolicy {
   const ReviewPolicy();
   ReviewState? afterAnswer(AnswerAttempt attempt, ReviewState? previous) {
@@ -29,8 +32,10 @@ class ReviewPolicy {
   }
 }
 
+/// Controls low-water refills and the maximum prefetched question count.
 class BufferPolicy {
-  const BufferPolicy({this.low = 5, this.target = 20, this.batchSize = 10});
+  // Smaller batches expose the first questions sooner on reasoning models.
+  const BufferPolicy({this.low = 5, this.target = 20, this.batchSize = 5});
   final int low, target, batchSize;
   int nextBatch(int available, {required bool filling}) {
     if (available >= target || (!filling && available >= low)) return 0;
@@ -38,15 +43,18 @@ class BufferPolicy {
   }
 }
 
+/// Supplies time independently of wall-clock APIs for deterministic scheduling.
 abstract interface class Clock {
   DateTime now();
 }
 
+/// Production clock using UTC instants for persisted scheduling.
 class SystemClock implements Clock {
   @override
   DateTime now() => DateTime.now().toUtc();
 }
 
+/// Produces opaque identities without coupling use cases to a UUID implementation.
 abstract interface class IdGenerator {
   String next();
 }

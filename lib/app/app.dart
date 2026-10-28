@@ -1,3 +1,5 @@
+// Composes providers, localized navigation and practice lifecycle; repositories own persistence.
+
 import '../l10n/localization.dart';
 
 import 'dart:async';
@@ -10,16 +12,21 @@ import '../presentation/library/library_page.dart';
 import '../presentation/library/library_view_model.dart';
 import '../presentation/practice/practice_page.dart';
 import '../presentation/practice/practice_view_model.dart';
+import '../presentation/practice/guidance_view_model.dart';
 import '../presentation/review/review_page.dart';
 import '../presentation/review/review_view_model.dart';
 import '../presentation/settings/settings_page.dart';
 import '../presentation/settings/settings_view_model.dart';
 import 'dependencies.dart';
 import 'theme.dart';
+import '../infrastructure/platform/window_title.dart';
 import '../presentation/settings/language_view_model.dart';
+import '../presentation/settings/appearance_view_model.dart';
+import '../presentation/settings/question_language_view_model.dart';
 import '../presentation/updates/update_controller.dart';
 import '../presentation/updates/update_panel.dart';
 
+/// Localized application shell for a single library dependency graph.
 class OmniQuizApp extends StatefulWidget {
   const OmniQuizApp({
     super.key,
@@ -28,12 +35,14 @@ class OmniQuizApp extends StatefulWidget {
     this.settingsControls,
     this.currentLibraryName,
     this.updates,
+    this.hasLibrary = true,
   });
   final AppDependencies dependencies;
   final Widget? libraryControls;
   final Widget? settingsControls;
   final String? currentLibraryName;
   final UpdateController? updates;
+  final bool hasLibrary;
   @override
   State<OmniQuizApp> createState() => _OmniQuizAppState();
 }
@@ -54,9 +63,17 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
           routes: [
             GoRoute(
               path: '/library',
-              builder: (_, _) => LibraryPage(controls: widget.libraryControls),
+              builder: (_, _) => LibraryPage(
+                controls: widget.libraryControls,
+                hasLibrary: widget.hasLibrary,
+                unavailable:
+                    !widget.hasLibrary && widget.currentLibraryName != null,
+              ),
             ),
-            GoRoute(path: '/practice', builder: (_, _) => const PracticePage()),
+            GoRoute(
+              path: '/practice',
+              builder: (_, _) => PracticePage(hasLibrary: widget.hasLibrary),
+            ),
             GoRoute(path: '/review', builder: (_, _) => const ReviewPage()),
             GoRoute(
               path: '/settings',
@@ -77,9 +94,14 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Backgrounding pauses transport, while leaving Practice ends user intent.
+    // Keeping these distinct permits safe foreground resume without surprise calls.
     if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
         state == AppLifecycleState.detached) {
-      unawaited(widget.dependencies.coordinator.stop());
+      unawaited(widget.dependencies.practice.suspendPractice());
+    } else if (state == AppLifecycleState.resumed && _lastPath == '/practice') {
+      unawaited(widget.dependencies.practice.resumePractice());
     }
   }
 
@@ -89,7 +111,9 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
     final path = _router.routeInformationProvider.value.uri.path;
     if (path == _lastPath) return;
     _lastPath = path;
-    if (path != '/practice') unawaited(widget.dependencies.coordinator.stop());
+    if (path != '/practice') {
+      unawaited(widget.dependencies.practice.endPractice());
+    }
     unawaited(widget.dependencies.library.refresh());
     unawaited(widget.dependencies.practice.refresh());
     unawaited(widget.dependencies.review.refresh());
@@ -127,12 +151,17 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                       excludeFromSemantics: true,
                     ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'OmniQuiz',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                    Flexible(
+                      child: Text(
+                        context.l10n.appName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
                     ),
                   ],
                 ),
+                actions: const [_ThemeToggle()],
                 centerTitle: false,
               ),
         body: SafeArea(
@@ -142,7 +171,7 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                 SizedBox(
                   width: 220,
                   child: Material(
-                    color: const Color(0xFFEDF1E8),
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
                     child: ListView(
                       padding: EdgeInsets.zero,
                       children: [
@@ -159,7 +188,7 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                               SizedBox(width: 10),
                               Flexible(
                                 child: Text(
-                                  'OmniQuiz',
+                                  context.l10n.appName,
                                   style: TextStyle(
                                     fontSize: 23,
                                     fontWeight: FontWeight.w800,
@@ -175,7 +204,9 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                             context.l10n.tagline,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.black54,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -187,7 +218,9 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                             ),
                             child: ListTile(
                               selected: selected == i,
-                              selectedTileColor: const Color(0xFFDDE8D7),
+                              selectedTileColor: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -196,6 +229,13 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                               onTap: () => _navigate(i),
                             ),
                           ),
+                        const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: _ThemeToggle(),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -241,6 +281,15 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) => MultiProvider(
     providers: [
+      ChangeNotifierProvider<GuidanceViewModel>.value(
+        value: widget.dependencies.guidance,
+      ),
+      ChangeNotifierProvider<QuestionLanguageViewModel>.value(
+        value: widget.dependencies.questionLanguage,
+      ),
+      ChangeNotifierProvider<AppearanceViewModel>.value(
+        value: widget.dependencies.appearance,
+      ),
       ChangeNotifierProvider<LanguageViewModel>.value(
         value: widget.dependencies.language,
       ),
@@ -257,14 +306,21 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
         value: widget.dependencies.settings,
       ),
     ],
-    child: Consumer<LanguageViewModel>(
-      builder: (context, language, _) => MaterialApp.router(
+    child: Consumer2<LanguageViewModel, AppearanceViewModel>(
+      builder: (context, language, appearance, _) => MaterialApp.router(
         locale: language.locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
-        title: 'OmniQuiz',
+        onGenerateTitle: (context) {
+          // Localizations are available here; the Windows HWND needs its own bridge.
+          final title = context.l10n.appName;
+          unawaited(DesktopWindowTitle.update(title));
+          return title;
+        },
         debugShowCheckedModeBanner: false,
         theme: buildTheme(),
+        darkTheme: buildTheme(brightness: Brightness.dark),
+        themeMode: appearance.mode,
         routerConfig: _router,
       ),
     ),
@@ -275,5 +331,21 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
     _router.routeInformationProvider.removeListener(_routeChanged);
     _router.dispose();
     super.dispose();
+  }
+}
+
+class _ThemeToggle extends StatelessWidget {
+  const _ThemeToggle();
+  @override
+  Widget build(BuildContext context) {
+    final appearance = context.watch<AppearanceViewModel>();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return IconButton(
+      tooltip: dark ? context.l10n.switchToLight : context.l10n.switchToDark,
+      icon: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
+      onPressed: appearance.saving
+          ? null
+          : () => appearance.select(dark ? ThemeMode.light : ThemeMode.dark),
+    );
   }
 }

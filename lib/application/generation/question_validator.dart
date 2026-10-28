@@ -1,6 +1,9 @@
+// Accepts only well-formed, novel questions whose citations match the selected source excerpts.
+
 import '../../domain/models.dart';
 import '../../domain/policies.dart';
 
+/// Rejects fabricated citations, malformed options and repeated prompts before persistence.
 class QuestionValidator {
   QuestionValidator(this.ids);
   final IdGenerator ids;

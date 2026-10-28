@@ -1,3 +1,5 @@
+# Packages version-tag builds; signing secrets and release publication belong to trusted jobs only.
+
 name: Tag release
 on:
   workflow_dispatch:

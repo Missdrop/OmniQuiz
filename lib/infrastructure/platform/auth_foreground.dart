@@ -1,3 +1,5 @@
+// Waits for mobile foreground return before continuing a browser-authorized request.
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';

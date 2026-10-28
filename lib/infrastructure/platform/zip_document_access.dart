@@ -1,3 +1,5 @@
+// Expands selected ZIPs into temporary storage with traversal, entry-count and size checks.
+
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';

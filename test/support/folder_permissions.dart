@@ -1,3 +1,5 @@
+// Mocks native folder-grant calls so filesystem tests cannot display OS permission dialogs.
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

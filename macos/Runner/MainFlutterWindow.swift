@@ -1,3 +1,5 @@
+// Retains security-scoped folder bookmarks and native file export for the lifetime of the window.
+
 import Cocoa
 import FlutterMacOS
 
@@ -6,6 +8,8 @@ class MainFlutterWindow: NSWindow {
   private var accessedFolders: [String: URL] = [:]
 
   private func folderAccess(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    // Resolve bookmarks back to the exact selected folder before acquiring scope;
+    // a stale bookmark must never silently redirect imports to another location.
     guard let path = call.arguments as? String else {
       result(FlutterError(code: "invalid_path", message: "Missing folder path", details: nil))
       return
@@ -45,6 +49,7 @@ class MainFlutterWindow: NSWindow {
   }
 
   deinit {
+    // Each successful startAccessing call is balanced once at window teardown.
     for url in accessedFolders.values { url.stopAccessingSecurityScopedResource() }
   }
 

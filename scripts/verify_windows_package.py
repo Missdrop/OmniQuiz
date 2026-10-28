@@ -6,6 +6,7 @@ import tempfile
 
 
 def digest(path):
+    """Compare extracted installer payloads byte-for-byte using a streaming-independent content hash."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 

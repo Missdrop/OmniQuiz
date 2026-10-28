@@ -1,14 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-class AppFailure implements Exception {
-  const AppFailure(this.message, {this.retryable = false, this.retryAfter});
-  final Duration? retryAfter;
-  final String message;
-  final bool retryable;
-  @override
-  String toString() => message;
-}
+// Immutable study and generation data; source revisions bind questions to their supporting evidence.
 
+import 'failure.dart';
+import 'generation_guidance.dart';
+export 'failure.dart';
+
+/// A revision-bound excerpt that may be cited as evidence in generated questions.
 class SourceChunk {
   const SourceChunk({
     required this.id,
@@ -21,6 +19,7 @@ class SourceChunk {
   final String id, documentId, documentName, revision, location, text;
 }
 
+/// The currently imported revision of one original material.
 class StudyDocument {
   const StudyDocument({
     required this.id,
@@ -35,11 +34,37 @@ class StudyDocument {
   final int chunkCount;
 }
 
+/// One stable option identifier and its user-visible text.
 class AnswerOption {
   const AnswerOption(this.id, this.text);
   final String id, text;
 }
 
+/// Local question-quality feedback is independent from whether an answer was correct.
+enum QuestionRating { good, bad, error }
+
+/// A bounded quality example for subsequent batches, never factual evidence.
+class QuestionFeedback {
+  const QuestionFeedback({
+    required this.rating,
+    required this.prompt,
+    required this.options,
+    required this.explanation,
+    required this.note,
+  });
+  final QuestionRating rating;
+  final String prompt, explanation, note;
+  final List<String> options;
+  Map<String, dynamic> toJson() => {
+    'rating': rating.name,
+    'prompt': prompt,
+    'options': options,
+    'explanation': explanation,
+    'note': note,
+  };
+}
+
+/// A four-option question with one correct answer and a source-backed quote.
 class Question {
   Question({
     required this.id,
@@ -73,6 +98,10 @@ class Question {
   bool isCorrect(String optionId) => correctOptionId == optionId;
 }
 
+/// API gateways use the same transport as the official OpenAI API.
+enum AiConnectionType { chatGptSubscription, openAiCompatible }
+
+/// Non-secret connection settings; credentials are addressed only by an opaque reference.
 class ProviderProfile {
   ProviderProfile({
     required this.baseUrl,
@@ -80,9 +109,14 @@ class ProviderProfile {
     this.jsonMode = false,
     this.credentialRef = '',
     this.language = '简体中文',
-    this.chatGpt = false,
-  }) {
-    if (chatGpt &&
+    bool chatGpt = false,
+    AiConnectionType? type,
+  }) : type =
+           type ??
+           (chatGpt
+               ? AiConnectionType.chatGptSubscription
+               : AiConnectionType.openAiCompatible) {
+    if (this.chatGpt &&
         (baseUrl != 'https://api.openai.com/v1' ||
             !credentialRef.startsWith('oaiapp_'))) {
       throw const AppFailure('Sign in to ChatGPT in Settings first.');
@@ -104,11 +138,13 @@ class ProviderProfile {
   }
   final String baseUrl, model, credentialRef, language;
   final bool jsonMode;
-  final bool chatGpt;
+  final AiConnectionType type;
+  bool get chatGpt => type == AiConnectionType.chatGptSubscription;
   Uri get completionsUri =>
       Uri.parse('${baseUrl.replaceAll(RegExp(r'/+$'), '')}/chat/completions');
 }
 
+/// An idempotently identified answer event, separate from the mutable question view.
 class AnswerAttempt {
   const AnswerAttempt({
     required this.id,
@@ -122,6 +158,7 @@ class AnswerAttempt {
   final DateTime at;
 }
 
+/// Spaced-review progress and the next due instant for one question.
 class ReviewState {
   const ReviewState({
     required this.questionId,
@@ -135,12 +172,14 @@ class ReviewState {
   bool get mastered => streak >= 3;
 }
 
+/// Combines question content with its persisted review schedule for presentation.
 class ReviewEntry {
   const ReviewEntry(this.question, this.state);
   final Question question;
   final ReviewState state;
 }
 
+/// A read-only aggregate of library progress, excluding hidden or stale ready questions.
 class StudyStats {
   const StudyStats({
     this.documents = 0,
@@ -152,20 +191,30 @@ class StudyStats {
   final int documents, ready, attempts, correct, review;
 }
 
+/// An immutable batch snapshot shared by API and subscription generation transports.
 class GenerationRequest {
   GenerationRequest({
     required this.profile,
     required List<SourceChunk> chunks,
     required this.count,
     required List<String> recentPrompts,
+    this.additionalRequirements = '',
+    List<ReferenceExample> referenceExamples = const [],
+    List<QuestionFeedback> qualityFeedback = const [],
   }) : chunks = List.unmodifiable(chunks),
-       recentPrompts = List.unmodifiable(recentPrompts);
+       recentPrompts = List.unmodifiable(recentPrompts),
+       referenceExamples = List.unmodifiable(referenceExamples),
+       qualityFeedback = List.unmodifiable(qualityFeedback);
   final ProviderProfile profile;
   final List<SourceChunk> chunks;
   final int count;
   final List<String> recentPrompts;
+  final String additionalRequirements;
+  final List<ReferenceExample> referenceExamples;
+  final List<QuestionFeedback> qualityFeedback;
 }
 
+/// A request snapshot bound to a library epoch so late responses cannot publish stale data.
 class GenerationJob {
   const GenerationJob({
     required this.id,
@@ -180,6 +229,7 @@ class GenerationJob {
   final GenerationRequest request;
 }
 
+/// Reports partial import successes without hiding per-file failures.
 class ImportResult {
   const ImportResult(this.imported, this.unchanged, this.errors);
   final int imported, unchanged;

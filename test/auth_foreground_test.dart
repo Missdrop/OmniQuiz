@@ -1,3 +1,5 @@
+// Mobile authorization waits for app foreground return and honours cancellation and timeout.
+
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';

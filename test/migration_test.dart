@@ -1,3 +1,5 @@
+// Older schema fixtures upgrade without losing material, question or answer records.
+
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -30,6 +32,7 @@ void main() {
       );
       // The v1 schema differs only by the absent chunk_document index.
       await old.customStatement('DROP INDEX chunk_document');
+      await old.customStatement('DROP TABLE feedback');
       await old.customStatement('PRAGMA user_version=1');
       await old.close();
       final upgraded = QuizDatabase(NativeDatabase(file));
@@ -37,7 +40,7 @@ void main() {
         expect(
           (await upgraded.customSelect('PRAGMA user_version').getSingle())
               .read<int>('user_version'),
-          2,
+          3,
         );
         expect(
           (await SqlMaterialRepository(upgraded).documents()).single.id,

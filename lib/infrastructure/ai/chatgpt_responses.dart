@@ -1,10 +1,14 @@
+// Translates shared study messages into subscription inference requests and bounded responses.
+
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:http/http.dart' as http;
 
 import '../../domain/models.dart';
 import 'chatgpt_sessions.dart';
 
+/// Executes subscription inference while rejecting interrupted or oversized responses.
 class ChatGptResponses {
   ChatGptResponses(this.sessions, {http.Client Function()? factory})
     : factory = factory ?? http.Client.new;
@@ -58,9 +62,13 @@ class ChatGptResponses {
           );
         }
         return await readEvents(response.stream);
-      })().timeout(const Duration(seconds: 120));
+      })().timeout(const Duration(minutes: 3));
     } on AppFailure {
       rethrow;
+    } on TimeoutException {
+      throw const AppFailure(
+        'Generation timed out. A retry may incur another API charge.',
+      );
     } catch (_) {
       throw const AppFailure(
         'ChatGPT request was interrupted. Please try again.',

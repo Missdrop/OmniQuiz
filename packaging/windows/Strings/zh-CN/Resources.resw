@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AppDisplayName" xml:space="preserve"><value>万物一点通</value></data>
+  <data name="AppDescription" xml:space="preserve"><value>根据学习资料生成题目，持续练习、复习错题。</value></data>
+</root>

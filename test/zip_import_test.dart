@@ -1,3 +1,5 @@
+// Archive import rejects traversal/oversized entries and preserves safe subfolder identities.
+
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -177,7 +179,13 @@ void main() {
     await deps.library.importZip();
     expect(deps.library.documents.single.id, old);
     expect(deps.library.message, contains('ZIP'));
-    expect(await materials.list().length, 1);
+    expect(
+      await materials
+          .list()
+          .where((entry) => !p.basename(entry.path).startsWith('.'))
+          .length,
+      1,
+    );
   });
 
   test(

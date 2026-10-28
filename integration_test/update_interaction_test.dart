@@ -1,3 +1,5 @@
+// Native update-control and permission audit; installation transitions use fake release services.
+
 import 'dart:io';
 
 import 'package:drift/native.dart';

@@ -1,3 +1,5 @@
+// Displays spaced-review state and lets users practice due or early questions explicitly.
+
 import '../../l10n/localization.dart';
 
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'review_view_model.dart';
 import '../practice/practice_view_model.dart';
 import '../shared/widgets.dart';
 
+/// Presents saved mistakes and due dates without mutating review state on display.
 class ReviewPage extends StatelessWidget {
   const ReviewPage({super.key});
   @override
@@ -63,7 +66,9 @@ class ReviewPage extends StatelessWidget {
                                 '${MaterialLocalizations.of(context).formatMediumDate(entry.state.dueAt.toLocal())} ${MaterialLocalizations.of(context).formatTimeOfDay(TimeOfDay.fromDateTime(entry.state.dueAt.toLocal()))}',
                               )
                             : context.l10n.dueNow,
-                        style: const TextStyle(color: Colors.black54),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       TextButton(
                         onPressed: () async {

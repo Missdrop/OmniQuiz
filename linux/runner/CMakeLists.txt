@@ -1,3 +1,5 @@
+# Compiles the native GTK application host with Flutter plugin linkage.
+
 cmake_minimum_required(VERSION 3.13)
 project(runner LANGUAGES CXX)
 

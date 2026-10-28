@@ -1,3 +1,5 @@
+// Utility declarations used during runner startup; no user content is processed here.
+
 #ifndef RUNNER_UTILS_H_
 #define RUNNER_UTILS_H_
 
