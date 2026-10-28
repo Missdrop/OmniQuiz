@@ -12,8 +12,27 @@ concurrency:
   group: rolling-prerelease
   cancel-in-progress: false
 jobs:
-  build:
+  prepare:
     if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.tags.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: tags
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { execFileSync } = require('node:child_process');
+            const tags = execFileSync('git', ['tag', '--points-at', context.sha], { encoding: 'utf8' }).trim().split(/\s+/);
+            const tagged = context.eventName === 'push' && tags.some(tag => /^v\d+\.\d+\.\d+$/.test(tag));
+            core.setOutput('build', tagged ? 'false' : 'true');
+            if (tagged) core.notice('The tag workflow will build and publish both stable and Nightly packages.');
+  build:
+    needs: prepare
+    if: needs.prepare.outputs.build == 'true'
     uses: ./.github/workflows/ci.yml
     secrets: inherit
   publish:
@@ -21,6 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    concurrency:
+      group: publish-release-assets
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4

@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test scripts/publish-release.test.cjs
+      - run: node --test scripts/publish-release.test.cjs scripts/release-build.test.cjs
       - run: python -m unittest discover -s scripts -p "test_*.py"
       - uses: subosito/flutter-action@v2
         with:
