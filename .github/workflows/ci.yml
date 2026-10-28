@@ -97,6 +97,8 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
           omniquiz_build_number=$(($(date +%s) - 1704067200))
+          # The signed Android callback test build used 89160000; stable releases must upgrade it.
+          if [ "$omniquiz_build_number" -le 89160000 ]; then omniquiz_build_number=89160001; fi
           flutter build apk --release --split-per-abi --build-number "$omniquiz_build_number"
       - if: matrix.target != 'android'
         run: ${{ matrix.command }}

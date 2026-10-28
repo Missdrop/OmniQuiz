@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/models.dart';
 import '../platform/auth_foreground.dart';
+import '../platform/auth_browser.dart';
 
 /// Owns one browser callback listener and its state, nonce and PKCE verifier.
 class ChatGptLogin {
@@ -22,6 +23,7 @@ class ChatGptLogin {
   Completer<Map<String, String>>? _pending;
   Completer<void>? _cancelSignal;
   static Future<bool> _launch(Uri uri) async {
+    if (Platform.isAndroid) return AndroidAuthBrowser.open(uri);
     final mobile = Platform.isAndroid || Platform.isIOS;
     if (mobile && !await supportsLaunchMode(LaunchMode.inAppBrowserView)) {
       return false;
@@ -94,6 +96,12 @@ class ChatGptLogin {
       if (valid && !pending.isCompleted) pending.complete(query);
     });
     try {
+      if (Platform.isAndroid) {
+        AndroidAuthBrowser.onClosed(() {
+          // Closing after a valid callback must not cancel its foreground handoff.
+          if (!pending.isCompleted) cancel();
+        });
+      }
       if (!await launch(uri)) throw const FormatException();
       final result = await pending.future.timeout(timeout);
       final issued = result['client_id'] ?? clientId;
@@ -105,6 +113,11 @@ class ChatGptLogin {
         throw const FormatException();
       }
       if (Platform.isAndroid) {
+        // Close the browser sheet before exchanging the single-use code, so network
+        // requests run with the app resumed even under restrictive OEM power policies.
+        try {
+          await AndroidAuthBrowser.close();
+        } catch (_) {}
         // Android can suspend network access while the browser is foregrounded;
         // exchange the single-use code only after explicit return to the app.
         await waitForAuthForeground(
@@ -127,6 +140,12 @@ class ChatGptLogin {
       _pending = null;
       _cancelSignal = null;
       await server.close(force: true);
+      if (Platform.isAndroid) {
+        AndroidAuthBrowser.onClosed(null);
+        try {
+          await AndroidAuthBrowser.close();
+        } catch (_) {}
+      }
       if (Platform.isIOS) {
         try {
           await closeInAppWebView();

@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:omniquiz/infrastructure/ai/chatgpt_login.dart';
 import 'package:omniquiz/infrastructure/platform/credentials.dart';
+import 'package:omniquiz/infrastructure/platform/auth_browser.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../test/chatgpt_test.dart' as protocol;
@@ -63,10 +64,10 @@ void main() {
             'client_id': 'oaiapp_integration',
           },
         );
-        return launchUrl(
-          Uri.parse('http://127.0.0.1:${page.port}/authorize'),
-          mode: LaunchMode.inAppBrowserView,
-        );
+        final pageUri = Uri.parse('http://127.0.0.1:${page.port}/authorize');
+        return Platform.isAndroid
+            ? AndroidAuthBrowser.open(pageUri)
+            : launchUrl(pageUri, mode: LaunchMode.inAppBrowserView);
       },
     );
     final result = await login.authorize('urn:uuid:integration-test');
