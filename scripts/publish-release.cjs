@@ -63,7 +63,7 @@ module.exports = async function publish({ github, context, core, nightly, direct
     ...repo, release_id: release.id, per_page: 100,
   });
   // GitHub provides each asset's SHA-256 digest through the Releases API.
-  for (const old of existing.filter(asset => asset.name === 'SHA256SUMS')) {
+  for (const old of existing.filter(asset => ['SHA256SUMS', 'OmniQuiz-android-debug.apk'].includes(asset.name))) {
     await github.rest.repos.deleteReleaseAsset({ ...repo, asset_id: old.id });
   }
   for (const file of files) {

@@ -66,6 +66,14 @@ test('first nightly creates one draft then publishes it', async t => {
   assert.equal(calls.at(-1).args.draft, false);
 });
 
+test('nightly removes the obsolete debug APK rather than retaining a second signing identity', async t => {
+  const { calls, options } = fixture(t);
+  const list = options.github.paginate;
+  options.github.paginate = async () => [...await list(), { name: 'OmniQuiz-android-debug.apk', id: 99 }];
+  await publish(options);
+  assert.ok(calls.some(call => call.name === 'deleteReleaseAsset' && call.args.asset_id === 99));
+});
+
 test('tag release uses the exact tag name and never moves its tag', async t => {
   const { calls, options } = fixture(t, { nightly: false, existing: false });
   await publish(options);

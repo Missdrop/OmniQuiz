@@ -116,7 +116,7 @@ The MSI and portable ZIP bundle Visual C++ runtime DLLs. Preserve the MSI `Upgra
 
 ### Android signing
 
-Release APKs must reuse the existing private signing identity; do not generate a new key for a normal update. The repository stores no private signing files. Maintainers configure `ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD` and `ANDROID_KEY_ALIAS` as GitHub Actions secrets. Pull-request builds use debug APKs without those secrets.
+Release APKs must reuse the existing private signing identity; do not generate a new key for a normal update. The repository stores no private signing files. Maintainers configure `ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD`, `ANDROID_KEY_PASSWORD` and `ANDROID_KEY_ALIAS` as GitHub Actions secrets. Validate pull requests locally; they do not trigger Actions.
 
 Local signed builds need a privately configured keystore and an increasing build number:
 
@@ -144,7 +144,7 @@ The approved source is `assets/branding/logo.png`. To update launchers, run `dar
 
 ## Release workflow
 
-Releases are maintainer actions. A push to `main` runs the full matrix and updates **Nightly**; `dev` does not publish automatically. A tag such as `v1.1.0` triggers a same-name stable Release after tests and all five platform builds pass. Update `pubspec.yaml` before tagging: tags do not change the embedded app version.
+Maintainers develop on `dev`, open a PR to `main`, merge it, then publish a version tag. Neither `dev` pushes nor pull requests trigger Actions. A `main` push builds and updates **Nightly**. A version tag publishes a same-name stable Release and mirrors the same packages to Nightly; it reuses a matching main build if one is already running or complete. When the commit already has a version tag, Nightly skips its separate build. Update `pubspec.yaml` before tagging: tags do not change the embedded app version.
 
 The release contains three signed Android APKs, Windows MSI/ZIP, macOS DMG/tar.gz, Linux tar.gz and an unsigned iOS tar.gz. No separate `SHA256SUMS` file is uploaded; GitHub provides asset digests. Published stable assets are not replaced by rerunning the workflow. Verify downloads, embedded versions and signing continuity before announcing a release.
 
