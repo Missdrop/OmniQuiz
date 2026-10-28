@@ -34,11 +34,9 @@ void main() {
         await deps.settings.load();
       });
       await tester.runAsync(() async {
-        final localFont = File(
-          '.tooling/flutter/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf',
-        );
+        final localFont = File('assets/fonts/NotoSansSC.ttf');
         if (await localFont.exists()) {
-          final loader = FontLoader('Roboto')
+          final loader = FontLoader('OmniQuizSans')
             ..addFont(
               localFont.readAsBytes().then((b) => ByteData.sublistView(b)),
             );
@@ -83,6 +81,31 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('20 ready'), findsOneWidget);
       expect(deps.practice.current, isNotNull);
+      final optionATexts = find.descendant(
+        of: find.widgetWithText(OutlinedButton, 'A').first,
+        matching: find.text('A'),
+      );
+      expect(optionATexts, findsNWidgets(2));
+      final baselines = optionATexts.evaluate().map((element) {
+        final paragraph = element.findRenderObject()! as RenderParagraph;
+        expect(
+          paragraph.text.style!.color,
+          Theme.of(element).colorScheme.onSurface,
+        );
+        return paragraph.localToGlobal(Offset.zero).dy +
+            paragraph.getDryBaseline(
+              paragraph.constraints,
+              TextBaseline.alphabetic,
+            )!;
+      }).toList();
+      expect(
+        (baselines[0] - baselines[1]).abs(),
+        lessThan(.5),
+        reason: 'The option marker and its first text line share a baseline',
+      );
+      await tester.ensureVisible(
+        find.widgetWithText(OutlinedButton, 'B').first,
+      );
       await tester.tap(find.widgetWithText(OutlinedButton, 'B').first);
       await tester.pump();
       expect(find.text('Check answer'), findsNothing);

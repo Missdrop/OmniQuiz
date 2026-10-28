@@ -89,7 +89,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text('End practice'), findsOneWidget);
       final calls = ai.calls;
-      await tester.tap(find.byTooltip('Switch to dark mode'));
+      // The visible label is part of the desktop hit target, not just its icon.
+      await tester.tap(find.text('Appearance'));
       await tester.runAsync(() async {
         await Future<void>.delayed(const Duration(milliseconds: 30));
       });

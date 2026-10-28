@@ -118,9 +118,9 @@ void main() {
         await deps.settings.load();
         await deps.language.select('en');
         await deps.library.import(sample: true, chineseSample: true);
-        final font = File('C:/Windows/Fonts/msyh.ttc');
+        final font = File('assets/fonts/NotoSansSC.ttf');
         if (await font.exists()) {
-          for (final family in ['Roboto', 'Segoe UI']) {
+          for (final family in ['Roboto', 'Segoe UI', 'OmniQuizSans']) {
             final loader = FontLoader(family)
               ..addFont(font.readAsBytes().then(ByteData.sublistView));
             await loader.load();

@@ -21,7 +21,8 @@ class ReviewPage extends StatelessWidget {
       title: context.l10n.reviewTitle,
       subtitle: context.l10n.reviewSubtitle,
       children: [
-        if (vm.error != null) Notice(vm.error!, error: true),
+        if (vm.error != null)
+          Notice(vm.error!, error: true, onDismiss: vm.dismissError),
         if (vm.entries.isEmpty)
           EmptyCard(
             icon: Icons.spa_outlined,

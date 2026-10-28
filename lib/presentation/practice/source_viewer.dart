@@ -1,4 +1,4 @@
-// Opens the original cited PDF at its page, after checking the imported revision.
+// Expands an inline source preview after checking the imported file revision.
 
 import 'dart:io';
 import 'dart:typed_data';
@@ -11,6 +11,113 @@ import '../../application/ports/repositories.dart';
 import '../../domain/models.dart';
 import '../../l10n/localization.dart';
 import '../../infrastructure/platform/folder_permissions.dart';
+
+/// Expands a source underneath its button; changing questions resets the preview.
+class SourceCitation extends StatefulWidget {
+  const SourceCitation({
+    super.key,
+    required this.source,
+    required this.materials,
+    this.libraryDirectory,
+    this.trailing,
+  });
+  final Widget? trailing;
+  final SourceChunk source;
+  final MaterialRepository materials;
+  final String? libraryDirectory;
+  @override
+  State<SourceCitation> createState() => _SourceCitationState();
+}
+
+class _SourceCitationState extends State<SourceCitation> {
+  bool _expanded = false;
+  @override
+  Widget build(BuildContext context) {
+    final page = RegExp(r'^Page (\d+)')
+        .firstMatch(widget.source.location)
+        ?.group(1);
+    final controls = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.sourceName(widget.source.documentName) +
+              (page == null ? '' : ' · ${context.l10n.sourcePage(page)}'),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        TextButton.icon(
+          onPressed: () => setState(() => _expanded = !_expanded),
+          icon: Icon(
+            _expanded ? Icons.expand_less : Icons.description_outlined,
+          ),
+          label: Text(
+            _expanded ? context.l10n.hideSource : context.l10n.fullSource,
+          ),
+        ),
+      ],
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.trailing == null)
+          controls
+        else
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 740) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(flex: 2, child: controls),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      flex: 3,
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: widget.trailing!,
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  controls,
+                  const SizedBox(height: 8),
+                  widget.trailing!,
+                ],
+              );
+            },
+          ),
+        if (_expanded)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Container(
+              height: (MediaQuery.sizeOf(context).height * .55).clamp(
+                280.0,
+                600.0,
+              ),
+              width: double.infinity,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SourceViewer(
+                source: widget.source,
+                materials: widget.materials,
+                libraryDirectory: widget.libraryDirectory,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
 
 /// A PDF is rendered from verified bytes so a replaced file cannot mislead a citation.
 class SourceViewer extends StatefulWidget {
@@ -68,19 +175,11 @@ class _SourceViewerState extends State<SourceViewer> {
               '',
         ) ??
         1;
-    return Dialog.fullscreen(
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            tooltip: context.l10n.close,
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text(
-            widget.source.documentName,
-            overflow: TextOverflow.ellipsis,
-          ),
-          actions: [
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
             IconButton(
               tooltip: context.l10n.zoomOut,
               icon: const Icon(Icons.zoom_out),
@@ -97,7 +196,7 @@ class _SourceViewerState extends State<SourceViewer> {
             ),
           ],
         ),
-        body: SafeArea(
+        Expanded(
           child: FutureBuilder<Uint8List?>(
             future: _pdf,
             builder: (context, state) {
@@ -113,7 +212,7 @@ class _SourceViewerState extends State<SourceViewer> {
                 );
               }
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -126,13 +225,8 @@ class _SourceViewerState extends State<SourceViewer> {
                           color: Theme.of(context).colorScheme.error,
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                     ],
-                    Text(
-                      widget.source.location,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 20),
                     SelectableText(
                       widget.source.text,
                       style: const TextStyle(height: 1.8),
@@ -143,7 +237,7 @@ class _SourceViewerState extends State<SourceViewer> {
             },
           ),
         ),
-      ),
+      ],
     );
   }
 }

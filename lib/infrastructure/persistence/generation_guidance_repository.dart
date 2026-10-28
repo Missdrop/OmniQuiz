@@ -4,13 +4,24 @@ import 'dart:convert';
 
 import '../../application/ports/repositories.dart';
 import '../../domain/generation_guidance.dart';
+import '../../domain/policies.dart';
 import 'database.dart';
 
 /// Uses the library DB, not global provider settings, so subjects remain isolated.
-class SqlGenerationGuidanceRepository implements GenerationGuidanceRepository {
+class SqlGenerationGuidanceRepository
+    implements GenerationGuidanceRepository, GenerationBufferRepository {
   SqlGenerationGuidanceRepository(this.database);
   static const key = 'generation_guidance';
   final QuizDatabase database;
+
+  @override
+  Future<BufferPolicy> loadBufferPolicy() async {
+    final settings = await load();
+    return BufferPolicy(
+      low: settings.refillThreshold,
+      batchSize: settings.questionsPerBatch,
+    );
+  }
 
   @override
   Future<GenerationGuidance> load() async {
@@ -32,7 +43,7 @@ class SqlGenerationGuidanceRepository implements GenerationGuidanceRepository {
     final previous = await database
         .customSelect("SELECT value FROM settings WHERE key='$key'")
         .getSingleOrNull();
-    if ((previous == null && value.isEmpty) ||
+    if ((previous == null && value.isDefault) ||
         previous?.read<String>('value') == encoded) {
       return;
     }

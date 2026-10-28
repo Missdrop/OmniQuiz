@@ -102,6 +102,7 @@ class BackupCollector {
             .relative(entity.path, from: library.directory)
             .replaceAll('\\', '/');
         if (relative != '.omniquiz/guidance/requirements.md' &&
+            relative != '.omniquiz/guidance/settings.json' &&
             relative != '.omniquiz/guidance/pasted-example.md' &&
             !RegExp(
               r'^\.omniquiz/guidance/examples/.+\.(pdf|txt|md|markdown)$',

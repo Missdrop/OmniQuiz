@@ -94,7 +94,7 @@ void main() {
     await tap(tester, find.text('体验示例资料'));
     await capture(tester, '05-imported-library');
     await tap(tester, find.byIcon(Icons.play_circle_outline));
-    await tap(tester, find.text('样题与出题要求'));
+    await tap(tester, find.text('出题设置'));
     await capture(tester, '06-guidance-draft');
     await tap(tester, find.text('取消'));
     await tap(tester, find.byIcon(Icons.history_rounded));

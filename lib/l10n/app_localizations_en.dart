@@ -13,11 +13,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'OmniQuiz';
 
   @override
-  String get guidanceTitle => 'Examples and question requirements';
+  String get guidanceTitle => 'Question settings';
 
   @override
   String get guidanceHelp =>
-      'Sample questions and papers guide style and difficulty, not factual answers. Answers must remain grounded in study materials. Currently supports four-option single-choice questions. Settings belong to this library; requirements and sample excerpts are sent to your selected AI when generating. Files are stored in .omniquiz/guidance inside this library; external edits are read for subsequent batches.';
+      'Set the pace, examples and requirements for this library. Examples guide style; answers come from your materials. Requirements and sample excerpts are sent to your selected AI during generation.';
 
   @override
   String get extraRequirements => 'Additional question requirements';
@@ -34,7 +34,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get guidanceFormats =>
-      'TXT, Markdown and text-based PDF. Up to 8 files, 20 MB each, with 120,000 characters of reference text in total; pasted text is limited to 20,000. Long papers rotate through excerpts (about 12,000 characters per batch). Originals stay unchanged. Scanned files need OCR first.';
+      'TXT, Markdown and text-based PDF; up to 8 files, 20 MB each. Scanned papers need OCR first.';
 
   @override
   String exampleCharacters(int count) {
@@ -1302,4 +1302,38 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get connectionRemoved =>
       'Connection removed. Other saved connections were kept.';
+
+  @override
+  String get questionsPerBatch => 'Questions per batch';
+
+  @override
+  String get questionsPerBatchHelp =>
+      'Request 1–50 questions at a time. Default: 10.';
+
+  @override
+  String get questionsPerBatchError => 'Enter a whole number from 1 to 50.';
+
+  @override
+  String get refillThreshold => 'Auto-refill threshold';
+
+  @override
+  String get refillThresholdHelp =>
+      'Refill at or below this unanswered count (0–100; default: 10). Use 0 to refill only when empty.';
+
+  @override
+  String get refillThresholdError => 'Enter a whole number from 0 to 100.';
+
+  @override
+  String get hideSource => 'Hide source';
+
+  @override
+  String sourcePage(String page) {
+    return 'Page $page';
+  }
+
+  @override
+  String get interfaceSettings => 'Appearance & language';
+
+  @override
+  String get chatGptSignInCancelled => 'ChatGPT sign-in cancelled.';
 }

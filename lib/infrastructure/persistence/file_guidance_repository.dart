@@ -10,12 +10,14 @@ import 'package:uuid/uuid.dart';
 import '../../application/ports/repositories.dart';
 import '../../domain/generation_guidance.dart';
 import '../../domain/models.dart';
+import '../../domain/policies.dart';
 import 'generation_guidance_repository.dart';
 import 'library_workspace.dart';
 
 /// Swaps a complete guidance folder on Save. Reads never overwrite external edits.
 /// A retained previous directory recovers an interrupted rename on the next open.
-class FileGenerationGuidanceRepository implements GenerationGuidanceRepository {
+class FileGenerationGuidanceRepository
+    implements GenerationGuidanceRepository, GenerationBufferRepository {
   FileGenerationGuidanceRepository(this.workspace, this.cache, this.parser);
   final LibraryWorkspace workspace;
   final SqlGenerationGuidanceRepository cache;
@@ -23,6 +25,27 @@ class FileGenerationGuidanceRepository implements GenerationGuidanceRepository {
   final Map<String, String> _paths = {};
   String get _root => workspace.guidancePath;
   String get _previous => p.join(workspace.metadata, '.guidance-previous');
+
+  Future<GenerationGuidance> _bufferSettings() async {
+    final text = await _text(p.join(_root, 'settings.json'), 4096);
+    return text.isEmpty
+        ? GenerationGuidance()
+        : GenerationGuidance.fromJson(
+            Map<String, dynamic>.from(jsonDecode(text) as Map),
+          );
+  }
+
+  @override
+  Future<BufferPolicy> loadBufferPolicy() async {
+    await _recover();
+    final settings = await Directory(_root).exists()
+        ? await _bufferSettings()
+        : await cache.load();
+    return BufferPolicy(
+      low: settings.refillThreshold,
+      batchSize: settings.questionsPerBatch,
+    );
+  }
 
   Future<void> _recover() async {
     await workspace.ensure();
@@ -54,6 +77,7 @@ class FileGenerationGuidanceRepository implements GenerationGuidanceRepository {
       p.join(_root, 'pasted-example.md'),
       GenerationGuidance.pastedLimit * 4,
     );
+    final settings = await _bufferSettings();
     final examples = <ReferenceExample>[];
     final examplesPath = p.join(_root, 'examples');
     await LibraryWorkspace.ensureDirectory(examplesPath);
@@ -100,6 +124,8 @@ class FileGenerationGuidanceRepository implements GenerationGuidanceRepository {
       requirements: requirements,
       pastedExample: pasted,
       examples: examples,
+      questionsPerBatch: settings.questionsPerBatch,
+      refillThreshold: settings.refillThreshold,
     );
     // External edits invalidate pending work, but never discard cached questions.
     await cache.save(value);
@@ -142,6 +168,13 @@ class FileGenerationGuidanceRepository implements GenerationGuidanceRepository {
           .writeAsString(value.requirements, flush: true);
       await File(p.join(stage.path, 'pasted-example.md'))
           .writeAsString(value.pastedExample, flush: true);
+      await File(p.join(stage.path, 'settings.json')).writeAsString(
+        jsonEncode({
+          'questionsPerBatch': value.questionsPerBatch,
+          'refillThreshold': value.refillThreshold,
+        }),
+        flush: true,
+      );
       final examples = await Directory(p.join(stage.path, 'examples')).create();
       final names = <String>{};
       final nextPaths = <String, String>{};

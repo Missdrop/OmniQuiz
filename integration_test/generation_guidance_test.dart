@@ -12,6 +12,7 @@ import 'package:pdfrx/pdfrx.dart';
 import 'package:path/path.dart' as p;
 import 'package:omniquiz/app/app.dart';
 import 'package:omniquiz/app/dependencies.dart';
+import 'package:omniquiz/presentation/practice/source_viewer.dart';
 import 'package:omniquiz/domain/generation_guidance.dart';
 import 'package:omniquiz/application/ports/repositories.dart';
 import 'package:omniquiz/infrastructure/persistence/database.dart';
@@ -169,6 +170,8 @@ void main() {
         }
         expect(viewer?.isReady, isTrue);
         expect(viewer!.pageCount, 1);
+        expect(find.byType(Dialog), findsNothing);
+        await tester.ensureVisible(find.byType(SourceViewer));
         await tester.tap(find.byTooltip('Zoom in'));
         await tester.pumpAndSettle();
         expect(
@@ -192,7 +195,8 @@ void main() {
             () => Future<void>.delayed(const Duration(seconds: 10)),
           );
         }
-        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.ensureVisible(find.text('Hide source'));
+        await tester.tap(find.text('Hide source'));
         await tester.pumpAndSettle();
         await File(deps.library.documents.single.origin)
             .writeAsString('Changed original.');
@@ -215,7 +219,8 @@ void main() {
           findsOneWidget,
         );
         expect(find.byType(PdfViewer), findsNothing);
-        await tester.tap(find.byIcon(Icons.close).first);
+        await tester.ensureVisible(find.text('Hide source'));
+        await tester.tap(find.text('Hide source'));
         await tester.pumpAndSettle();
         expect(
           await File(p.join(library.directory, '.omniquiz', 'quiz.sqlite'))
@@ -276,8 +281,35 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.play_circle_outline).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.text('样题与出题要求'));
+      await tester.tap(find.text('出题设置'));
       await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextFormField>(
+              find.byKey(const ValueKey('questions-per-batch')),
+            )
+            .controller!
+            .text,
+        '10',
+      );
+      expect(
+        tester
+            .widget<TextFormField>(
+              find.byKey(const ValueKey('refill-threshold')),
+            )
+            .controller!
+            .text,
+        '10',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('questions-per-batch')),
+        '7',
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('refill-threshold')),
+        '3',
+      );
+      await tester.ensureVisible(find.widgetWithText(TextField, '额外出题要求'));
       await tester.enterText(
         find.widgetWithText(TextField, '额外出题要求'),
         '中等难度，偏重概念应用。解析说明干扰项为什么不正确。',
@@ -334,10 +366,13 @@ void main() {
         contains('STYLE_SAMPLE_ONLY'),
       );
       expect(deps.guidance.value.requirements, contains('概念应用'));
+      expect(deps.guidance.value.questionsPerBatch, 7);
+      expect(deps.guidance.value.refillThreshold, 3);
       await deps.practice.startPractice();
       await deps.practice.refresh();
       await tester.pumpAndSettle();
       expect(ai.requests.first.referenceExamples, hasLength(2));
+      expect(ai.requests.first.count, 7);
       expect(ai.requests.first.additionalRequirements, contains('干扰项'));
       deps.practice.choose('b');
       await deps.practice.submit();

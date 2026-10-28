@@ -23,7 +23,12 @@ class GuidanceViewModel extends ChangeNotifier {
   final Future<void> Function(Future<void> Function()) applyChanges;
   GenerationGuidance value = GenerationGuidance();
   bool busy = false, _disposed = false;
+  bool _needsRepair = false;
   String? error;
+  void dismissError() {
+    error = null;
+    _notify();
+  }
 
   void _notify() {
     if (!_disposed) notifyListeners();
@@ -38,6 +43,7 @@ class GuidanceViewModel extends ChangeNotifier {
     try {
       value = await repository.load();
     } catch (_) {
+      _needsRepair = true;
       error = 'Could not load question guidance. Save it again to repair it.';
     } finally {
       busy = false;
@@ -100,7 +106,8 @@ class GuidanceViewModel extends ChangeNotifier {
     if (busy) return false;
     // A no-op save must not clear an answer choice or replace a paid buffer.
     // An earlier load/import error still allows the same draft to repair storage.
-    if (error == null &&
+    if (!_needsRepair &&
+        error == null &&
         jsonEncode(value.toJson()) == jsonEncode(draft.toJson())) {
       return true;
     }
@@ -110,10 +117,12 @@ class GuidanceViewModel extends ChangeNotifier {
     try {
       await applyChanges(() async {
         await repository.save(draft);
+        _needsRepair = false;
         value = draft;
       });
       return true;
     } catch (_) {
+      _needsRepair = true;
       error = 'Could not save question guidance. Please try again.';
       return false;
     } finally {

@@ -14,6 +14,12 @@ class LanguageViewModel extends ChangeNotifier {
   bool saving = false;
   bool saveFailed = false;
 
+  /// Dismiss only the warning; the last successfully saved preference stays active.
+  void dismissError() {
+    saveFailed = false;
+    notifyListeners();
+  }
+
   Future<void> load() async {
     final saved = await repository.loadInterfaceLanguage();
     _language = ['en', 'zh'].contains(saved) ? saved! : 'system';

@@ -51,6 +51,11 @@ class LibraryViewModel extends ChangeNotifier {
   String? message;
   bool get supportsDirectories => access.supportsDirectories;
   bool _disposed = false;
+  void dismissMessage() {
+    message = null;
+    _notify();
+  }
+
   void _notify() {
     if (!_disposed) notifyListeners();
   }
@@ -66,6 +71,7 @@ class LibraryViewModel extends ChangeNotifier {
       _documents = await materials.documents();
       stats = await questions.stats();
       excluded = await scanner?.exclusions() ?? {};
+      if (message == 'Could not load your library.') message = null;
     } catch (_) {
       message = 'Could not load your library.';
     }
@@ -219,6 +225,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<void> include(String origin) async {
     if (_disposed || busy || scanner == null) return;
     busy = true;
+    message = null;
     _notify();
     try {
       await scanner!.include(origin);
@@ -235,6 +242,7 @@ class LibraryViewModel extends ChangeNotifier {
   Future<void> remove(String id) async {
     if (_disposed || busy) return;
     busy = true;
+    message = null;
     _notify();
     try {
       await coordinator.stop();

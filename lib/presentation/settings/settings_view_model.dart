@@ -1,6 +1,9 @@
 // Serializes provider/account actions and activates validated settings through repository ports.
 
 import 'package:flutter/foundation.dart';
+
+import 'dart:async';
+
 import 'package:uuid/uuid.dart';
 
 import '../../application/generation/coordinator.dart';
@@ -45,19 +48,59 @@ class SettingsViewModel extends ChangeNotifier {
   List<String> chatGptModels = [];
   String? chatGptAccount;
   bool signingIn = false;
-  void cancelSignIn() => chatGpt?.cancelLogin();
+  bool _cancelledSignIn = false;
+  void cancelSignIn() {
+    if (signingIn) _cancelledSignIn = true;
+    chatGpt?.cancelLogin();
+  }
+
   ProviderProfile? profile;
   bool busy = false, loaded = false;
   String? message;
   bool actionFailed = false;
   bool _disposed = false;
+  Timer? _noticeTimer;
+  String? _timedMessage;
+
+  /// Clear presentation feedback without altering accounts, connection selection or requests.
+  void dismissMessage() {
+    message = null;
+    actionFailed = false;
+    _notify();
+  }
+
+  bool _isCancelledLogin(Object error) =>
+      _cancelledSignIn &&
+      error is AppFailure &&
+      error.message ==
+          'ChatGPT sign-in was cancelled or expired. Please try again.';
+
   void _notify() {
-    if (!_disposed) notifyListeners();
+    if (_disposed) return;
+    // Do not restart a banner's lifetime on unrelated model/account notifications.
+    if (busy || message == null || message != _timedMessage) {
+      _noticeTimer?.cancel();
+      _timedMessage = busy ? null : message;
+      final canExpire =
+          message !=
+              'Signed out locally. Disconnect OmniQuiz in ChatGPT Settings to confirm revocation.' &&
+          (!actionFailed ||
+              message ==
+                  'ChatGPT sign-in was cancelled or expired. Please try again.');
+      if (_timedMessage != null && canExpire) {
+        _noticeTimer = Timer(
+          Duration(seconds: actionFailed ? 12 : 5),
+          dismissMessage,
+        );
+      }
+    }
+    notifyListeners();
   }
 
   @override
   void dispose() {
     _disposed = true;
+    _noticeTimer?.cancel();
     catalog?.cancel();
     cancelSignIn();
     super.dispose();
@@ -65,6 +108,7 @@ class SettingsViewModel extends ChangeNotifier {
 
   /// Loads non-secret configuration and safe account labels; no probe is sent.
   Future<void> load() async {
+    message = null;
     actionFailed = false;
     try {
       if (connectionRepository != null) {
@@ -85,12 +129,17 @@ class SettingsViewModel extends ChangeNotifier {
     if (busy || _disposed) return;
     busy = true;
     message = null;
+    actionFailed = false;
+    _cancelledSignIn = false;
     _notify();
     try {
       await coordinator.quiesce();
       await action();
     } catch (e) {
-      message = e is AppFailure
+      actionFailed = !_isCancelledLogin(e);
+      message = _isCancelledLogin(e)
+          ? 'ChatGPT sign-in cancelled.'
+          : e is AppFailure
           ? e.message
           : 'ChatGPT request failed. Sign in again or check your plan access.';
     } finally {
@@ -207,6 +256,7 @@ class SettingsViewModel extends ChangeNotifier {
     if (busy || _disposed || catalog == null) return [];
     busy = true;
     message = null;
+    actionFailed = false;
     _notify();
     try {
       var secret = noKey ? '' : key.trim();
@@ -222,6 +272,7 @@ class SettingsViewModel extends ChangeNotifier {
       }
       return await catalog!.list(url.trim(), secret);
     } catch (e) {
+      actionFailed = true;
       message = e is AppFailure ? e.message : 'Could not load models. Check the endpoint and key, or enter a model manually.';
       return [];
     } finally {
@@ -258,6 +309,7 @@ class SettingsViewModel extends ChangeNotifier {
     if (busy) return false;
     busy = true;
     message = null;
+    actionFailed = false;
     _notify();
     try {
       await coordinator.stop();
@@ -273,6 +325,7 @@ class SettingsViewModel extends ChangeNotifier {
       message = 'Settings saved. Your key is stored securely on this device.';
       return true;
     } catch (e) {
+      actionFailed = true;
       message = e is AppFailure ? e.message : 'Could not save settings.';
       return false;
     } finally {
@@ -292,6 +345,7 @@ class SettingsViewModel extends ChangeNotifier {
     if (busy) return;
     busy = true;
     message = null;
+    actionFailed = false;
     _notify();
     try {
       final candidate = ProviderProfile(
@@ -313,6 +367,7 @@ class SettingsViewModel extends ChangeNotifier {
       await generator.probe(candidate, secret);
       message = 'Connection successful. The model returned valid JSON.';
     } catch (e) {
+      actionFailed = true;
       message = e is AppFailure
           ? e.message
           : 'Connection test failed. Check secure storage and connectivity.';

@@ -55,7 +55,7 @@ void main() {
     }
     await eventually(() => !deps.coordinator.status.running);
     await vm.refresh();
-    expect(ai.calls, greaterThanOrEqualTo(6));
+    expect(ai.calls, greaterThanOrEqualTo(5));
     expect(ai.maxActive, 1);
     expect(vm.active, isTrue);
     expect(vm.readyCount, greaterThan(0));

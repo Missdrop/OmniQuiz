@@ -56,6 +56,7 @@ Future<void> connectionFlow(WidgetTester tester, {bool native = false}) async {
   try {
     final first = deps.settings.connections.activeId;
     final question = deps.practice.current!.id;
+    final initialCalls = generator.calls;
     await tester.pumpWidget(
       RepaintBoundary(
         key: capture,
@@ -119,7 +120,7 @@ Future<void> connectionFlow(WidgetTester tester, {bool native = false}) async {
     expect(deps.practice.selected, 'b');
     expect(
       generator.calls,
-      4,
+      initialCalls,
       reason: 'Saving or switching inactive practice does not issue inference',
     );
     await tap(find.descendant(of: card(), matching: find.text('Edit')));

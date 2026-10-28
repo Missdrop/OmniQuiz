@@ -29,14 +29,17 @@ extension ConnectionManagement on SettingsViewModel {
     busy = true;
     message = null;
     actionFailed = false;
+    _cancelledSignIn = false;
     _notify();
     try {
       connections = await connectionRepository!.load();
       final result = await action();
       return result;
     } catch (error) {
-      actionFailed = true;
-      message = error is AppFailure
+      actionFailed = !_isCancelledLogin(error);
+      message = _isCancelledLogin(error)
+          ? 'ChatGPT sign-in cancelled.'
+          : error is AppFailure
           ? error.message
           : 'Could not save AI connections. Please try again.';
       return null;

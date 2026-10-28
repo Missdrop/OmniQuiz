@@ -12,6 +12,12 @@ class AppearanceViewModel extends ChangeNotifier {
   bool saving = false, saveFailed = false;
   bool _disposed = false;
 
+  /// Dismiss only the warning; the last successfully saved preference stays active.
+  void dismissError() {
+    saveFailed = false;
+    notifyListeners();
+  }
+
   Future<void> load() async {
     final saved = await repository.loadThemeMode();
     mode = ThemeMode.values.firstWhere(

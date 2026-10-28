@@ -102,6 +102,7 @@ class BackupMaterial {
     final path = json['path'] as String;
     // Metadata restores may carry authoring files, never replace the database or logs.
     if (path.startsWith('.omniquiz/') &&
+        path != '.omniquiz/guidance/settings.json' &&
         path != '.omniquiz/guidance/requirements.md' &&
         path != '.omniquiz/guidance/pasted-example.md' &&
         !RegExp(

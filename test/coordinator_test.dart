@@ -105,7 +105,7 @@ void main() {
         coordinator.replenish(),
       ]);
       expect((await questions.ready(null)).length, 20);
-      expect(ai.calls, 4);
+      expect(ai.calls, 2);
       expect(ai.maxActive, 1);
     },
   );

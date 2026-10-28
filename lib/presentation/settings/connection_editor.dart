@@ -27,6 +27,8 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
   String? _id, _account;
   List<String> _models = [];
   bool _noKey = false, _json = false, _visible = false, _initialized = false;
+  // A manager's previous save result does not describe this newly opened draft.
+  bool _showMessage = false;
   bool get _subscription => widget.type == AiConnectionType.chatGptSubscription;
   @override
   void didChangeDependencies() {
@@ -55,6 +57,7 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
   }
 
   Future<void> _login({bool another = false}) async {
+    setState(() => _showMessage = true);
     final vm = context.read<SettingsViewModel>();
     final item = await vm.connectSubscription(
       id: another ? null : _id,
@@ -75,6 +78,7 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
   }
 
   Future<void> _loadModels() async {
+    setState(() => _showMessage = true);
     final vm = context.read<SettingsViewModel>();
     final models = _subscription
         ? (_account == null
@@ -102,6 +106,7 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
   }
 
   Future<void> _save(bool use) async {
+    setState(() => _showMessage = true);
     final vm = context.read<SettingsViewModel>();
     AiConnection? item;
     if (_subscription) {
@@ -137,6 +142,9 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
         (!_subscription || (_account != null && _model.text.isNotEmpty));
     return PopScope(
       canPop: !vm.busy,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) vm.dismissMessage();
+      },
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(
@@ -155,8 +163,12 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
                 : l.compatibleConnectionHelp,
             children: [
               if (vm.busy) const LinearProgressIndicator(),
-              if (vm.message != null)
-                Notice(vm.message!, error: vm.actionFailed),
+              if (_showMessage && !vm.busy && vm.message != null)
+                Notice(
+                  vm.message!,
+                  error: vm.actionFailed,
+                  onDismiss: vm.dismissMessage,
+                ),
               TextField(
                 controller: _name,
                 enabled: !vm.busy,
@@ -219,6 +231,7 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
                         onPressed: vm.busy
                             ? null
                             : () async {
+                                setState(() => _showMessage = true);
                                 await vm.disconnectSubscription(_account!);
                                 if (mounted) {
                                   setState(() {
@@ -341,6 +354,7 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
                                 (_account == null || _model.text.isEmpty))
                         ? null
                         : () {
+                            setState(() => _showMessage = true);
                             if (_subscription) {
                               vm.probeSubscription(_account!, _model.text);
                             } else {

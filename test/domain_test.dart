@@ -58,12 +58,14 @@ void main() {
       );
     },
   );
-  test('buffer respects its target and low watermark', () {
+  test('buffer refills at the threshold with a complete configured batch', () {
     const policy = BufferPolicy();
-    expect(policy.nextBatch(6, filling: false), 0);
-    expect(policy.nextBatch(4, filling: false), 5);
-    expect(policy.nextBatch(14, filling: true), 5);
-    expect(policy.nextBatch(20, filling: true), 0);
+    expect(policy.nextBatch(11), 0);
+    expect(policy.nextBatch(10), 10);
+    expect(policy.nextBatch(9), 10);
+    expect(policy.nextBatch(0), 10);
+    expect(const BufferPolicy(low: 0, batchSize: 3).nextBatch(1), 0);
+    expect(const BufferPolicy(low: 0, batchSize: 3).nextBatch(0), 3);
   });
   test('profile rejects insecure remote URLs and embedded credentials', () {
     for (final url in [

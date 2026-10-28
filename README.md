@@ -26,7 +26,7 @@ Finished reading your slides, but unsure what stuck? Give OmniQuiz your notes, t
 
 1. **Create a library.** Import TXT, Markdown or PDFs with selectable text. Link a folder on desktop, or import files and ZIPs on mobile.
 2. **Connect AI.** In **Settings → Configure AI**, add a ChatGPT subscription or OpenAI-compatible API connection.
-3. **Start practice.** Choose your material and select **Start practice**. To match an exam style, add a paper under **Reference examples and requirements** first.
+3. **Start practice.** Choose your material and select **Start practice**. To match an exam style, add a paper under **Question settings** first. Set the batch size and refill threshold there too; both default to 10.
 
 Questions currently have four choices and one correct answer; click a choice to submit. Scanned PDFs need OCR first. Generation requires internet access and consumes your selected service's plan allowance or API usage.
 

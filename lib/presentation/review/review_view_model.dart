@@ -12,6 +12,11 @@ class ReviewViewModel extends ChangeNotifier {
   List<ReviewEntry> _entries = [];
   List<ReviewEntry> get entries => List.unmodifiable(_entries);
   String? error;
+  void dismissError() {
+    error = null;
+    _notify();
+  }
+
   bool _disposed = false;
   void _notify() {
     if (!_disposed) notifyListeners();

@@ -1,13 +1,13 @@
 {
   "@@locale": "zh",
   "appName": "万物一点通",
-  "guidanceTitle": "样题与出题要求",
-  "guidanceHelp": "样题、样卷仅参考题型风格和难度，知识与答案仍以学习资料为准。目前支持四选一单选题。设置只保存在当前资料库；出题时会将要求和样题摘录发送给所选 AI。 文件保存在资料库的 .omniquiz/guidance 中，外部修改会在后续补题时重新读取。",
+  "guidanceTitle": "出题设置",
+  "guidanceHelp": "设置当前资料库的出题节奏、样题和要求。样题仅参考风格，答案仍以学习资料为准。出题时会将要求和样题摘录发送给所选 AI。",
   "extraRequirements": "额外出题要求",
   "extraRequirementsHint": "例如：中等难度，侧重概念应用，增加易混淆概念的干扰项；解析说明其他选项为什么不对。",
   "pasteExamples": "粘贴样题或样卷内容（可选）",
   "importExamples": "导入样题／样卷",
-  "guidanceFormats": "支持 TXT、Markdown、文字型 PDF；最多 8 个文件，每个不超过 20 MB，参考文本合计最多 12 万字符。粘贴最多 2 万字符。长样卷分批参考，每批最多约 1.2 万字符；原文件不修改。扫描件需先 OCR。",
+  "guidanceFormats": "支持 TXT、Markdown 和文字型 PDF；最多 8 个文件，每个 20 MB。扫描件请先识别文字。",
   "exampleCharacters": "{count} 字符 · 点击查看摘录",
   "@exampleCharacters": {
     "placeholders": {
@@ -437,5 +437,22 @@
   "connectionSaveError": "无法保存 AI 连接，请重试。",
   "connectionSavedActive": "连接已保存，后续出题将使用此连接。",
   "connectionSavedInactive": "连接已保存，当前使用的 AI 连接保持不变。",
-  "connectionRemoved": "连接已删除，其他连接配置保留。"
+  "connectionRemoved": "连接已删除，其他连接配置保留。",
+  "questionsPerBatch": "每次出题数量",
+  "questionsPerBatchHelp": "每次向 AI 请求 1–50 道题，默认 10 道。",
+  "questionsPerBatchError": "请输入 1–50 的整数。",
+  "refillThreshold": "自动补题阈值",
+  "refillThresholdHelp": "待答题小于或等于此数量时补题；范围 0–100，默认 10。0 表示用完后才补题。",
+  "refillThresholdError": "请输入 0–100 的整数。",
+  "hideSource": "收起原始资料",
+  "sourcePage": "第 {page} 页",
+  "@sourcePage": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "interfaceSettings": "界面与语言",
+  "chatGptSignInCancelled": "已取消 ChatGPT 登录。"
 }

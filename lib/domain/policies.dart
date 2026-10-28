@@ -32,15 +32,11 @@ class ReviewPolicy {
   }
 }
 
-/// Controls low-water refills and the maximum prefetched question count.
+/// Requests full batches only at or below the unanswered-question threshold.
 class BufferPolicy {
-  // Smaller batches expose the first questions sooner on reasoning models.
-  const BufferPolicy({this.low = 5, this.target = 20, this.batchSize = 5});
-  final int low, target, batchSize;
-  int nextBatch(int available, {required bool filling}) {
-    if (available >= target || (!filling && available >= low)) return 0;
-    return (target - available).clamp(0, batchSize);
-  }
+  const BufferPolicy({this.low = 10, this.batchSize = 10});
+  final int low, batchSize;
+  int nextBatch(int available) => available <= low ? batchSize : 0;
 }
 
 /// Supplies time independently of wall-clock APIs for deterministic scheduling.

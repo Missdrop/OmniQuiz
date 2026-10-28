@@ -107,13 +107,13 @@ abstract class AppLocalizations {
   /// No description provided for @guidanceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Examples and question requirements'**
+  /// **'Question settings'**
   String get guidanceTitle;
 
   /// No description provided for @guidanceHelp.
   ///
   /// In en, this message translates to:
-  /// **'Sample questions and papers guide style and difficulty, not factual answers. Answers must remain grounded in study materials. Currently supports four-option single-choice questions. Settings belong to this library; requirements and sample excerpts are sent to your selected AI when generating. Files are stored in .omniquiz/guidance inside this library; external edits are read for subsequent batches.'**
+  /// **'Set the pace, examples and requirements for this library. Examples guide style; answers come from your materials. Requirements and sample excerpts are sent to your selected AI during generation.'**
   String get guidanceHelp;
 
   /// No description provided for @extraRequirements.
@@ -143,7 +143,7 @@ abstract class AppLocalizations {
   /// No description provided for @guidanceFormats.
   ///
   /// In en, this message translates to:
-  /// **'TXT, Markdown and text-based PDF. Up to 8 files, 20 MB each, with 120,000 characters of reference text in total; pasted text is limited to 20,000. Long papers rotate through excerpts (about 12,000 characters per batch). Originals stay unchanged. Scanned files need OCR first.'**
+  /// **'TXT, Markdown and text-based PDF; up to 8 files, 20 MB each. Scanned papers need OCR first.'**
   String get guidanceFormats;
 
   /// No description provided for @exampleCharacters.
@@ -2311,6 +2311,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connection removed. Other saved connections were kept.'**
   String get connectionRemoved;
+
+  /// No description provided for @questionsPerBatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions per batch'**
+  String get questionsPerBatch;
+
+  /// No description provided for @questionsPerBatchHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Request 1–50 questions at a time. Default: 10.'**
+  String get questionsPerBatchHelp;
+
+  /// No description provided for @questionsPerBatchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number from 1 to 50.'**
+  String get questionsPerBatchError;
+
+  /// No description provided for @refillThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-refill threshold'**
+  String get refillThreshold;
+
+  /// No description provided for @refillThresholdHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Refill at or below this unanswered count (0–100; default: 10). Use 0 to refill only when empty.'**
+  String get refillThresholdHelp;
+
+  /// No description provided for @refillThresholdError.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number from 0 to 100.'**
+  String get refillThresholdError;
+
+  /// No description provided for @hideSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide source'**
+  String get hideSource;
+
+  /// No description provided for @sourcePage.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String sourcePage(String page);
+
+  /// No description provided for @interfaceSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance & language'**
+  String get interfaceSettings;
+
+  /// No description provided for @chatGptSignInCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatGPT sign-in cancelled.'**
+  String get chatGptSignInCancelled;
 }
 
 class _AppLocalizationsDelegate

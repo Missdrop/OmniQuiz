@@ -48,6 +48,7 @@ extension LocalizedDiagnostics on AppLocalizations {
           chatGptRequestError,
       "ChatGPT identity could not be verified. Please sign in again.":
           chatGptIdentityError,
+      'ChatGPT sign-in cancelled.': chatGptSignInCancelled,
       "ChatGPT sign-in was cancelled or expired. Please try again.":
           chatGptLoginCancelled,
       "ChatGPT sign-in is already running.": chatGptLoginBusy,

@@ -55,7 +55,7 @@ test('nightly replaces nine packages and removes the legacy checksum file', asyn
   assert.equal(update.release_id, 7);
   assert.equal(update.prerelease, true);
   assert.equal(update.make_latest, 'false');
-  assert.equal(update.body, '[Compare changes](https://github.com/owner/repo/compare/v0.9.0...nightly)');
+  assert.equal(update.body, 'OmniQuiz Nightly\n\n**Full Changelog:** [v0.9.0...nightly](https://github.com/owner/repo/compare/v0.9.0...nightly)');
 });
 
 test('first nightly creates one draft then publishes it', async t => {
@@ -72,7 +72,7 @@ test('tag release uses the exact tag name and never moves its tag', async t => {
   assert.equal(calls[0].args.name, 'v1.0.0');
   assert.equal(calls.at(-1).args.name, 'v1.0.0');
   assert.equal(calls.at(-1).args.prerelease, false);
-  assert.equal(calls.at(-1).args.body, '[Compare changes](https://github.com/owner/repo/compare/v0.9.0...v1.0.0)');
+  assert.equal(calls.at(-1).args.body, 'OmniQuiz v1.0.0\n\n**Full Changelog:** [v0.9.0...v1.0.0](https://github.com/owner/repo/compare/v0.9.0...v1.0.0)');
   assert.equal(calls.some(c => c.name === 'updateRef'), false);
   assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 9);
   assert.equal(calls.some(c => c.name === 'uploadReleaseAsset' && c.args.name === 'SHA256SUMS'), false);
@@ -81,7 +81,7 @@ test('tag release uses the exact tag name and never moves its tag', async t => {
 test('first stable release has no invented comparison and metadata failures do not publish', async t => {
   const { calls, options } = fixture(t, { nightly: false, existing: false, previous: null });
   await publish(options);
-  assert.equal(calls.at(-1).args.body, '');
+  assert.equal(calls.at(-1).args.body, 'OmniQuiz v1.0.0\n\n**Full Changelog:** [v1.0.0](https://github.com/owner/repo/commits/v1.0.0)');
   calls.length = 0;
   options.github.rest.repos.getLatestRelease = async () => {
     throw Object.assign(new Error('Forbidden'), { status: 403 });

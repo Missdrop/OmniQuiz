@@ -15,6 +15,12 @@ class QuestionLanguageViewModel extends ChangeNotifier {
       ? PlatformDispatcher.instance.locale.toLanguageTag()
       : language;
 
+  /// Dismiss only the warning; the last successfully saved preference stays active.
+  void dismissError() {
+    saveFailed = false;
+    notifyListeners();
+  }
+
   Future<void> load() async {
     final saved = await repository.loadQuestionLanguage();
     language = ['简体中文', 'English'].contains(saved) ? saved! : 'system';

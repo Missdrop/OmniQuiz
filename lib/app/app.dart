@@ -110,6 +110,7 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
   void _routeChanged() {
     final path = _router.routeInformationProvider.value.uri.path;
     if (path == _lastPath) return;
+    if (_lastPath == '/settings') widget.dependencies.settings.dismissMessage();
     _lastPath = path;
     if (path != '/practice') {
       unawaited(widget.dependencies.practice.endPractice());
@@ -168,77 +169,11 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
           child: Row(
             children: [
               if (wide)
-                SizedBox(
-                  width: 220,
-                  child: Material(
-                    color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    child: ListView(
-                      padding: EdgeInsets.zero,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(24, 36, 24, 4),
-                          child: Row(
-                            children: [
-                              Image.asset(
-                                'assets/branding/logo.png',
-                                width: 32,
-                                height: 32,
-                                excludeFromSemantics: true,
-                              ),
-                              SizedBox(width: 10),
-                              Flexible(
-                                child: Text(
-                                  context.l10n.appName,
-                                  style: TextStyle(
-                                    fontSize: 23,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(24, 4, 24, 32),
-                          child: Text(
-                            context.l10n.tagline,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        for (var i = 0; i < labels.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 4,
-                            ),
-                            child: ListTile(
-                              selected: selected == i,
-                              selectedTileColor: Theme.of(context)
-                                  .colorScheme
-                                  .secondaryContainer,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              leading: Icon(icons[i]),
-                              title: Text(labels[i]),
-                              onTap: () => _navigate(i),
-                            ),
-                          ),
-                        const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: _ThemeToggle(),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                _DesktopNavigation(
+                  labels: labels,
+                  icons: icons,
+                  selected: selected,
+                  onSelected: _navigate,
                 ),
               Expanded(
                 child: Column(
@@ -334,18 +269,172 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
   }
 }
 
+/// Desktop navigation stays anchored while the content scrolls independently.
+class _DesktopNavigation extends StatelessWidget {
+  const _DesktopNavigation({
+    required this.labels,
+    required this.icons,
+    required this.selected,
+    required this.onSelected,
+  });
+  final List<String> labels;
+  final List<IconData> icons;
+  final int selected;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      width: 232,
+      decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : scheme.surfaceContainerLow,
+        border: Border(
+          right: BorderSide(color: scheme.outlineVariant.withValues(alpha: .4)),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 30, 18, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        'assets/branding/logo.png',
+                        width: 36,
+                        height: 36,
+                        excludeFromSemantics: true,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          context.l10n.appName,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    context.l10n.tagline,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontSize: 12,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Column(
+                  children: [
+                    for (var i = 0; i < labels.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: ListTile(
+                          selected: selected == i,
+                          selectedTileColor: scheme.primary.withValues(
+                            alpha: .1,
+                          ),
+                          selectedColor: scheme.primary,
+                          iconColor: scheme.onSurfaceVariant,
+                          minLeadingWidth: 22,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 3,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          leading: Icon(icons[i], size: 22),
+                          title: Text(
+                            labels[i],
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: selected == i
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                            ),
+                          ),
+                          trailing: selected == i
+                              ? Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: scheme.primary,
+                                    shape: BoxShape.circle,
+                                  ),
+                                )
+                              : null,
+                          onTap: () => onSelected(i),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 16, 16),
+              child: Column(
+                children: [const Divider(), const _ThemeToggle(expanded: true)],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _ThemeToggle extends StatelessWidget {
-  const _ThemeToggle();
+  const _ThemeToggle({this.expanded = false});
+  final bool expanded;
   @override
   Widget build(BuildContext context) {
     final appearance = context.watch<AppearanceViewModel>();
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final toggle = appearance.saving
+        ? null
+        : () => appearance.select(dark ? ThemeMode.light : ThemeMode.dark);
+    final icon = dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined;
+    if (expanded) {
+      return Tooltip(
+        message: dark ? context.l10n.switchToLight : context.l10n.switchToDark,
+        child: ListTile(
+          key: const ValueKey('appearance-toggle-row'),
+          enabled: !appearance.saving,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+          minLeadingWidth: 22,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(13),
+          ),
+          leading: Icon(icon, size: 22),
+          title: Text(
+            context.l10n.appearance,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+          onTap: toggle,
+        ),
+      );
+    }
     return IconButton(
       tooltip: dark ? context.l10n.switchToLight : context.l10n.switchToDark,
-      icon: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined),
-      onPressed: appearance.saving
-          ? null
-          : () => appearance.select(dark ? ThemeMode.light : ThemeMode.dark),
+      icon: Icon(icon),
+      onPressed: toggle,
     );
   }
 }

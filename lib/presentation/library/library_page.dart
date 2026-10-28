@@ -40,9 +40,7 @@ class LibraryPage extends StatelessWidget {
       subtitle: context.l10n.librarySubtitle,
       children: [
         ?controls,
-        Wrap(
-          spacing: 12,
-          runSpacing: 12,
+        SummaryGrid(
           children: [
             _stat(
               context,
@@ -136,7 +134,8 @@ class LibraryPage extends StatelessWidget {
             label: Text(context.l10n.cancelScan),
           ),
         ],
-        if (vm.message != null) Notice(vm.message!),
+        if (vm.message != null)
+          Notice(vm.message!, onDismiss: vm.dismissMessage),
         if (vm.documents.isEmpty)
           EmptyCard(
             icon: Icons.menu_book_outlined,
@@ -288,32 +287,39 @@ class LibraryPage extends StatelessWidget {
     String value,
     String label,
     IconData icon,
-  ) => SizedBox(
-    width: MediaQuery.sizeOf(context).width < 600
-        ? (MediaQuery.sizeOf(context).width - 52) / 2
-        : 210,
-    child: Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 20),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.headlineMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
+  ) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary
+                  .withValues(alpha: .07),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: Theme.of(context).colorScheme.primary,
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.headlineMedium
+                ?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
       ),
     ),
   );

@@ -192,9 +192,14 @@ void main() {
       expect(await original.readAsString(), 'Compare two scenarios.');
       await File(p.join(folder, 'requirements.md'))
           .writeAsString('Short explanations.');
+      await File(p.join(folder, 'settings.json')).writeAsString(
+        jsonEncode({'questionsPerBatch': 7, 'refillThreshold': 3}),
+      );
       await deps.practice.startPractice();
       await deps.practice.refresh();
       expect(ai.requests.first.additionalRequirements, 'Short explanations.');
+      expect(ai.requests.first.count, 7);
+      expect(ai.requests, hasLength(1));
       final question = deps.practice.current!;
       await Future.wait([deps.practice.answer('b'), deps.practice.answer('a')]);
       expect((await deps.practice.questions.stats()).attempts, 1);
@@ -213,6 +218,17 @@ void main() {
       expect(await port.exportTo(backup), 0);
       expect(await port.restoreFrom(backup), 1);
       final restored = catalog.libraries.last;
+      expect(
+        jsonDecode(
+          await File(
+            p.join(
+              LibraryWorkspace(restored.directory).guidancePath,
+              'settings.json',
+            ),
+          ).readAsString(),
+        ),
+        {'questionsPerBatch': 7, 'refillThreshold': 3},
+      );
       expect(
         await File(
           p.join(

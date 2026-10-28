@@ -2,6 +2,12 @@
 
 import '../../domain/models.dart';
 import '../../domain/generation_guidance.dart';
+import '../../domain/policies.dart';
+
+/// Reads lightweight refill settings without reparsing reference PDFs after each answer.
+abstract interface class GenerationBufferRepository {
+  Future<BufferPolicy> loadBufferPolicy();
+}
 
 /// Persist reference papers and authoring preferences separately from study sources.
 abstract interface class GenerationGuidanceRepository {

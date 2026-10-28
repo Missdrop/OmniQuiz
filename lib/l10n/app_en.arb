@@ -1,13 +1,13 @@
 {
   "@@locale": "en",
   "appName": "OmniQuiz",
-  "guidanceTitle": "Examples and question requirements",
-  "guidanceHelp": "Sample questions and papers guide style and difficulty, not factual answers. Answers must remain grounded in study materials. Currently supports four-option single-choice questions. Settings belong to this library; requirements and sample excerpts are sent to your selected AI when generating. Files are stored in .omniquiz/guidance inside this library; external edits are read for subsequent batches.",
+  "guidanceTitle": "Question settings",
+  "guidanceHelp": "Set the pace, examples and requirements for this library. Examples guide style; answers come from your materials. Requirements and sample excerpts are sent to your selected AI during generation.",
   "extraRequirements": "Additional question requirements",
   "extraRequirementsHint": "For example: medium difficulty; focus on applying concepts, use plausible distractors, and explain why other options are incorrect.",
   "pasteExamples": "Paste sample questions or paper text (optional)",
   "importExamples": "Import sample questions / papers",
-  "guidanceFormats": "TXT, Markdown and text-based PDF. Up to 8 files, 20 MB each, with 120,000 characters of reference text in total; pasted text is limited to 20,000. Long papers rotate through excerpts (about 12,000 characters per batch). Originals stay unchanged. Scanned files need OCR first.",
+  "guidanceFormats": "TXT, Markdown and text-based PDF; up to 8 files, 20 MB each. Scanned papers need OCR first.",
   "exampleCharacters": "{count} characters · Expand to preview",
   "@exampleCharacters": {
     "placeholders": {
@@ -556,5 +556,22 @@
   "connectionSaveError": "Could not save AI connections. Please try again.",
   "connectionSavedActive": "Connection saved and selected for new questions.",
   "connectionSavedInactive": "Connection saved. The current AI connection is unchanged.",
-  "connectionRemoved": "Connection removed. Other saved connections were kept."
+  "connectionRemoved": "Connection removed. Other saved connections were kept.",
+  "questionsPerBatch": "Questions per batch",
+  "questionsPerBatchHelp": "Request 1–50 questions at a time. Default: 10.",
+  "questionsPerBatchError": "Enter a whole number from 1 to 50.",
+  "refillThreshold": "Auto-refill threshold",
+  "refillThresholdHelp": "Refill at or below this unanswered count (0–100; default: 10). Use 0 to refill only when empty.",
+  "refillThresholdError": "Enter a whole number from 0 to 100.",
+  "hideSource": "Hide source",
+  "sourcePage": "Page {page}",
+  "@sourcePage": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      }
+    }
+  },
+  "interfaceSettings": "Appearance & language",
+  "chatGptSignInCancelled": "ChatGPT sign-in cancelled."
 }

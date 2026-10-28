@@ -11,6 +11,11 @@ import '../../domain/policies.dart';
 
 /// Tracks attempts and explicit session intent across refills, review and lifecycle changes.
 class PracticeViewModel extends ChangeNotifier {
+  void dismissMessage() {
+    message = null;
+    _notify();
+  }
+
   PracticeViewModel(
     this.questions,
     this.progress,
@@ -53,6 +58,7 @@ class PracticeViewModel extends ChangeNotifier {
       final total = await questions.readyCount(scope);
       if (version != _version || _disposed) return;
       readyCount = total;
+      if (message == 'Could not load questions.') message = null;
       if (!busy &&
           !answered &&
           !reviewing &&
@@ -99,7 +105,7 @@ class PracticeViewModel extends ChangeNotifier {
     await submit();
   }
 
-  /// Votes stay local. Error reports retire the question but keep its history.
+  /// Saves ratings for future batches. Error reports retire the question but keep its history.
   Future<void> rate(QuestionRating value, {String note = ''}) async {
     final question = current;
     if (question == null || busy) return;
@@ -126,6 +132,7 @@ class PracticeViewModel extends ChangeNotifier {
     _sessionActive = active;
     _version++;
     scope = value;
+    message = null;
     current = null;
     answered = false;
     selected = null;

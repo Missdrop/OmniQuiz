@@ -45,12 +45,13 @@ module.exports = async function publish({ github, context, core, nightly, direct
     core.notice('This tag is already published; keeping its assets unchanged.');
     return;
   }
-  // Keep release notes to a tag comparison; installation details belong in README.
-  // The first release has no predecessor, so leave its description empty.
+  // Keep a recognizable heading and changelog link; installation details belong in README.
+  // The first release links its commit history instead of inventing a previous tag.
   const previous = await optional(() => github.rest.repos.getLatestRelease(repo));
-  const body = previous && previous.tag_name !== tag
-    ? `[Compare changes](https://github.com/${repo.owner}/${repo.repo}/compare/${encodeURIComponent(previous.tag_name)}...${encodeURIComponent(tag)})`
-    : '';
+  const changelog = previous && previous.tag_name !== tag
+    ? `[${previous.tag_name}...${tag}](https://github.com/${repo.owner}/${repo.repo}/compare/${encodeURIComponent(previous.tag_name)}...${encodeURIComponent(tag)})`
+    : `[${tag}](https://github.com/${repo.owner}/${repo.repo}/commits/${encodeURIComponent(tag)})`;
+  const body = `OmniQuiz ${nightly ? 'Nightly' : tag}\n\n**Full Changelog:** ${changelog}`;
   if (!release) {
     release = (await github.rest.repos.createRelease({
       ...repo, tag_name: tag, target_commitish: context.sha,

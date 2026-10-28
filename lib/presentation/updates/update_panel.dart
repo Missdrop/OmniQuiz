@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../infrastructure/updates/release_updater.dart';
 import '../../l10n/localization.dart';
 import 'update_controller.dart';
+import '../shared/widgets.dart';
 
 Future<void> openUpdateWebsite(
   BuildContext context,
@@ -72,9 +73,9 @@ class UpdatePanel extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                l.updateTitle,
-                style: Theme.of(context).textTheme.titleLarge,
+              SectionHeading(
+                icon: Icons.system_update_alt,
+                title: l.updateTitle,
               ),
               const SizedBox(height: 8),
               Text(l.updateVersion(controller.version ?? '…')),

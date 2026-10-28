@@ -90,9 +90,9 @@ class _BackupPanelState extends State<BackupPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            context.l10n.backupTitle,
-            style: Theme.of(context).textTheme.titleLarge,
+          SectionHeading(
+            icon: Icons.backup_outlined,
+            title: context.l10n.backupTitle,
           ),
           const SizedBox(height: 12),
           Text(context.l10n.backupHelp),
@@ -119,7 +119,10 @@ class _BackupPanelState extends State<BackupPanel> {
           if (_message != null)
             Padding(
               padding: const EdgeInsets.only(top: 12),
-              child: Notice(_message!),
+              child: Notice(
+                _message!,
+                onDismiss: () => setState(() => _message = null),
+              ),
             ),
         ],
       ),

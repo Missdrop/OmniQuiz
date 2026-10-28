@@ -32,14 +32,22 @@ class ConnectionSummary extends StatelessWidget {
         ? context.l10n.noActiveConnection
         : '${active.name} · ${active.profile.model}';
     if (compact) {
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: .05),
+          borderRadius: BorderRadius.circular(14),
+        ),
         child: Wrap(
           spacing: 12,
           runSpacing: 8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            Text('${context.l10n.generationConnection}: $label'),
+            Text(
+              '${context.l10n.generationConnection}: $label',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
             TextButton.icon(
               onPressed: vm.busy || !vm.loaded
                   ? null
@@ -57,9 +65,9 @@ class ConnectionSummary extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              context.l10n.generationConnection,
-              style: Theme.of(context).textTheme.titleLarge,
+            SectionHeading(
+              icon: Icons.hub_outlined,
+              title: context.l10n.generationConnection,
             ),
             const SizedBox(height: 12),
             Text(label),
@@ -157,6 +165,9 @@ class ConnectionManager extends StatelessWidget {
     final vm = context.watch<SettingsViewModel>();
     return PopScope(
       canPop: !vm.busy,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) vm.dismissMessage();
+      },
       child: Scaffold(
         appBar: AppBar(
           leading: BackButton(
@@ -170,15 +181,22 @@ class ConnectionManager extends StatelessWidget {
             title: context.l10n.savedConnections,
             subtitle: context.l10n.connectionSelectionHelp,
             children: [
-              FilledButton.icon(
-                onPressed: vm.busy ? null : () => _add(context),
-                icon: const Icon(Icons.add),
-                label: Text(context.l10n.addConnection),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: FilledButton.icon(
+                  onPressed: vm.busy ? null : () => _add(context),
+                  icon: const Icon(Icons.add),
+                  label: Text(context.l10n.addConnection),
+                ),
               ),
               const SizedBox(height: 16),
               if (vm.busy) const LinearProgressIndicator(),
               if (vm.message != null)
-                Notice(vm.message!, error: vm.actionFailed),
+                Notice(
+                  vm.message!,
+                  error: vm.actionFailed,
+                  onDismiss: vm.dismissMessage,
+                ),
               if (vm.connections.active == null)
                 Notice(context.l10n.noActiveConnection),
               for (final item in [

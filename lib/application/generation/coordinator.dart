@@ -137,11 +137,16 @@ class GenerationCoordinator {
 
   bool _current(int token) => !_disposed && _enabled && token == _token;
   Future<void> _fill(int token) async {
-    var filling = false;
     try {
       while (_current(token)) {
+        final repository = guidance;
+        final buffer = repository is GenerationBufferRepository
+            ? await (repository as GenerationBufferRepository)
+                  .loadBufferPolicy()
+            : policy;
+        if (!_current(token)) return;
         final available = await questions.readyCount(_scope);
-        final count = policy.nextBatch(available, filling: filling);
+        final count = buffer.nextBatch(available);
         if (count == 0) {
           _emit('$available questions ready');
           return;
@@ -156,7 +161,6 @@ class GenerationCoordinator {
         if (!_current(token)) return;
         _job = null;
         if (!complete) return;
-        filling = true;
         _emit('New questions saved', running: true);
       }
     } catch (e) {

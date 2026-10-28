@@ -29,8 +29,18 @@ class GenerationGuidance {
   GenerationGuidance({
     this.requirements = '',
     this.pastedExample = '',
+    this.questionsPerBatch = 10,
+    this.refillThreshold = 10,
     List<ReferenceExample> examples = const [],
   }) : examples = List.unmodifiable(examples) {
+    if (questionsPerBatch < 1 ||
+        questionsPerBatch > 50 ||
+        refillThreshold < 0 ||
+        refillThreshold > 100) {
+      throw const AppFailure(
+        'Invalid generation batch size or refill threshold.',
+      );
+    }
     if (requirements.length > requirementsLimit ||
         pastedExample.length > pastedLimit ||
         examples.length > exampleCountLimit ||
@@ -55,6 +65,9 @@ class GenerationGuidance {
   static const exampleCharactersLimit = 120000;
   static const requestCharactersLimit = 12000;
   final String requirements, pastedExample;
+
+  /// A full batch is requested when the unanswered count reaches this threshold.
+  final int questionsPerBatch, refillThreshold;
   final List<ReferenceExample> examples;
   int get totalExampleCharacters =>
       pastedExample.length + examples.fold<int>(0, (n, e) => n + e.text.length);
@@ -62,6 +75,8 @@ class GenerationGuidance {
       requirements.trim().isEmpty &&
       pastedExample.trim().isEmpty &&
       examples.isEmpty;
+  bool get isDefault =>
+      isEmpty && questionsPerBatch == 10 && refillThreshold == 10;
 
   /// Rotate through long papers across batches; share the budget across all samples.
   List<ReferenceExample> excerpts(int batch) {
@@ -94,12 +109,16 @@ class GenerationGuidance {
   Map<String, dynamic> toJson() => {
     'requirements': requirements,
     'pastedExample': pastedExample,
+    'questionsPerBatch': questionsPerBatch,
+    'refillThreshold': refillThreshold,
     'examples': examples.map((e) => e.toJson()).toList(),
   };
   factory GenerationGuidance.fromJson(Map<String, dynamic> value) =>
       GenerationGuidance(
         requirements: value['requirements'] as String? ?? '',
         pastedExample: value['pastedExample'] as String? ?? '',
+        questionsPerBatch: value['questionsPerBatch'] as int? ?? 10,
+        refillThreshold: value['refillThreshold'] as int? ?? 10,
         examples: (value['examples'] as List? ?? const [])
             .map(
               (e) => ReferenceExample.fromJson(

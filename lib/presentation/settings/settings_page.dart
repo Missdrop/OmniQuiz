@@ -53,6 +53,11 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SectionHeading(
+                  icon: Icons.palette_outlined,
+                  title: context.l10n.interfaceSettings,
+                ),
+                const SizedBox(height: 24),
                 DropdownButtonFormField<ThemeMode>(
                   isExpanded: true,
                   key: ValueKey('theme-${appearance.mode.name}'),
@@ -80,7 +85,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           if (value != null) appearance.select(value);
                         },
                 ),
-                if (appearance.saveFailed) Text(context.l10n.themeSaveError),
+                if (appearance.saveFailed)
+                  Notice(
+                    context.l10n.themeSaveError,
+                    error: true,
+                    onDismiss: appearance.dismissError,
+                  ),
                 const SizedBox(height: 24),
                 DropdownButtonFormField<String>(
                   key: ValueKey('interface-${language.language}'),
@@ -106,7 +116,11 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 12),
                 Text(context.l10n.appLanguageHelp),
                 if (language.saveFailed)
-                  Notice(context.l10n.languageSaveError, error: true),
+                  Notice(
+                    context.l10n.languageSaveError,
+                    error: true,
+                    onDismiss: language.dismissError,
+                  ),
                 const SizedBox(height: 24),
                 DropdownButtonFormField<String>(
                   key: ValueKey(
@@ -137,14 +151,23 @@ class _SettingsPageState extends State<SettingsPage> {
                         },
                 ),
                 if (questionLanguage.saveFailed)
-                  Notice(context.l10n.languageSaveError, error: true),
+                  Notice(
+                    context.l10n.languageSaveError,
+                    error: true,
+                    onDismiss: questionLanguage.dismissError,
+                  ),
               ],
             ),
           ),
         ),
         const SizedBox(height: 20),
         if (!vm.loaded) const LinearProgressIndicator(),
-        if (vm.message != null) Notice(vm.message!, error: vm.actionFailed),
+        if (vm.message != null)
+          Notice(
+            vm.message!,
+            error: vm.actionFailed,
+            onDismiss: vm.dismissMessage,
+          ),
         const ConnectionSummary(),
         const SizedBox(height: 20),
         ?widget.controls,
@@ -155,9 +178,9 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    context.l10n.updateTitle,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  SectionHeading(
+                    icon: Icons.system_update_alt,
+                    title: context.l10n.updateTitle,
                   ),
                   const SizedBox(height: 12),
                   Text(context.l10n.storeUpdatesHelp),
@@ -215,15 +238,18 @@ class _SettingsPageState extends State<SettingsPage> {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
-        TextButton(
-          onPressed: () => showLicensePage(
-            context: context,
-            applicationName: context.l10n.appName,
-            applicationVersion: widget.updates?.version,
-            applicationLegalese:
-                'Copyright © 2026 Missdrop\nLicensed under GPL-3.0-only',
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => showLicensePage(
+              context: context,
+              applicationName: context.l10n.appName,
+              applicationVersion: widget.updates?.version,
+              applicationLegalese:
+                  'Copyright © 2026 Missdrop\nLicensed under GPL-3.0-only',
+            ),
+            child: Text(context.l10n.licenses),
           ),
-          child: Text(context.l10n.licenses),
         ),
       ],
     );

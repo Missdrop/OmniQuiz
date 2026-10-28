@@ -13,11 +13,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appName => '万物一点通';
 
   @override
-  String get guidanceTitle => '样题与出题要求';
+  String get guidanceTitle => '出题设置';
 
   @override
   String get guidanceHelp =>
-      '样题、样卷仅参考题型风格和难度，知识与答案仍以学习资料为准。目前支持四选一单选题。设置只保存在当前资料库；出题时会将要求和样题摘录发送给所选 AI。 文件保存在资料库的 .omniquiz/guidance 中，外部修改会在后续补题时重新读取。';
+      '设置当前资料库的出题节奏、样题和要求。样题仅参考风格，答案仍以学习资料为准。出题时会将要求和样题摘录发送给所选 AI。';
 
   @override
   String get extraRequirements => '额外出题要求';
@@ -34,7 +34,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get guidanceFormats =>
-      '支持 TXT、Markdown、文字型 PDF；最多 8 个文件，每个不超过 20 MB，参考文本合计最多 12 万字符。粘贴最多 2 万字符。长样卷分批参考，每批最多约 1.2 万字符；原文件不修改。扫描件需先 OCR。';
+      '支持 TXT、Markdown 和文字型 PDF；最多 8 个文件，每个 20 MB。扫描件请先识别文字。';
 
   @override
   String exampleCharacters(int count) {
@@ -1189,4 +1189,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get connectionRemoved => '连接已删除，其他连接配置保留。';
+
+  @override
+  String get questionsPerBatch => '每次出题数量';
+
+  @override
+  String get questionsPerBatchHelp => '每次向 AI 请求 1–50 道题，默认 10 道。';
+
+  @override
+  String get questionsPerBatchError => '请输入 1–50 的整数。';
+
+  @override
+  String get refillThreshold => '自动补题阈值';
+
+  @override
+  String get refillThresholdHelp => '待答题小于或等于此数量时补题；范围 0–100，默认 10。0 表示用完后才补题。';
+
+  @override
+  String get refillThresholdError => '请输入 0–100 的整数。';
+
+  @override
+  String get hideSource => '收起原始资料';
+
+  @override
+  String sourcePage(String page) {
+    return '第 $page 页';
+  }
+
+  @override
+  String get interfaceSettings => '界面与语言';
+
+  @override
+  String get chatGptSignInCancelled => '已取消 ChatGPT 登录。';
 }
