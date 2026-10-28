@@ -12,8 +12,6 @@ on:
         required: true
       ANDROID_KEY_ALIAS:
         required: true
-  pull_request:
-  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
@@ -79,18 +77,15 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libsecret-1-dev libjsoncpp-dev
       - run: flutter pub get
       - name: Prepare Android signing
-        if: matrix.target == 'android' && github.event_name != 'pull_request'
+        if: matrix.target == 'android'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: python scripts/android_signing.py prepare-ci
-      - name: Compile Android pull requests without release secrets
-        if: matrix.target == 'android' && github.event_name == 'pull_request'
-        run: flutter build apk --debug
       - name: Build signed Android release APKs
-        if: matrix.target == 'android' && github.event_name != 'pull_request'
+        if: matrix.target == 'android'
         env:
           ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
