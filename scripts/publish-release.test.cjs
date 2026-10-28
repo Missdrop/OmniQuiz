@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const publish = require('./publish-release.cjs');
 
-function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
+function fixture(t, { nightly = true, existing = true, head = 'abc', previous = 'v0.9.0' } = {}) {
   fs.mkdirSync('.tooling', { recursive: true });
   const directory = fs.mkdtempSync('.tooling/release-test-');
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
@@ -23,6 +23,10 @@ function fixture(t, { nightly = true, existing = true, head = 'abc' } = {}) {
         updateRef: record('updateRef'), createRef: record('createRef'),
       },
       repos: {
+        getLatestRelease: async () => {
+          if (!previous) throw Object.assign(new Error('Missing'), { status: 404 });
+          return { data: { tag_name: previous } };
+        },
         getReleaseByTag: async () => {
           if (!existing) throw Object.assign(new Error('Missing'), { status: 404 });
           return { data: { id: 7, draft: false, prerelease: nightly } };
@@ -51,6 +55,7 @@ test('nightly replaces nine packages and removes the legacy checksum file', asyn
   assert.equal(update.release_id, 7);
   assert.equal(update.prerelease, true);
   assert.equal(update.make_latest, 'false');
+  assert.equal(update.body, '[Compare changes](https://github.com/owner/repo/compare/v0.9.0...nightly)');
 });
 
 test('first nightly creates one draft then publishes it', async t => {
@@ -67,9 +72,22 @@ test('tag release uses the exact tag name and never moves its tag', async t => {
   assert.equal(calls[0].args.name, 'v1.0.0');
   assert.equal(calls.at(-1).args.name, 'v1.0.0');
   assert.equal(calls.at(-1).args.prerelease, false);
+  assert.equal(calls.at(-1).args.body, '[Compare changes](https://github.com/owner/repo/compare/v0.9.0...v1.0.0)');
   assert.equal(calls.some(c => c.name === 'updateRef'), false);
   assert.equal(calls.filter(c => c.name === 'uploadReleaseAsset').length, 9);
   assert.equal(calls.some(c => c.name === 'uploadReleaseAsset' && c.args.name === 'SHA256SUMS'), false);
+});
+
+test('first stable release has no invented comparison and metadata failures do not publish', async t => {
+  const { calls, options } = fixture(t, { nightly: false, existing: false, previous: null });
+  await publish(options);
+  assert.equal(calls.at(-1).args.body, '');
+  calls.length = 0;
+  options.github.rest.repos.getLatestRelease = async () => {
+    throw Object.assign(new Error('Forbidden'), { status: 403 });
+  };
+  await assert.rejects(publish(options), /Forbidden/);
+  assert.equal(calls.length, 0);
 });
 
 test('old main builds and already-published stable tags cause no mutations', async t => {

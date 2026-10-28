@@ -45,16 +45,12 @@ module.exports = async function publish({ github, context, core, nightly, direct
     core.notice('This tag is already published; keeping its assets unchanged.');
     return;
   }
-  const body = [
-    nightly ? 'Latest successful main build. Assets are replaced in place.' : `OmniQuiz ${tag}`,
-    '', `Commit: ${context.sha}`,
-    `Build: https://github.com/${repo.owner}/${repo.repo}/actions/runs/${context.runId}`,
-    '', 'Android APKs use the fixed OmniQuiz release signing identity.',
-    'Windows: MSI installer or portable ZIP. The installer is not code-signed.',
-    'macOS: open the DMG and drag OmniQuiz to Applications. It is not notarized.',
-    'The unsigned iOS app requires signing before installation.',
-    'Application version comes from pubspec.yaml; update it before tagging a version.',
-  ].join('\n');
+  // Keep release notes to a tag comparison; installation details belong in README.
+  // The first release has no predecessor, so leave its description empty.
+  const previous = await optional(() => github.rest.repos.getLatestRelease(repo));
+  const body = previous && previous.tag_name !== tag
+    ? `[Compare changes](https://github.com/${repo.owner}/${repo.repo}/compare/${encodeURIComponent(previous.tag_name)}...${encodeURIComponent(tag)})`
+    : '';
   if (!release) {
     release = (await github.rest.repos.createRelease({
       ...repo, tag_name: tag, target_commitish: context.sha,
