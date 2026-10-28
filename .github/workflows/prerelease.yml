@@ -4,7 +4,6 @@ name: Rolling prerelease
 on:
   push:
     branches: [main]
-  workflow_dispatch:
 permissions:
   contents: read
 # Never interrupt asset replacement. GitHub retains the newest pending run.
