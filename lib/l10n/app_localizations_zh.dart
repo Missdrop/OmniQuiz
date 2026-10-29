@@ -13,6 +13,99 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appName => '万物一点通';
 
   @override
+  String get manageMaterials => '资料管理';
+
+  @override
+  String get materialSelectionHelp => '勾选的资料用于后续出题。新资料默认勾选；取消勾选不会删除文件、题目或答题记录。';
+
+  @override
+  String get backToLibrary => '返回资料库';
+
+  @override
+  String materialsSelected(int count) {
+    return '已选 $count';
+  }
+
+  @override
+  String materialSelectionCount(int selected, int total) {
+    return '已选 $selected / 共 $total 份资料';
+  }
+
+  @override
+  String get selectAllMaterials => '全选';
+
+  @override
+  String get deselectAllMaterials => '全不选';
+
+  @override
+  String get viewMaterial => '查看资料';
+
+  @override
+  String get materialSelectionError => '未能保存资料选择，请重试。';
+
+  @override
+  String get answerHistory => '答题历史';
+
+  @override
+  String get answerHistoryHelp => '查看每次作答的结果、解析与来源。这里包含练习及复习记录。';
+
+  @override
+  String get answerHistoryEmpty => '还没有答题记录';
+
+  @override
+  String get answerHistoryEmptyHelp => '完成一道练习后，就可以在这里回顾。';
+
+  @override
+  String get historyCorrect => '回答正确';
+
+  @override
+  String get historyIncorrect => '回答错误';
+
+  @override
+  String get historyYourAnswer => '你的选择';
+
+  @override
+  String get historyRightAnswer => '正确答案';
+
+  @override
+  String get historyExplanation => '解析';
+
+  @override
+  String get historyLoadError => '无法读取答题记录，请重试。';
+
+  @override
+  String get retryHistory => '重试';
+
+  @override
+  String get loadMoreHistory => '加载更多记录';
+
+  @override
+  String get deleteLibrary => '删除资料库';
+
+  @override
+  String deleteLibraryTitle(String name) {
+    return '删除“$name”？';
+  }
+
+  @override
+  String get deleteLibraryBody => '该资料库将从列表移除，题目、错题和出题设置将被删除。此操作不可恢复，建议先备份。';
+
+  @override
+  String get keepLibraryMaterials => '保留资料文件';
+
+  @override
+  String get deleteLibraryKeepHelp => '保留文件夹中的原始 PDF、文档等资料，只删除 .omniquiz 学习数据。';
+
+  @override
+  String get deleteLibraryFolderWarning => '将永久删除上面显示的整个文件夹，包括其中所有文件。';
+
+  @override
+  String get deleteLibraryError => '无法删除资料库，请检查目录权限。系统目录和包含其他资料库的目录不能整体删除。';
+
+  @override
+  String get deleteLibraryCleanupError => '资料库已移除，但部分本地学习数据未能删除。请检查文件夹权限。';
+
+  @override
   String get guidanceTitle => '出题设置';
 
   @override
@@ -227,7 +320,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get removeDocumentTitle => '移除这份资料？';
 
   @override
-  String get removeDocumentBody => '相关题目将从练习和复习队列中移除，历史答题记录会保留。';
+  String get removeDocumentBody => '停止使用这份资料生成新题。已有题目、错题、答题记录和原始文件都会保留。';
 
   @override
   String get cancel => '取消';

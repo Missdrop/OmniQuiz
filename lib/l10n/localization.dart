@@ -69,6 +69,8 @@ extension LocalizedDiagnostics on AppLocalizations {
           noModelsError,
       'Scan cancelled. Completed imports were kept.': scanCancelled,
       'Could not restore this excluded file.': restoreExcludedError,
+      'Could not save material selection. Please try again.':
+          materialSelectionError,
       'Finish the current operation before backing up or restoring.':
           maintenanceBusy,
       'Backup is too large.': backupTooLarge,

@@ -108,7 +108,7 @@ class UpdatePanel extends StatelessWidget {
                       onPressed: () => showUpdateDialog(context, controller),
                       child: Text(l.updateDetails),
                     ),
-                  TextButton.icon(
+                  OutlinedButton.icon(
                     onPressed: () => openUpdateWebsite(context, controller),
                     icon: const Icon(Icons.open_in_new, size: 18),
                     label: Text(l.updateWebsite),

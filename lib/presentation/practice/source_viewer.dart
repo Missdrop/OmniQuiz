@@ -46,7 +46,7 @@ class _SourceCitationState extends State<SourceCitation> {
           style: Theme.of(context).textTheme.bodySmall
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
-        TextButton.icon(
+        OutlinedButton.icon(
           onPressed: () => setState(() => _expanded = !_expanded),
           icon: Icon(
             _expanded ? Icons.expand_less : Icons.description_outlined,

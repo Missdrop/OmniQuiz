@@ -5,7 +5,7 @@ import 'package:drift/drift.dart';
 /// SQL is confined to persistence adapters. Schema changes require a migration.
 class QuizDatabase extends GeneratedDatabase {
   QuizDatabase(super.executor);
-  static const currentSchemaVersion = 3;
+  static const currentSchemaVersion = 4;
   @override
   int get schemaVersion => currentSchemaVersion;
   @override
@@ -26,6 +26,11 @@ class QuizDatabase extends GeneratedDatabase {
         );
       }
       if (from < 3) await customStatement(_feedbackSchema);
+      if (from < 4) {
+        await customStatement(
+          'ALTER TABLE documents ADD COLUMN enabled INTEGER NOT NULL DEFAULT 1',
+        );
+      }
     },
     beforeOpen: (_) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -36,7 +41,8 @@ class QuizDatabase extends GeneratedDatabase {
     'CREATE TABLE settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)',
     "INSERT INTO settings VALUES ('epoch', '0')",
     '''CREATE TABLE documents (id TEXT PRIMARY KEY, name TEXT NOT NULL,
-       revision TEXT NOT NULL, origin TEXT NOT NULL UNIQUE, imported_at INTEGER NOT NULL)''',
+       revision TEXT NOT NULL, origin TEXT NOT NULL UNIQUE, imported_at INTEGER NOT NULL,
+       enabled INTEGER NOT NULL DEFAULT 1)''',
     '''CREATE TABLE chunks (id TEXT PRIMARY KEY, document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
        payload TEXT NOT NULL)''',
     '''CREATE TABLE questions (id TEXT PRIMARY KEY, document_id TEXT NOT NULL,

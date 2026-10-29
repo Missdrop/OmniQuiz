@@ -71,7 +71,7 @@ class ReviewPage extends StatelessWidget {
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      TextButton(
+                      OutlinedButton(
                         onPressed: () async {
                           await context.read<PracticeViewModel>().review(
                             entry.question,

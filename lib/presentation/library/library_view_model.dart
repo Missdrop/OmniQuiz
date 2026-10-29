@@ -46,6 +46,43 @@ class LibraryViewModel extends ChangeNotifier {
   final GenerationCoordinator coordinator;
   List<StudyDocument> _documents = [];
   List<StudyDocument> get documents => List.unmodifiable(_documents);
+  List<StudyDocument> get enabledDocuments =>
+      _documents.where((doc) => doc.enabled).toList();
+  int get totalDocuments =>
+      _documents.length +
+      excluded.keys
+          .where((origin) => !_documents.any((doc) => doc.origin == origin))
+          .length;
+
+  /// Selection affects new generation only and survives rescans and source replacement.
+  Future<void> selectDocuments(
+    Iterable<String> ids,
+    bool selected, {
+    bool restoreExcluded = false,
+  }) async {
+    if (_disposed || busy) return;
+    busy = true;
+    message = null;
+    _notify();
+    final legacy = restoreExcluded && selected
+        ? excluded.keys.toList()
+        : <String>[];
+    try {
+      await coordinator.stop();
+      await materials.setEnabled(ids, selected);
+      for (final origin in legacy) {
+        await scanner?.include(origin);
+      }
+      await refresh();
+    } catch (_) {
+      message = 'Could not save material selection. Please try again.';
+    } finally {
+      busy = false;
+      _notify();
+    }
+    if (legacy.isNotEmpty) await scan();
+  }
+
   StudyStats stats = const StudyStats();
   bool busy = false;
   String? message;

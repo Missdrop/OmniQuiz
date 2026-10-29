@@ -4,12 +4,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
 
 import '../domain/study_library.dart';
 import '../domain/models.dart';
 import '../infrastructure/persistence/library_catalog.dart';
+import '../infrastructure/persistence/database.dart';
 import '../infrastructure/platform/document_access.dart';
 import '../infrastructure/platform/library_files.dart';
 import '../l10n/localization.dart';
@@ -160,6 +162,113 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _delete(BuildContext context) async {
+    if (_switching || _dialogOpen || widget.catalog.selectedId.isEmpty) return;
+    final library = widget.catalog.selected;
+    var keepMaterials = true;
+    _dialogOpen = true;
+    final keep = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, update) {
+          final l = context.l10n;
+          return AlertDialog(
+            title: Text(l.deleteLibraryTitle(library.name)),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l.deleteLibraryBody),
+                  const SizedBox(height: 12),
+                  SelectableText(library.directory),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l.keepLibraryMaterials),
+                    value: keepMaterials,
+                    onChanged: (value) =>
+                        update(() => keepMaterials = value ?? true),
+                  ),
+                  Text(
+                    keepMaterials
+                        ? l.deleteLibraryKeepHelp
+                        : l.deleteLibraryFolderWarning,
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(l.cancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  foregroundColor: Theme.of(context).colorScheme.onError,
+                ),
+                onPressed: () => Navigator.pop(context, keepMaterials),
+                child: Text(l.deleteLibrary),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+    _dialogOpen = false;
+    if (keep == null || !mounted) return;
+    setState(() {
+      _switching = true;
+      _error = null;
+    });
+    final old = _dependencies;
+    AppDependencies? empty;
+    try {
+      await old.coordinator.stop();
+      await old.library.stopScan();
+      empty = await AppDependencies.create(
+        database: QuizDatabase(NativeDatabase.memory()),
+        settingsDatabase: widget.catalog.database,
+      );
+      if (!mounted) {
+        await empty.dispose();
+        return;
+      }
+      // Detach every provider before disposing the session and removing its database.
+      setState(() {
+        _dependencies = empty!;
+        _unavailable = true;
+      });
+      await WidgetsBinding.instance.endOfFrame;
+      await old.dispose();
+      await widget.catalog.remove(library, keepMaterials: keep);
+      if (!mounted) return;
+      setState(() {
+        _switching = false;
+        _unavailable = widget.catalog.selectedId.isNotEmpty;
+      });
+      final next = widget.catalog.libraries.firstOrNull;
+      if (next != null) await _select(next);
+    } catch (error) {
+      assert(() {
+        debugPrint('Library deletion failed (${error.runtimeType}): $error');
+        return true;
+      }());
+      if (empty != null && !identical(empty, _dependencies)) {
+        await empty.dispose();
+      }
+      if (mounted) {
+        setState(() {
+          _switching = false;
+          _error = error is AppFailure && error.message == 'Library removed, but some study data could not be deleted.'
+              ? 'deleteCleanup'
+              : 'delete';
+        });
+      }
+    }
+  }
+
   Future<void> _grantFolderAccess() async {
     _dialogOpen = true;
     try {
@@ -227,6 +336,12 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(context.l10n.noLibrariesBody),
+          if (_error != null)
+            Text(
+              _error == 'deleteCleanup'
+                  ? context.l10n.deleteLibraryCleanupError
+                  : context.l10n.deleteLibraryError,
+            ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: locked ? null : () => _create(context),
@@ -283,8 +398,16 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
               icon: const Icon(Icons.create_new_folder_outlined),
               label: Text(context.l10n.createLibrary),
             ),
+            OutlinedButton.icon(
+              onPressed: locked ? null : () => _delete(context),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              icon: const Icon(Icons.folder_delete_outlined),
+              label: Text(context.l10n.deleteLibrary),
+            ),
             if (PlatformDocumentAccess().supportsDirectories)
-              TextButton.icon(
+              OutlinedButton.icon(
                 onPressed: locked ? null : _grantFolderAccess,
                 icon: const Icon(Icons.folder_open),
                 label: Text(context.l10n.grantFolderAccess),
@@ -304,7 +427,7 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
               icon: const Icon(Icons.sync),
               label: Text(context.l10n.scanFolder),
             ),
-            TextButton.icon(
+            OutlinedButton.icon(
               onPressed: locked || !_hasLibrary
                   ? null
                   : () => _dependencies.library.scan(full: true),
@@ -329,6 +452,10 @@ class _LibraryHostState extends State<LibraryHost> with WidgetsBindingObserver {
           Text(
             _error == 'grant'
                 ? context.l10n.grantFolderError
+                : _error == 'delete'
+                ? context.l10n.deleteLibraryError
+                : _error == 'deleteCleanup'
+                ? context.l10n.deleteLibraryCleanupError
                 : context.l10n.openLibraryError,
           ),
         const SizedBox(height: 20),

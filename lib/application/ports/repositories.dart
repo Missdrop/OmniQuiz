@@ -26,8 +26,11 @@ abstract interface class MaterialRepository {
   /// Looks up a stable import origin to detect unchanged or replaced files.
   Future<StudyDocument?> byOrigin(String origin);
 
-  /// Publishes a document and all its chunks together; old-revision questions retire.
+  /// Publishes the current source without changing its selection or saved questions.
   Future<void> importDocument(StudyDocument document, List<SourceChunk> chunks);
+
+  /// Controls future generation only; existing questions and source excerpts stay intact.
+  Future<void> setEnabled(Iterable<String> documentIds, bool enabled);
 
   /// Removes imported content, never the user-owned original file.
   Future<void> removeDocument(String id);
@@ -71,6 +74,9 @@ abstract interface class QuestionRepository {
 
   /// Reads progress aggregates without changing review state.
   Future<StudyStats> stats();
+
+  /// Pages through all answer attempts, newest first, including repeat reviews.
+  Future<List<AnswerRecord>> history({int offset = 0, int limit = 40});
 }
 
 /// Atomically stores attempts and updates spaced-review state.

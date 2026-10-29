@@ -112,7 +112,7 @@ python scripts/package_release.py windows
 python scripts/verify_windows_package.py
 ```
 
-The MSI and portable ZIP bundle Visual C++ runtime DLLs. Preserve the MSI `UpgradeCode` so upgrades remain compatible. Windows packages are currently unsigned. macOS packaging verifies the app bundle and DMG, but does not add notarization. The iOS archive is unsigned, not a directly installable IPA.
+The MSI and portable ZIP bundle Visual C++ runtime DLLs. Preserve the MSI `UpgradeCode` so upgrades remain compatible. Windows packages are currently unsigned. macOS packaging verifies the app bundle and DMG, but does not add notarization. The iOS IPA must be signed by the user before installation.
 
 ### Android signing
 
@@ -146,7 +146,7 @@ The approved source is `assets/branding/logo.png`. To update launchers, run `dar
 
 Maintainers develop on `dev`, open a PR to `main`, merge it, then publish a version tag. Neither `dev` pushes nor pull requests trigger Actions. A `main` push builds and updates **Nightly**. A version tag publishes a same-name stable Release and mirrors the same packages to Nightly; it reuses a matching main build if one is already running or complete. When the commit already has a version tag, Nightly skips its separate build. Update `pubspec.yaml` before tagging: tags do not change the embedded app version.
 
-The release contains three signed Android APKs, Windows MSI/ZIP, macOS DMG/tar.gz, Linux tar.gz and an unsigned iOS tar.gz. No separate `SHA256SUMS` file is uploaded; GitHub provides asset digests. Published stable assets are not replaced by rerunning the workflow. Verify downloads, embedded versions and signing continuity before announcing a release.
+The release contains three signed Android APKs, Windows MSI/ZIP, macOS DMG/tar.gz, Linux tar.gz and an unsigned iOS IPA (`Payload/Runner.app`). The IPA is intended for user-side signing; no Apple distribution identity is configured. No separate `SHA256SUMS` file is uploaded; GitHub provides asset digests. Published stable assets are not replaced by rerunning the workflow. Verify downloads, embedded versions and signing continuity before announcing a release.
 
 ## License
 

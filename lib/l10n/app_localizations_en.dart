@@ -13,6 +13,109 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'OmniQuiz';
 
   @override
+  String get manageMaterials => 'Manage materials';
+
+  @override
+  String get materialSelectionHelp =>
+      'Selected materials are used for new questions. New files are selected automatically. Deselecting keeps files, questions and answer history.';
+
+  @override
+  String get backToLibrary => 'Back to library';
+
+  @override
+  String materialsSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String materialSelectionCount(int selected, int total) {
+    return '$selected selected / $total materials';
+  }
+
+  @override
+  String get selectAllMaterials => 'Select all';
+
+  @override
+  String get deselectAllMaterials => 'Deselect all';
+
+  @override
+  String get viewMaterial => 'View material';
+
+  @override
+  String get materialSelectionError =>
+      'Could not save material selection. Please try again.';
+
+  @override
+  String get answerHistory => 'Answer history';
+
+  @override
+  String get answerHistoryHelp =>
+      'Review answers, explanations and sources from practice and review sessions.';
+
+  @override
+  String get answerHistoryEmpty => 'No answers yet';
+
+  @override
+  String get answerHistoryEmptyHelp =>
+      'Complete a question to see your answer here.';
+
+  @override
+  String get historyCorrect => 'Correct';
+
+  @override
+  String get historyIncorrect => 'Incorrect';
+
+  @override
+  String get historyYourAnswer => 'Your choice';
+
+  @override
+  String get historyRightAnswer => 'Correct answer';
+
+  @override
+  String get historyExplanation => 'Explanation';
+
+  @override
+  String get historyLoadError =>
+      'Could not load answer history. Please try again.';
+
+  @override
+  String get retryHistory => 'Retry';
+
+  @override
+  String get loadMoreHistory => 'Load more answers';
+
+  @override
+  String get deleteLibrary => 'Delete library';
+
+  @override
+  String deleteLibraryTitle(String name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get deleteLibraryBody =>
+      'This removes the library from the list and deletes its questions, mistakes and generation settings. This cannot be undone. Consider making a backup first.';
+
+  @override
+  String get keepLibraryMaterials => 'Keep material files';
+
+  @override
+  String get deleteLibraryKeepHelp =>
+      'Keep original PDFs, documents and other materials. Only .omniquiz study data is deleted.';
+
+  @override
+  String get deleteLibraryFolderWarning =>
+      'The entire folder shown above and every file inside it will be permanently deleted.';
+
+  @override
+  String get deleteLibraryError =>
+      'Could not delete the library. Check folder access. System folders and folders containing other libraries cannot be deleted as a whole.';
+
+  @override
+  String get deleteLibraryCleanupError =>
+      'The library was removed, but some local study data could not be deleted. Check folder access.';
+
+  @override
   String get guidanceTitle => 'Question settings';
 
   @override
@@ -244,7 +347,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removeDocumentBody =>
-      'Its questions will leave the practice and review queues. Your answer history will be retained.';
+      'Stop generating new questions from this material. Existing questions, mistakes, answer history and the original file are kept.';
 
   @override
   String get cancel => 'Cancel';

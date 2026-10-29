@@ -39,13 +39,17 @@
 | macOS | [DMG 安装包](https://github.com/Missdrop/OmniQuiz/releases/latest/download/OmniQuiz-macos.dmg) |
 | Linux | [tar.gz 归档](https://github.com/Missdrop/OmniQuiz/releases/latest/download/OmniQuiz-linux-x64.tar.gz) |
 
-[全部文件与更新说明](https://github.com/Missdrop/OmniQuiz/releases/latest)中还有其他 Android 架构，以及需自行签名的 iOS 归档。Windows 尚未代码签名，macOS 尚未公证。Nightly 为预览版。
+[全部文件与更新说明](https://github.com/Missdrop/OmniQuiz/releases/latest)中还有其他 Android 架构和未签名 iOS IPA。Windows 尚未代码签名，macOS 尚未公证。Nightly 为预览版。
+
+**iOS 安装：** 将 IPA 导入 [AltStore Classic](https://faq.altstore.io/altstore-classic)，使用你自己的 Apple ID 签名并安装。免费账号需每 7 天刷新签名。此下载不属于 App Store／TestFlight 发行，也不是所有设备均可直接安装的通用签名包。
 
 **升级由你决定。** 独立发行版可检查更新、稍后提醒或跳过版本；只有点击更新才下载，失败时可打开官方下载页。Microsoft Store 版本由商店更新；iOS 仅提供更新提醒和下载页。
 
 ## 资料跟着你走
 
 每个资料库独立保存题目、错题和进度。样题、出题要求及学习数据库都在资料库的 `.omniquiz` 文件夹里；关掉软件后，可以一起迁移。也可以在设置中导出和恢复备份，恢复不会覆盖已有资料库。账号和密钥不包含在备份中。
+
+点击首页统计卡片，可以管理资料、开始练习、查看答题记录或复习错题。新增文件默认勾选，取消勾选只影响后续出题，已有题目会保留。删除资料库时，可以选择是否保留原始文件。
 
 中英文界面、出题语言及外观默认跟随系统，也可单独设置；支持白天和黑夜模式。
 

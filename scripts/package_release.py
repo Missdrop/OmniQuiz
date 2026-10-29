@@ -2,12 +2,15 @@
 import hashlib
 import os
 import pathlib
+import plistlib
 import re
 import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
+import stat
+import zipfile
 import xml.etree.ElementTree as ET
 
 
@@ -125,6 +128,36 @@ def macos_dmg(source, destination):
         subprocess.run(['hdiutil', 'verify', str(image)], check=True)
 
 
+def ios_ipa(source, destination):
+    """Create a sideloadable unsigned IPA layout, preserving executable modes and in-bundle links."""
+    source = pathlib.Path(source).resolve()
+    with (source / 'Info.plist').open('rb') as file:
+        info = plistlib.load(file)
+    executable = info.get('CFBundleExecutable')
+    if not executable or pathlib.Path(executable).name != executable or not (source / executable).is_file():
+        raise ValueError('The iOS app bundle has no valid executable')
+    if 'iPhoneSimulator' in info.get('CFBundleSupportedPlatforms', []):
+        raise ValueError('A simulator app cannot be distributed as a device IPA')
+    output = pathlib.Path(destination) / 'OmniQuiz-ios-unsigned.ipa'
+    temporary = output.with_suffix('.ipa.part')
+    try:
+        with zipfile.ZipFile(temporary, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
+            for item in sorted(source.rglob('*')):
+                name = 'Payload/Runner.app/' + item.relative_to(source).as_posix()
+                if item.is_symlink():
+                    if not item.resolve().is_relative_to(source):
+                        raise ValueError('An iOS bundle link points outside the app')
+                    entry = zipfile.ZipInfo(name)
+                    entry.create_system = 3
+                    entry.external_attr = (stat.S_IFLNK | 0o777) << 16
+                    archive.writestr(entry, os.readlink(item).encode('utf-8'))
+                elif item.is_file():
+                    archive.write(item, name)
+        temporary.replace(output)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
 def package(target):
     """Package one supported platform; do not publish tags or upload release assets."""
     destination = pathlib.Path('dist')
@@ -139,12 +172,13 @@ def package(target):
                                 destination / f'OmniQuiz-android-{abi}.apk')
     elif target == 'windows':
         windows_package(destination)
+    elif target == 'ios':
+        ios_ipa('build/ios/iphoneos/Runner.app', destination)
     else:
         sources = {
             'linux': ('build/linux/x64/release/bundle', 'OmniQuiz', 'linux-x64'),
             'macos': ('build/macos/Build/Products/Release/OmniQuiz.app',
                       'OmniQuiz.app', 'macos'),
-            'ios': ('build/ios/iphoneos/Runner.app', 'Runner.app', 'ios-unsigned'),
         }
         source, name, suffix = sources[target]
         if target == 'macos':

@@ -190,6 +190,13 @@ void main() {
         reason: 'busy=${deps.library.busy}; message=${deps.library.message}',
       );
       expect(deps.library.documents.single.name, '学习方法示例.md');
+      expect(find.text('已选 1'), findsOneWidget);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('stat:/library/materials')),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const ValueKey('stat:/library/materials')));
+      await settle();
       expect(find.text('已导入 1 份 · 0 份无变化'), findsOneWidget);
       await capture('library-zh-mobile');
       await tester.tap(find.text('练习').last);

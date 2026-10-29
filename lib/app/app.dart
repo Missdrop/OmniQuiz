@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 
 import '../presentation/library/library_page.dart';
 import '../presentation/library/library_view_model.dart';
+import '../presentation/library/materials_page.dart';
+import '../presentation/library/answer_history_page.dart';
 import '../presentation/practice/practice_page.dart';
 import '../presentation/practice/practice_view_model.dart';
 import '../presentation/practice/guidance_view_model.dart';
@@ -69,6 +71,16 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
                 unavailable:
                     !widget.hasLibrary && widget.currentLibraryName != null,
               ),
+              routes: [
+                GoRoute(
+                  path: 'materials',
+                  builder: (_, _) => const MaterialsPage(),
+                ),
+                GoRoute(
+                  path: 'history',
+                  builder: (_, _) => const AnswerHistoryPage(),
+                ),
+              ],
             ),
             GoRoute(
               path: '/practice',
@@ -112,6 +124,15 @@ class _OmniQuizAppState extends State<OmniQuizApp> with WidgetsBindingObserver {
     if (path == _lastPath) return;
     if (_lastPath == '/settings') widget.dependencies.settings.dismissMessage();
     _lastPath = path;
+    if (path == '/practice') {
+      final scope = widget.dependencies.practice.scope;
+      if (scope != null &&
+          !widget.dependencies.library.enabledDocuments.any(
+            (doc) => doc.id == scope,
+          )) {
+        unawaited(widget.dependencies.practice.changeScope(null));
+      }
+    }
     if (path != '/practice') {
       unawaited(widget.dependencies.practice.endPractice());
     }

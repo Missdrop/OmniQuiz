@@ -104,6 +104,180 @@ abstract class AppLocalizations {
   /// **'OmniQuiz'**
   String get appName;
 
+  /// No description provided for @manageMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage materials'**
+  String get manageMaterials;
+
+  /// No description provided for @materialSelectionHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected materials are used for new questions. New files are selected automatically. Deselecting keeps files, questions and answer history.'**
+  String get materialSelectionHelp;
+
+  /// No description provided for @backToLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to library'**
+  String get backToLibrary;
+
+  /// No description provided for @materialsSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String materialsSelected(int count);
+
+  /// No description provided for @materialSelectionCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{selected} selected / {total} materials'**
+  String materialSelectionCount(int selected, int total);
+
+  /// No description provided for @selectAllMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get selectAllMaterials;
+
+  /// No description provided for @deselectAllMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Deselect all'**
+  String get deselectAllMaterials;
+
+  /// No description provided for @viewMaterial.
+  ///
+  /// In en, this message translates to:
+  /// **'View material'**
+  String get viewMaterial;
+
+  /// No description provided for @materialSelectionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save material selection. Please try again.'**
+  String get materialSelectionError;
+
+  /// No description provided for @answerHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer history'**
+  String get answerHistory;
+
+  /// No description provided for @answerHistoryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Review answers, explanations and sources from practice and review sessions.'**
+  String get answerHistoryHelp;
+
+  /// No description provided for @answerHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No answers yet'**
+  String get answerHistoryEmpty;
+
+  /// No description provided for @answerHistoryEmptyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete a question to see your answer here.'**
+  String get answerHistoryEmptyHelp;
+
+  /// No description provided for @historyCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct'**
+  String get historyCorrect;
+
+  /// No description provided for @historyIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect'**
+  String get historyIncorrect;
+
+  /// No description provided for @historyYourAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Your choice'**
+  String get historyYourAnswer;
+
+  /// No description provided for @historyRightAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Correct answer'**
+  String get historyRightAnswer;
+
+  /// No description provided for @historyExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Explanation'**
+  String get historyExplanation;
+
+  /// No description provided for @historyLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load answer history. Please try again.'**
+  String get historyLoadError;
+
+  /// No description provided for @retryHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retryHistory;
+
+  /// No description provided for @loadMoreHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more answers'**
+  String get loadMoreHistory;
+
+  /// No description provided for @deleteLibrary.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete library'**
+  String get deleteLibrary;
+
+  /// No description provided for @deleteLibraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String deleteLibraryTitle(String name);
+
+  /// No description provided for @deleteLibraryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes the library from the list and deletes its questions, mistakes and generation settings. This cannot be undone. Consider making a backup first.'**
+  String get deleteLibraryBody;
+
+  /// No description provided for @keepLibraryMaterials.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep material files'**
+  String get keepLibraryMaterials;
+
+  /// No description provided for @deleteLibraryKeepHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep original PDFs, documents and other materials. Only .omniquiz study data is deleted.'**
+  String get deleteLibraryKeepHelp;
+
+  /// No description provided for @deleteLibraryFolderWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'The entire folder shown above and every file inside it will be permanently deleted.'**
+  String get deleteLibraryFolderWarning;
+
+  /// No description provided for @deleteLibraryError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not delete the library. Check folder access. System folders and folders containing other libraries cannot be deleted as a whole.'**
+  String get deleteLibraryError;
+
+  /// No description provided for @deleteLibraryCleanupError.
+  ///
+  /// In en, this message translates to:
+  /// **'The library was removed, but some local study data could not be deleted. Check folder access.'**
+  String get deleteLibraryCleanupError;
+
   /// No description provided for @guidanceTitle.
   ///
   /// In en, this message translates to:
@@ -515,7 +689,7 @@ abstract class AppLocalizations {
   /// No description provided for @removeDocumentBody.
   ///
   /// In en, this message translates to:
-  /// **'Its questions will leave the practice and review queues. Your answer history will be retained.'**
+  /// **'Stop generating new questions from this material. Existing questions, mistakes, answer history and the original file are kept.'**
   String get removeDocumentBody;
 
   /// No description provided for @cancel.

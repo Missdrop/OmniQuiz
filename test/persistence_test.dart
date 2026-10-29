@@ -103,6 +103,124 @@ void main() {
     expect(await jobs.complete(job, [sampleQuestion()]), false);
     expect(await questions.ready(null), isEmpty);
   });
+  test('new files start selected; deselection persists across source updates without losing questions', () async {
+    expect((await materials.documents()).single.enabled, isTrue);
+    final job = await prepare();
+    await jobs.complete(job, [sampleQuestion()]);
+    await materials.setEnabled(['d'], false);
+    expect((await materials.documents()).single.enabled, isFalse);
+    expect(await materials.generationChunks(null, 0, 10), isEmpty);
+    expect(await materials.generationChunks('d', 0, 10), isEmpty);
+    expect(await materials.chunks('d'), hasLength(1));
+    expect(await questions.ready(null), hasLength(1));
+    await materials.importDocument(
+      StudyDocument(
+        id: 'd',
+        name: 'Updated',
+        revision: 'new',
+        origin: 'notes',
+        importedAt: DateTime.utc(2026, 3),
+        chunkCount: 1,
+      ),
+      [chunk],
+    );
+    expect((await materials.byOrigin('notes'))!.enabled, isFalse);
+    await materials.setEnabled(['d'], true);
+    expect(await materials.generationChunks(null, 0, 10), hasLength(1));
+    expect(await questions.ready(null), hasLength(1));
+  });
+
+  test(
+    'answer history includes repeated reviews and pages deterministically',
+    () async {
+      final job = await prepare();
+      await jobs.complete(job, [sampleQuestion()]);
+      final progress = SqlProgressRepository(db, const ReviewPolicy());
+      await progress.submit(
+        AnswerAttempt(
+          id: 'first',
+          questionId: 'q',
+          optionId: 'b',
+          correct: false,
+          at: DateTime.utc(2026),
+        ),
+      );
+      await progress.submit(
+        AnswerAttempt(
+          id: 'review',
+          questionId: 'q',
+          optionId: 'a',
+          correct: true,
+          at: DateTime.utc(2026, 2),
+        ),
+      );
+      await materials.removeDocument('d');
+      final first = await questions.history(limit: 1);
+      final second = await questions.history(offset: 1, limit: 1);
+      expect(first.single.attempt.id, 'review');
+      expect(first.single.attempt.correct, isTrue);
+      expect(second.single.attempt.id, 'first');
+      expect(second.single.attempt.correct, isFalse);
+      expect(second.single.question.source.text, chunk.text);
+      expect(await questions.history(offset: 2), isEmpty);
+    },
+  );
+  test('source updates, removal and legacy stale flags preserve saved questions and reviews', () async {
+    final job = await prepare();
+    final base = sampleQuestion();
+    final second = Question(
+      id: 'q2',
+      prompt: 'A second question?',
+      options: base.options,
+      correctOptionId: base.correctOptionId,
+      explanation: base.explanation,
+      topic: base.topic,
+      source: base.source,
+      quote: base.quote,
+    );
+    await jobs.complete(job, [base, second]);
+    final progress = SqlProgressRepository(db, const ReviewPolicy());
+    await progress.submit(
+      AnswerAttempt(
+        id: 'old-attempt',
+        questionId: 'q',
+        optionId: 'b',
+        correct: false,
+        at: DateTime.utc(2026),
+      ),
+    );
+    await materials.importDocument(
+      StudyDocument(
+        id: 'd',
+        name: 'New notes',
+        revision: 'new',
+        origin: 'notes',
+        importedAt: DateTime.utc(2026, 2),
+        chunkCount: 0,
+      ),
+      [],
+    );
+    expect((await questions.ready(null)).single.id, 'q2');
+    expect((await questions.reviews()).single.question.id, 'q');
+    expect((await questions.ready(null)).single.source.text, chunk.text);
+    await materials.removeDocument('d');
+    // Previously hidden source revisions must also be usable after upgrading.
+    await db.customStatement('UPDATE questions SET stale=1');
+    expect(await questions.readyCount(null), 1);
+    expect((await questions.stats()).review, 1);
+    expect(await questions.recentPrompts(null), hasLength(2));
+    await progress.submit(
+      AnswerAttempt(
+        id: 'new-attempt',
+        questionId: 'q2',
+        optionId: 'a',
+        correct: true,
+        at: DateTime.utc(2026, 3),
+      ),
+    );
+    expect((await questions.stats()).attempts, 2);
+    expect((await questions.reviews()).single.question.id, 'q');
+  });
   test(
     'restart cancels unfinished jobs without replaying paid requests',
     () async {
