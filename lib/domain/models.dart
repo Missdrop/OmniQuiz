@@ -28,10 +28,19 @@ class StudyDocument {
     required this.origin,
     required this.importedAt,
     required this.chunkCount,
+    this.enabled = true,
   });
   final String id, name, revision, origin;
   final DateTime importedAt;
   final int chunkCount;
+  final bool enabled;
+}
+
+/// One saved answer, including its question snapshot and original evidence.
+class AnswerRecord {
+  const AnswerRecord(this.question, this.attempt);
+  final Question question;
+  final AnswerAttempt attempt;
 }
 
 /// One stable option identifier and its user-visible text.

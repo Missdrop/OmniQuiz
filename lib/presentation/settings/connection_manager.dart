@@ -48,7 +48,7 @@ class ConnectionSummary extends StatelessWidget {
               '${context.l10n.generationConnection}: $label',
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            TextButton.icon(
+            OutlinedButton.icon(
               onPressed: vm.busy || !vm.loaded
                   ? null
                   : () => openConnectionManager(context),
@@ -251,7 +251,7 @@ class ConnectionManager extends StatelessWidget {
                                     : () => vm.activateConnection(item.id),
                                 child: Text(context.l10n.useConnection),
                               ),
-                            TextButton.icon(
+                            OutlinedButton.icon(
                               onPressed: vm.busy
                                   ? null
                                   : () => Navigator.of(context).push<void>(
@@ -265,12 +265,17 @@ class ConnectionManager extends StatelessWidget {
                               icon: const Icon(Icons.edit_outlined),
                               label: Text(context.l10n.editConnection),
                             ),
-                            IconButton(
-                              tooltip: context.l10n.deleteConnection,
+                            OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .error,
+                              ),
                               onPressed: vm.busy
                                   ? null
                                   : () => _delete(context, item),
                               icon: const Icon(Icons.delete_outline),
+                              label: Text(context.l10n.deleteConnection),
                             ),
                           ],
                         ),

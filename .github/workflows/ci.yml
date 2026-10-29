@@ -59,7 +59,7 @@ jobs:
           - os: macos-latest
             target: ios
             command: flutter build ios --release --no-codesign
-            artifact: build/ios/iphoneos/Runner.app/
+            artifact: dist/OmniQuiz-ios-unsigned.ipa
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4

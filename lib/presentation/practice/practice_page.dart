@@ -93,7 +93,7 @@ class _PracticePageState extends State<PracticePage> {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       for (final vote in [QuestionRating.good, QuestionRating.bad])
-        TextButton.icon(
+        OutlinedButton.icon(
           onPressed: vm.busy ? null : () => vm.rate(vote),
           icon: Icon(
             vote == QuestionRating.good
@@ -108,7 +108,7 @@ class _PracticePageState extends State<PracticePage> {
                 : context.l10n.questionBad,
           ),
         ),
-      TextButton.icon(
+      OutlinedButton.icon(
         onPressed: vm.busy ? null : () => _reportError(context, vm),
         icon: const Icon(Icons.help_outline),
         label: Text(context.l10n.questionError),
@@ -196,11 +196,11 @@ class _PracticePageState extends State<PracticePage> {
                 : Wrap(
                     spacing: 12,
                     children: [
-                      TextButton(
+                      OutlinedButton(
                         onPressed: () => context.go('/library'),
                         child: Text(context.l10n.openLibrary),
                       ),
-                      TextButton(
+                      OutlinedButton(
                         onPressed: () =>
                             context.go(vm.reviewing ? '/review' : '/settings'),
                         child: Text(

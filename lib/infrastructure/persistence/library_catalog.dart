@@ -14,6 +14,7 @@ import 'library_workspace.dart';
 import '../backup/backup_database.dart';
 import 'scan_state_store.dart';
 import '../../application/libraries/scan_state.dart';
+import '../../domain/models.dart';
 
 /// Stored beside global preferences, never inside user-owned material folders.
 class LibraryCatalog {
@@ -183,6 +184,114 @@ class LibraryCatalog {
     }
     await _save(libraries, library.id);
     selectedId = library.id;
+  }
+
+  /// Call only after closing this library's session. Stage the exact registered target
+  /// before changing the catalog, so a failed catalog write can restore the folder.
+  Future<void> remove(StudyLibrary library, {bool keepMaterials = true}) async {
+    final registered = libraries
+        .where((item) => item.id == library.id)
+        .firstOrNull;
+    if (registered == null) throw ArgumentError('Unknown library');
+    var folder = p.normalize(p.absolute(registered.directory));
+    final type = await FileSystemEntity.type(folder, followLinks: false);
+    Directory? staged;
+    String? target;
+    if (type != FileSystemEntityType.notFound) {
+      if (type != FileSystemEntityType.directory) {
+        throw const AppFailure('Library deletion target is unsafe.');
+      }
+      final resolved = p.normalize(
+        await Directory(folder).resolveSymbolicLinks(),
+      );
+      final settings = p.normalize(
+        await Directory(root).resolveSymbolicLinks(),
+      );
+      final logicalSettings = p.normalize(p.absolute(root));
+      // Android exposes app-private storage through both /data/data and /data/user/0.
+      // Accept that alias only for the same relative path inside our private root.
+      final internalAlias =
+          p.isWithin(logicalSettings, folder) &&
+          p.isWithin(settings, resolved) &&
+          p.equals(
+            p.relative(folder, from: logicalSettings),
+            p.relative(resolved, from: settings),
+          );
+      if (!p.equals(folder, resolved) && !internalAlias) {
+        throw const AppFailure('Library deletion target is unsafe.');
+      }
+      folder = resolved;
+      if (!keepMaterials) {
+        if (p.equals(folder, p.dirname(folder)) ||
+            p.equals(folder, settings) ||
+            p.isWithin(folder, settings) ||
+            libraries.any(
+              (other) =>
+                  other.id != registered.id &&
+                  (p.equals(folder, p.normalize(p.absolute(other.directory))) ||
+                      p.isWithin(
+                        folder,
+                        p.normalize(p.absolute(other.directory)),
+                      )),
+            )) {
+          throw const AppFailure('Library deletion target is unsafe.');
+        }
+      }
+      await LibraryWorkspace(registered.directory).ensureForDeletion();
+      target = keepMaterials ? LibraryWorkspace(folder).metadata : folder;
+      final targetType = await FileSystemEntity.type(
+        target,
+        followLinks: false,
+      );
+      if (targetType != FileSystemEntityType.notFound) {
+        if (targetType != FileSystemEntityType.directory) {
+          throw const AppFailure('Library deletion target is unsafe.');
+        }
+        if (!p.equals(
+          p.normalize(target),
+          p.normalize(await Directory(target).resolveSymbolicLinks()),
+        )) {
+          throw const AppFailure('Library deletion target is unsafe.');
+        }
+        // Resolve and bound both paths before any rename or recursive deletion.
+        final parent = await Directory(p.dirname(target))
+            .resolveSymbolicLinks();
+        final destination = p.join(
+          parent,
+          '.omniquiz-delete-${const Uuid().v4()}',
+        );
+        if (!p.equals(p.normalize(p.dirname(target)), p.normalize(parent)) ||
+            !p.isWithin(parent, destination)) {
+          throw const AppFailure('Library deletion target is unsafe.');
+        }
+        staged = await Directory(target).rename(destination);
+      }
+    }
+    final next = libraries.where((item) => item.id != registered.id).toList();
+    final selection = selectedId == registered.id
+        ? next.firstOrNull?.id ?? ''
+        : selectedId;
+    try {
+      await _save(next, selection);
+    } catch (_) {
+      if (staged != null) await staged.rename(target!);
+      rethrow;
+    }
+    libraries = next;
+    selectedId = selection;
+    if (staged != null) {
+      try {
+        final resolved = p.normalize(await staged.resolveSymbolicLinks());
+        if (!p.equals(resolved, p.normalize(staged.absolute.path))) {
+          throw const AppFailure('Library deletion target is unsafe.');
+        }
+        await staged.delete(recursive: true);
+      } catch (_) {
+        throw const AppFailure(
+          'Library removed, but some study data could not be deleted.',
+        );
+      }
+    }
   }
 
   Future<void> addRestored(List<StudyLibrary> restored) async {

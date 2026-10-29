@@ -17,7 +17,7 @@ class BackupDatabase {
   // Checking table names alone accepts snapshots that repositories cannot read.
   static const _tables = {
     'settings': 'key, value',
-    'documents': 'id, name, revision, origin, imported_at',
+    'documents': 'id, name, revision, origin, imported_at, enabled',
     'chunks': 'id, document_id, payload',
     'questions': 'id, document_id, revision, payload, fingerprint, created_at, flagged, stale',
     'attempts': 'id, question_id, option_id, correct, at',
@@ -91,6 +91,9 @@ class BackupDatabase {
         db.select('PRAGMA user_version').single.values.single as int;
     final required = {..._tables}
       ..removeWhere((key, _) => key == 'feedback' && version < 3);
+    if (version < 4) {
+      required['documents'] = 'id, name, revision, origin, imported_at';
+    }
     final found = <String>{};
     for (final row in db.select(
       "SELECT name,type,sql FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",

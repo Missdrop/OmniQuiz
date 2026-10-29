@@ -12,7 +12,7 @@ function fixture(t, { nightly = true, existing = true, head = 'abc', previous = 
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const names = ['OmniQuiz-android-arm64-v8a.apk', 'OmniQuiz-android-armeabi-v7a.apk', 'OmniQuiz-android-x86_64.apk', 'OmniQuiz-linux-x64.tar.gz',
     'OmniQuiz-windows-x64.zip', 'OmniQuiz-windows-x64.msi',
-    'OmniQuiz-macos.tar.gz', 'OmniQuiz-macos.dmg', 'OmniQuiz-ios-unsigned.tar.gz'];
+    'OmniQuiz-macos.tar.gz', 'OmniQuiz-macos.dmg', 'OmniQuiz-ios-unsigned.ipa'];
   for (const name of names) fs.writeFileSync(path.join(directory, name), name);
   const calls = [];
   const record = name => async args => { calls.push({ name, args }); return { data: { id: 7 } }; };
@@ -72,6 +72,15 @@ test('nightly removes the obsolete debug APK rather than retaining a second sign
   options.github.paginate = async () => [...await list(), { name: 'OmniQuiz-android-debug.apk', id: 99 }];
   await publish(options);
   assert.ok(calls.some(call => call.name === 'deleteReleaseAsset' && call.args.asset_id === 99));
+});
+
+test('nightly replaces the old iOS directory archive with an IPA', async t => {
+  const { calls, options } = fixture(t);
+  const list = options.github.paginate;
+  options.github.paginate = async () => [...await list(), { name: 'OmniQuiz-ios-unsigned.tar.gz', id: 100 }];
+  await publish(options);
+  assert.ok(calls.some(call => call.name === 'deleteReleaseAsset' && call.args.asset_id === 100));
+  assert.ok(calls.some(call => call.name === 'uploadReleaseAsset' && call.args.name === 'OmniQuiz-ios-unsigned.ipa'));
 });
 
 test('tag release uses the exact tag name and never moves its tag', async t => {

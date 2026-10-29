@@ -110,6 +110,20 @@ void main() {
       await settle();
       expect(catalog.libraries, hasLength(1));
       expect(catalog.selected.name, 'My course');
+      expect(find.text('Import files'), findsNothing);
+      for (
+        var i = 0;
+        i < 100 && find.byType(CircularProgressIndicator).evaluate().isNotEmpty;
+        i++
+      ) {
+        await settle();
+      }
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('stat:/library/materials')),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const ValueKey('stat:/library/materials')));
+      await settle();
       expect(find.text('Import files'), findsOneWidget);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());

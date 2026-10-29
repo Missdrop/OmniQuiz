@@ -10,7 +10,7 @@ const assets = [
   'OmniQuiz-windows-x64.msi',
   'OmniQuiz-macos.tar.gz',
   'OmniQuiz-macos.dmg',
-  'OmniQuiz-ios-unsigned.tar.gz',
+  'OmniQuiz-ios-unsigned.ipa',
 ];
 
 /** Missing release/tag metadata is normal; authentication and server errors are not. */
@@ -63,7 +63,7 @@ module.exports = async function publish({ github, context, core, nightly, direct
     ...repo, release_id: release.id, per_page: 100,
   });
   // GitHub provides each asset's SHA-256 digest through the Releases API.
-  for (const old of existing.filter(asset => ['SHA256SUMS', 'OmniQuiz-android-debug.apk'].includes(asset.name))) {
+  for (const old of existing.filter(asset => ['SHA256SUMS', 'OmniQuiz-android-debug.apk', 'OmniQuiz-ios-unsigned.tar.gz'].includes(asset.name))) {
     await github.rest.repos.deleteReleaseAsset({ ...repo, asset_id: old.id });
   }
   for (const file of files) {

@@ -88,26 +88,29 @@ class ChatGptPanel extends StatelessWidget {
                   ),
                 ),
                 if (vm.chatGptAccounts.isNotEmpty)
-                  TextButton(
+                  OutlinedButton(
                     onPressed: vm.busy
                         ? null
                         : () => vm.signInChatGpt(newAccount: true),
                     child: Text(l.chatGptAddAccount),
                   ),
                 if (vm.chatGptAccount != null)
-                  TextButton(
+                  OutlinedButton(
                     onPressed: vm.busy ? null : vm.signOutChatGpt,
                     child: Text(l.chatGptSignOut),
                   ),
                 if (vm.chatGptAccount != null)
-                  TextButton(
+                  OutlinedButton(
                     onPressed: vm.busy
                         ? null
                         : () => vm.selectChatGpt(vm.chatGptAccount!),
                     child: Text(l.loadModels),
                   ),
                 if (vm.signingIn)
-                  TextButton(onPressed: vm.cancelSignIn, child: Text(l.cancel)),
+                  OutlinedButton(
+                    onPressed: vm.cancelSignIn,
+                    child: Text(l.cancel),
+                  ),
               ],
             ),
             if (vm.busy) ...[
@@ -151,7 +154,7 @@ class ChatGptPanel extends StatelessWidget {
               l.chatGptTestHelp,
               style: Theme.of(context).textTheme.bodySmall,
             ),
-            TextButton(
+            OutlinedButton(
               onPressed: () => launchUrl(
                 Uri.parse('https://chatgpt.com/settings/usage'),
                 mode: LaunchMode.externalApplication,

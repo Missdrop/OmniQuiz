@@ -39,13 +39,17 @@ Questions currently have four choices and one correct answer; click a choice to 
 | macOS | [DMG installer](https://github.com/Missdrop/OmniQuiz/releases/latest/download/OmniQuiz-macos.dmg) |
 | Linux | [tar.gz archive](https://github.com/Missdrop/OmniQuiz/releases/latest/download/OmniQuiz-linux-x64.tar.gz) |
 
-[All downloads and release notes](https://github.com/Missdrop/OmniQuiz/releases/latest) include other Android architectures and an unsigned iOS archive that requires signing. Windows packages are not code-signed; macOS packages are not notarized. Nightly builds are previews.
+[All downloads and release notes](https://github.com/Missdrop/OmniQuiz/releases/latest) include other Android architectures and an unsigned iOS IPA. Windows packages are not code-signed; macOS packages are not notarized. Nightly builds are previews.
+
+**iOS:** import the IPA into [AltStore Classic](https://faq.altstore.io/altstore-classic) to sign and install it with your own Apple ID. Free-account installs require refreshing every 7 days. The download is not an App Store/TestFlight release or a universally installable signed IPA.
 
 **You control upgrades.** Standalone builds can check for updates, remind you later or skip a version. Downloads start only after you choose to update, with a download-page fallback. Microsoft Store builds update through the Store; iOS offers update notices and a download link.
 
 ## Take your library with you
 
 Each library has its own questions, mistakes and progress. Sample papers, requirements and the study database live in its `.omniquiz` folder; close the app before moving the library. You can also export and restore backups in Settings without replacing existing libraries. Accounts and keys are excluded from backups.
+
+Open the dashboard cards to manage materials, practice, browse answer history or review mistakes. New files are selected automatically; unchecking a file only changes future generation and keeps saved questions. Deleting a library lets you choose whether to keep its original files.
 
 Interface language, question language and appearance follow your system by default, with manual choices available. Light and dark themes are included.
 

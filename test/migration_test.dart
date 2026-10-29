@@ -33,6 +33,7 @@ void main() {
       // The v1 schema differs only by the absent chunk_document index.
       await old.customStatement('DROP INDEX chunk_document');
       await old.customStatement('DROP TABLE feedback');
+      await old.customStatement('ALTER TABLE documents DROP COLUMN enabled');
       await old.customStatement('PRAGMA user_version=1');
       await old.close();
       final upgraded = QuizDatabase(NativeDatabase(file));
@@ -40,7 +41,7 @@ void main() {
         expect(
           (await upgraded.customSelect('PRAGMA user_version').getSingle())
               .read<int>('user_version'),
-          3,
+          QuizDatabase.currentSchemaVersion,
         );
         expect(
           (await SqlMaterialRepository(upgraded).documents()).single.id,

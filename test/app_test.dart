@@ -55,6 +55,15 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Import files'), findsNothing);
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('stat:/library/materials')),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.runAsync(() async {
+        await tester.tap(find.byKey(const ValueKey('stat:/library/materials')));
+      });
+      await tester.pumpAndSettle();
       expect(find.text('Your next chapter starts here'), findsOneWidget);
       await tester.runAsync(() async {
         await deps.library.import(sample: true);
@@ -142,6 +151,25 @@ void main() {
       });
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
+      await tester.runAsync(() async {
+        await tester.ensureVisible(
+          find.byKey(const ValueKey('stat:/library/history')),
+        );
+        await tester.tap(find.byKey(const ValueKey('stat:/library/history')));
+      });
+      for (var i = 0; i < 20; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+      }
+      await tester.pumpAndSettle();
+      expect(find.byType(ExpansionTile), findsOneWidget);
+      await tester.tap(find.byType(ExpansionTile));
+      await tester.pumpAndSettle();
+      expect(find.text('Explanation'), findsOneWidget);
+      await tester.tap(find.text('Back to library'));
+      await tester.pumpAndSettle();
       Future<void> capture(String name) async {
         await tester.runAsync(() async {
           final image =
@@ -171,10 +199,12 @@ void main() {
       await tester.runAsync(() async {
         await deps.practice.next();
         expect(deps.practice.current, isNotNull);
+        final currentId = deps.practice.current!.id;
+        final ready = deps.practice.readyCount;
         await deps.library.remove(deps.library.documents.single.id);
         await deps.practice.refresh();
-        expect(deps.practice.current, isNull);
-        expect(deps.practice.readyCount, 0);
+        expect(deps.practice.current!.id, currentId);
+        expect(deps.practice.readyCount, ready);
       });
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.runAsync(deps.dispose);

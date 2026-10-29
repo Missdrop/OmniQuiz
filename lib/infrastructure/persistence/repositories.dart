@@ -10,7 +10,7 @@ import '../../domain/policies.dart';
 import 'codec.dart';
 import 'database.dart';
 
-/// Publishes material revisions and retires questions tied to replaced source text.
+/// Updates source material while preserving questions and their embedded original excerpts.
 class SqlMaterialRepository implements MaterialRepository {
   SqlMaterialRepository(this.db);
   final QuizDatabase db;
@@ -24,6 +24,7 @@ class SqlMaterialRepository implements MaterialRepository {
       isUtc: true,
     ),
     chunkCount: r.read('chunk_count'),
+    enabled: r.read<int>('enabled') == 1,
   );
   static const _select =
       '''SELECT d.*, (SELECT COUNT(*) FROM chunks c WHERE c.document_id=d.id) chunk_count FROM documents d''';
@@ -48,13 +49,9 @@ class SqlMaterialRepository implements MaterialRepository {
     StudyDocument d,
     List<SourceChunk> chunks,
   ) => db.transaction(() async {
-    await db.customStatement(
-      'UPDATE questions SET stale=1 WHERE document_id=?',
-      [d.id],
-    );
     await db.customStatement('DELETE FROM chunks WHERE document_id=?', [d.id]);
     await db.customStatement(
-      '''INSERT INTO documents VALUES (?,?,?,?,?) ON CONFLICT(id)
+      '''INSERT INTO documents (id,name,revision,origin,imported_at) VALUES (?,?,?,?,?) ON CONFLICT(id)
       DO UPDATE SET name=excluded.name, revision=excluded.revision, origin=excluded.origin, imported_at=excluded.imported_at''',
       [d.id, d.name, d.revision, d.origin, d.importedAt.millisecondsSinceEpoch],
     );
@@ -68,11 +65,20 @@ class SqlMaterialRepository implements MaterialRepository {
     await db.invalidateGeneration();
   });
   @override
+  Future<void> setEnabled(Iterable<String> documentIds, bool enabled) =>
+      db.transaction(() async {
+        final ids = documentIds.toSet();
+        if (ids.isEmpty) return;
+        for (final id in ids) {
+          await db.customStatement(
+            'UPDATE documents SET enabled=? WHERE id=?',
+            [enabled ? 1 : 0, id],
+          );
+        }
+        await db.invalidateGeneration();
+      });
+  @override
   Future<void> removeDocument(String id) => db.transaction(() async {
-    await db.customStatement(
-      'UPDATE questions SET stale=1 WHERE document_id=?',
-      [id],
-    );
     await db.customStatement('DELETE FROM documents WHERE id=?', [id]);
     await db.invalidateGeneration();
   });
@@ -96,7 +102,9 @@ class SqlMaterialRepository implements MaterialRepository {
     int limit,
   ) async {
     if (limit <= 0) return [];
-    final where = documentId == null ? '' : 'WHERE document_id=?';
+    final where =
+        'WHERE document_id IN (SELECT id FROM documents WHERE enabled=1)'
+        '${documentId == null ? '' : ' AND document_id=?'}';
     final variables = [if (documentId != null) Variable(documentId)];
     final total =
         (await db
@@ -131,10 +139,42 @@ class SqlMaterialRepository implements MaterialRepository {
   }
 }
 
-/// Queries ready/review queues while excluding stale and explicitly hidden questions.
+/// Source replacement never retires saved questions; only explicit hiding excludes them.
 class SqlQuestionRepository implements QuestionRepository {
   SqlQuestionRepository(this.db);
   final QuizDatabase db;
+  @override
+  Future<List<AnswerRecord>> history({int offset = 0, int limit = 40}) async {
+    if (offset < 0 || limit < 1 || limit > 100) {
+      throw ArgumentError('Invalid history page');
+    }
+    final rows = await db
+        .customSelect(
+          '''SELECT q.*, a.id attempt_id, a.option_id,
+      a.correct, a.at FROM attempts a JOIN questions q ON q.id=a.question_id
+      ORDER BY a.at DESC, a.id DESC LIMIT ? OFFSET ?''',
+          variables: [Variable(limit), Variable(offset)],
+        )
+        .get();
+    return rows
+        .map(
+          (row) => AnswerRecord(
+            _question(row),
+            AnswerAttempt(
+              id: row.read('attempt_id'),
+              questionId: row.read('id'),
+              optionId: row.read('option_id'),
+              correct: row.read<int>('correct') == 1,
+              at: DateTime.fromMillisecondsSinceEpoch(
+                row.read('at'),
+                isUtc: true,
+              ),
+            ),
+          ),
+        )
+        .toList();
+  }
+
   Question _question(QueryRow r) => questionFromJson(
     jsonDecode(r.read('payload')),
     flagged: r.read<int>('flagged') == 1,
@@ -145,7 +185,7 @@ class SqlQuestionRepository implements QuestionRepository {
       (await db
               .customSelect(
                 '''SELECT q.* FROM questions q
-    WHERE stale=0 AND flagged=0 AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.question_id=q.id)
+    WHERE flagged=0 AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.question_id=q.id)
     ${scope == null ? '' : 'AND document_id=?'} ORDER BY created_at, id LIMIT 40''',
                 variables: [if (scope != null) Variable(scope)],
               )
@@ -156,7 +196,7 @@ class SqlQuestionRepository implements QuestionRepository {
   Future<int> readyCount(String? scope) async =>
       (await db
               .customSelect(
-                """SELECT COUNT(*) n FROM questions q WHERE stale=0 AND flagged=0
+                """SELECT COUNT(*) n FROM questions q WHERE flagged=0
     AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.question_id=q.id)
     ${scope == null ? '' : 'AND document_id=?'}""",
                 variables: [if (scope != null) Variable(scope)],
@@ -169,7 +209,7 @@ class SqlQuestionRepository implements QuestionRepository {
       (await db
               .customSelect(
                 '''SELECT payload FROM questions
-    WHERE stale=0 ${scope == null ? '' : 'AND document_id=?'} ORDER BY created_at DESC LIMIT 200''',
+    ${scope == null ? '' : 'WHERE document_id=?'} ORDER BY created_at DESC LIMIT 200''',
                 variables: [if (scope != null) Variable(scope)],
               )
               .get())
@@ -178,7 +218,7 @@ class SqlQuestionRepository implements QuestionRepository {
   @override
   Future<List<ReviewEntry>> reviews() async =>
       (await db.customSelect('''SELECT q.*, r.streak, r.mistakes, r.due_at
-    FROM reviews r JOIN questions q ON q.id=r.question_id WHERE r.streak<3 AND q.flagged=0 AND q.stale=0
+    FROM reviews r JOIN questions q ON q.id=r.question_id WHERE r.streak<3 AND q.flagged=0
     ORDER BY r.due_at''').get())
           .map(
             (r) => ReviewEntry(
@@ -270,10 +310,10 @@ class SqlQuestionRepository implements QuestionRepository {
     final r = await db.customSelect(
       '''SELECT
       (SELECT COUNT(*) FROM documents) documents,
-      (SELECT COUNT(*) FROM questions q WHERE stale=0 AND flagged=0 AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.question_id=q.id)) ready,
+      (SELECT COUNT(*) FROM questions q WHERE flagged=0 AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.question_id=q.id)) ready,
       (SELECT COUNT(*) FROM attempts) attempts,
       (SELECT COUNT(*) FROM attempts WHERE correct=1) correct,
-      (SELECT COUNT(*) FROM reviews r JOIN questions q ON q.id=r.question_id WHERE streak<3 AND stale=0 AND flagged=0) review''',
+      (SELECT COUNT(*) FROM reviews r JOIN questions q ON q.id=r.question_id WHERE streak<3 AND flagged=0) review''',
     ).getSingle();
     return StudyStats(
       documents: r.read('documents'),
@@ -309,9 +349,7 @@ class SqlProgressRepository implements ProgressRepository {
           variables: [Variable(a.questionId)],
         )
         .getSingleOrNull();
-    if (row == null ||
-        row.read<int>('stale') == 1 ||
-        row.read<int>('flagged') == 1) {
+    if (row == null || row.read<int>('flagged') == 1) {
       throw const AppFailure(
         'This question is no longer available. Choose another question.',
       );

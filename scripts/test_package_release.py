@@ -3,6 +3,9 @@
 import contextlib
 import os
 import pathlib
+import plistlib
+import zipfile
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -14,6 +17,41 @@ from package_release import app_version, windows_manifest, macos_dmg, verify_mac
 
 class PackagingTests(unittest.TestCase):
     """Keep release assembly failures local by mocking external platform tools."""
+
+    def test_ios_ipa_contains_payload_and_preserves_binary_permissions(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
+            app = pathlib.Path('build/ios/iphoneos/Runner.app')
+            app.mkdir(parents=True)
+            (app / 'Info.plist').write_bytes(plistlib.dumps({
+                'CFBundleExecutable': 'Runner', 'CFBundleSupportedPlatforms': ['iPhoneOS'],
+            }))
+            executable = app / 'Runner'
+            executable.write_bytes(b'device executable')
+            executable.chmod(0o755)
+            (app / 'data.txt').write_text('data')
+            package('ios')
+            output = pathlib.Path('dist/OmniQuiz-ios-unsigned.ipa')
+            with zipfile.ZipFile(output) as archive:
+                self.assertEqual(set(archive.namelist()), {
+                    'Payload/Runner.app/Info.plist', 'Payload/Runner.app/Runner', 'Payload/Runner.app/data.txt'})
+                self.assertEqual(archive.read('Payload/Runner.app/Runner'), b'device executable')
+                mode = archive.getinfo('Payload/Runner.app/Runner').external_attr >> 16
+                self.assertTrue(stat.S_ISREG(mode))
+                if os.name != 'nt':
+                    self.assertTrue(mode & stat.S_IXUSR)
+            self.assertFalse(pathlib.Path('dist/OmniQuiz-ios-unsigned.tar.gz').exists())
+
+    def test_ios_simulator_bundle_is_not_packaged_as_an_installable_device_app(self):
+        with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
+            app = pathlib.Path('build/ios/iphoneos/Runner.app')
+            app.mkdir(parents=True)
+            (app / 'Info.plist').write_bytes(plistlib.dumps({
+                'CFBundleExecutable': 'Runner', 'CFBundleSupportedPlatforms': ['iPhoneSimulator'],
+            }))
+            (app / 'Runner').write_bytes(b'simulator')
+            with self.assertRaisesRegex(ValueError, 'simulator'):
+                package('ios')
+            self.assertFalse(pathlib.Path('dist/OmniQuiz-ios-unsigned.ipa').exists())
 
     def test_macos_repairs_only_stale_ad_hoc_outer_seals(self):
         with patch('package_release.subprocess.run', side_effect=[

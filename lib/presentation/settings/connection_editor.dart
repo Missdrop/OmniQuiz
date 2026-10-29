@@ -222,12 +222,12 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
                       ),
                     ),
                     if (_account != null)
-                      TextButton(
+                      OutlinedButton(
                         onPressed: vm.busy ? null : () => _login(another: true),
                         child: Text(l.chatGptAddAccount),
                       ),
                     if (_account != null)
-                      TextButton(
+                      OutlinedButton(
                         onPressed: vm.busy
                             ? null
                             : () async {
@@ -243,11 +243,11 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
                         child: Text(l.chatGptSignOut),
                       ),
                     if (vm.signingIn)
-                      TextButton(
+                      OutlinedButton(
                         onPressed: vm.cancelSignIn,
                         child: Text(l.cancel),
                       ),
-                    TextButton.icon(
+                    OutlinedButton.icon(
                       onPressed: vm.busy
                           ? null
                           : () => openSupportLink(
@@ -339,7 +339,7 @@ class _ConnectionEditorState extends State<ConnectionEditor> {
                 spacing: 12,
                 runSpacing: 12,
                 children: [
-                  TextButton.icon(
+                  OutlinedButton.icon(
                     key: const ValueKey('load-models'),
                     onPressed: vm.busy || (_subscription && _account == null)
                         ? null

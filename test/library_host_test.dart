@@ -17,14 +17,110 @@ import 'package:omniquiz/infrastructure/platform/library_files.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 import 'package:omniquiz/presentation/library/library_page.dart';
+import 'package:omniquiz/presentation/library/materials_page.dart';
 import 'package:omniquiz/presentation/library/library_view_model.dart';
 
 import 'ai_test.dart' show MemoryCredentials;
 import 'coordinator_test.dart' show FakeGenerator;
 import 'support/folder_permissions.dart';
 
-void main() {
+void main({bool deletionOnly = false}) {
   mockFolderPermissions();
+  for (final keepMaterials in [true, false]) {
+    testWidgets(
+      'delete dialog keeps materials=$keepMaterials and safely detaches the active library',
+      (tester) async {
+        late Directory root;
+        late _TrackedDatabase global;
+        late LibraryCatalog catalog;
+        late AppDependencies initial;
+        late StudyLibrary library;
+        await tester.runAsync(() async {
+          root = await Directory.systemTemp.createTemp('omniquiz-delete-ui-');
+          global = _TrackedDatabase(NativeDatabase.memory());
+          catalog = LibraryCatalog(global, root.path);
+          library = await catalog.create('Disposable course');
+          await catalog.select(library);
+          await File(p.join(library.directory, 'notes.md'))
+              .writeAsString('Study notes');
+          initial = await AppDependencies.create(
+            database: await catalog.openLibrary(library),
+            settingsDatabase: global,
+            credentialStore: MemoryCredentials(),
+            ai: FakeGenerator(),
+          );
+          await initial.language.select('en');
+        });
+        await tester.pumpWidget(
+          LibraryHost(catalog: catalog, initial: initial),
+        );
+        for (var i = 0; i < 100; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await tester.pump(const Duration(milliseconds: 50));
+          if (!initial.library.busy) break;
+        }
+        await tester.ensureVisible(find.text('Delete library'));
+        await tester.tap(find.text('Delete library'));
+        await tester.pumpAndSettle();
+        expect(
+          tester.widget<CheckboxListTile>(find.byType(CheckboxListTile)).value,
+          isTrue,
+        );
+        expect(find.text(library.directory), findsOneWidget);
+        // Cancelling the dialog must not close the active session or remove anything.
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(catalog.selectedId, library.id);
+        await tester.tap(find.text('Delete library'));
+        await tester.pumpAndSettle();
+        if (!keepMaterials) {
+          await tester.tap(find.byType(CheckboxListTile));
+          await tester.pumpAndSettle();
+          expect(find.textContaining('entire folder'), findsOneWidget);
+        }
+        await tester.tap(find.widgetWithText(FilledButton, 'Delete library'));
+        await tester.pump();
+        for (var i = 0; i < 200; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await tester.pump(const Duration(milliseconds: 50));
+          if (catalog.libraries.isEmpty &&
+              find.byType(CircularProgressIndicator).evaluate().isEmpty) {
+            break;
+          }
+        }
+        expect(catalog.libraries, isEmpty);
+        expect(catalog.selectedId, isEmpty);
+        expect(
+          await tester.runAsync(
+            () => File(p.join(library.directory, 'notes.md')).exists(),
+          ),
+          keepMaterials,
+        );
+        expect(
+          await tester.runAsync(
+            () => Directory(p.join(library.directory, '.omniquiz')).exists(),
+          ),
+          isFalse,
+        );
+        expect(find.text('Create library'), findsWidgets);
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+        for (var i = 0; i < 100 && !global.closed.isCompleted; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 20)),
+          );
+          await tester.pump();
+        }
+        expect(global.closed.isCompleted, isTrue);
+        await tester.runAsync(() => root.delete(recursive: true));
+      },
+    );
+  }
+  if (deletionOnly) return;
   testWidgets(
     'an unavailable portable library keeps Settings accessible and can reopen',
     (tester) async {
@@ -69,8 +165,18 @@ void main() {
           () => Future<void>.delayed(const Duration(milliseconds: 40)),
         );
         await tester.pump(const Duration(milliseconds: 100));
-        if (find.text('notes.md').evaluate().isNotEmpty) break;
+        if (find.text('Reopen library').evaluate().isEmpty &&
+            find.text('1 selected').evaluate().isNotEmpty &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty) {
+          break;
+        }
       }
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('stat:/library/materials')),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const ValueKey('stat:/library/materials')));
+      await tester.pumpAndSettle();
       expect(find.text('notes.md'), findsOneWidget);
       expect(find.text('Reopen library'), findsNothing);
       expect(tester.takeException(), isNull);
@@ -184,7 +290,8 @@ void main() {
         await generating;
       });
       expect(catalog.selected.name, 'Physics');
-      expect(find.text('Physics notes.md'), findsOneWidget);
+      expect(find.text('Physics notes.md'), findsNothing);
+      expect(find.text('1 selected'), findsOneWidget);
       expect(find.text('Learning science.md'), findsNothing);
       expect(
         await tester.runAsync(
@@ -194,22 +301,40 @@ void main() {
       );
       expect(tester.takeException(), isNull);
 
-      // Exclusion is reversible through the real page, including its dialog.
-      await tester.ensureVisible(find.byIcon(Icons.delete_outline));
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      // Source selection is reversible without deleting the indexed document or its history.
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('stat:/library/materials')),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const ValueKey('stat:/library/materials')));
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, 'Remove'));
-      await tester.pump();
-      await settleWork(library: 'Physics');
-      expect(find.text('Physics notes.md'), findsNothing);
-      final excluded = find.text('Excluded files (1)');
-      await tester.ensureVisible(excluded);
-      await tester.tap(excluded);
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Import again'));
-      await tester.pump();
-      await settleWork(library: 'Physics');
+      final materialVm = tester
+          .element(find.byType(MaterialsPage))
+          .read<LibraryViewModel>();
       expect(find.text('Physics notes.md'), findsOneWidget);
+      await tester.tap(find.byType(Checkbox));
+      for (var i = 0; i < 100; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump(const Duration(milliseconds: 50));
+        if (!materialVm.busy && !materialVm.documents.single.enabled) break;
+      }
+      expect(materialVm.documents.single.enabled, isFalse);
+      expect(find.text('Physics notes.md'), findsOneWidget);
+      expect(find.byIcon(Icons.delete_outline), findsNothing);
+      await tester.tap(find.text('Select all'));
+      for (var i = 0; i < 100; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump(const Duration(milliseconds: 50));
+        if (!materialVm.busy && materialVm.documents.single.enabled) break;
+      }
+      expect(materialVm.documents.single.enabled, isTrue);
+      await tester.tap(find.text('Back to library'));
+      await tester.pumpAndSettle();
+      await settleWork(library: 'Physics');
 
       tester.view.physicalSize = const Size(390, 844);
       await tester.pump();
@@ -221,6 +346,12 @@ void main() {
       await tester.pump();
       await settleWork(library: 'Biology');
       expect(catalog.selected.name, 'Biology');
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('stat:/library/materials')),
+      );
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const ValueKey('stat:/library/materials')));
+      await tester.pumpAndSettle();
       expect(find.text('Import ZIP'), findsOneWidget);
       expect(find.text('Physics notes.md'), findsNothing);
       expect(tester.takeException(), isNull);

@@ -179,7 +179,7 @@ class PracticeViewModel extends ChangeNotifier {
       await persist();
       saved = true;
       _version++;
-      // Refresh retires the current question only if persistence marked it stale.
+      // Refresh preserves saved questions even when their source material has changed.
       // Keeping the old buffer must also preserve a choice already on screen.
       await refresh();
     } catch (_) {

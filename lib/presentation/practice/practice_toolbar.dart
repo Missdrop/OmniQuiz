@@ -59,7 +59,7 @@ class _PracticeToolbarState extends State<PracticeToolbar> {
             l.reviewPracticeTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          TextButton.icon(
+          OutlinedButton.icon(
             onPressed: vm.leaveReview,
             icon: const Icon(Icons.arrow_back),
             label: Text(l.backToFresh),
@@ -73,7 +73,7 @@ class _PracticeToolbarState extends State<PracticeToolbar> {
         : '${active.name} · ${active.profile.model}';
     final ai = Tooltip(
       message: '${l.generationConnection}: $connection · ${l.switchConnection}',
-      child: TextButton.icon(
+      child: OutlinedButton.icon(
         onPressed: vm.busy || settings.busy || !settings.loaded
             ? null
             : () => openConnectionManager(context),
@@ -109,7 +109,7 @@ class _PracticeToolbarState extends State<PracticeToolbar> {
             label: Text(l.startPractice),
           );
     final retry = vm.active && !vm.coordinator.enabled && !vm.generation.running
-        ? TextButton.icon(
+        ? OutlinedButton.icon(
             onPressed: vm.startPractice,
             icon: const Icon(Icons.refresh),
             label: Text(l.retryPractice),
@@ -121,14 +121,14 @@ class _PracticeToolbarState extends State<PracticeToolbar> {
           width: constraints.maxWidth < 480 ? constraints.maxWidth : 220,
           child: DropdownButtonFormField<String>(
             key: ValueKey(vm.scope),
-            initialValue: library.documents.any((d) => d.id == vm.scope)
+            initialValue: library.enabledDocuments.any((d) => d.id == vm.scope)
                 ? vm.scope
                 : '',
             isExpanded: true,
             decoration: InputDecoration(labelText: l.practiceScope),
             items: [
               DropdownMenuItem(value: '', child: Text(l.allMaterials)),
-              ...library.documents.map(
+              ...library.enabledDocuments.map(
                 (d) => DropdownMenuItem(
                   value: d.id,
                   child: Text(d.name, overflow: TextOverflow.ellipsis),

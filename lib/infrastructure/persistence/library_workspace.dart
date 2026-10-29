@@ -15,6 +15,9 @@ class LibraryWorkspace {
   String get databasePath => p.join(metadata, 'quiz.sqlite');
   String get guidancePath => p.join(metadata, 'guidance');
 
+  /// Restore access without creating new metadata during deletion.
+  Future<void> ensureForDeletion() => FolderPermissions.restore(directory);
+
   /// Refuse links instead of redirecting private state outside the chosen root.
   Future<void> ensure() async {
     await FolderPermissions.restore(directory);

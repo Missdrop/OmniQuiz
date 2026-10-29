@@ -169,6 +169,7 @@ void main() {
 
   test('missing legacy originals retain cached text and progress in a restored library', () async {
     final doc = deps.library.documents.single;
+    await deps.library.materials.setEnabled([doc.id], false);
     await File(doc.origin).delete();
     final archive = p.join(root.path, 'missing.zip');
     final service = LibraryBackup(catalog);
@@ -184,6 +185,10 @@ void main() {
         startsWith('restored:'),
       );
       expect(await SqlMaterialRepository(db).chunks(null), isNotEmpty);
+      expect(
+        (await SqlMaterialRepository(db).documents()).single.enabled,
+        false,
+      );
       expect((await SqlQuestionRepository(db).stats()).attempts, 1);
     } finally {
       await db.close();
